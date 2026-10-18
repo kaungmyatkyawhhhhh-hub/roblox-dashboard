@@ -1,0 +1,58 @@
+name: Update dashboard
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: dashboard
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Player-count history lives on the `stats` branch as a single commit
+      # that is replaced on every run, so it never grows the repo's history.
+      - name: Restore history
+        run: git fetch --depth=1 origin stats && git show origin/stats:history.json > history.json || echo '{}' > history.json
+
+      - name: Collect stats
+        run: node scripts/collect.js history.json site/data.json
+
+      - name: Save history
+        run: |
+          tmp=$(mktemp -d)
+          cp history.json "$tmp/"
+          cd "$tmp"
+          git init -q -b stats
+          git add history.json
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -qm "Update stats history"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" stats
+
+      - name: Build site
+        run: cp public/index.html site/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4

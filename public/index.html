@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Experience Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f6f6f5;
+    --panel: #ffffff;
+    --line: #e6e6e3;
+    --line-soft: #efefec;
+    --row-hover: #fafaf9;
+    --ink: #111110;
+    --ink-2: #4f4e4b;
+    --ink-3: #85847f;
+    --accent: #2a78d6;
+    --series-1: #2a78d6;
+    --series-2: #eb6834;
+    --series-3: #1baf7a;
+    --series-4: #eda100;
+    --series-5: #e87ba4;
+    --series-other: #b4b3ad;
+    --pos: #0f7a2e;
+    --neg: #c23a3a;
+    --live: #1f9d45;
+    --track: #ececea;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0e0e0d;
+      --panel: #171716;
+      --line: #2a2a28;
+      --line-soft: #222220;
+      --row-hover: #1c1c1b;
+      --ink: #efeeea;
+      --ink-2: #b9b8b1;
+      --ink-3: #807f79;
+      --accent: #3987e5;
+      --series-1: #3987e5;
+      --series-2: #d95926;
+      --series-3: #199e70;
+      --series-4: #c98500;
+      --series-5: #d55181;
+      --series-other: #5f5e5a;
+      --pos: #4cc06a;
+      --neg: #e66767;
+      --live: #3fbf62;
+      --track: #2a2a28;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0e0e0d;
+    --panel: #171716;
+    --line: #2a2a28;
+    --line-soft: #222220;
+    --row-hover: #1c1c1b;
+    --ink: #efeeea;
+    --ink-2: #b9b8b1;
+    --ink-3: #807f79;
+    --accent: #3987e5;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #c98500;
+    --series-5: #d55181;
+    --series-other: #5f5e5a;
+    --pos: #4cc06a;
+    --neg: #e66767;
+    --live: #3fbf62;
+    --track: #2a2a28;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 13px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* top bar */
+  .topbar {
+    height: 52px; display: flex; align-items: center; gap: 16px; padding: 0 20px;
+    background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; white-space: nowrap; }
+  .brand .mark { width: 18px; height: 18px; border-radius: 4px; background: var(--ink); transform: rotate(-12deg); position: relative; }
+  .brand .mark::after { content: ""; position: absolute; inset: 6px; background: var(--panel); border-radius: 1px; }
+  .brand .divider { width: 1px; height: 18px; background: var(--line); }
+  .brand .section { color: var(--ink-2); font-weight: 500; }
+  .topbar form { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+  .field { position: relative; }
+  .field label {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--ink-3); font-size: 12px; pointer-events: none;
+  }
+  input {
+    font: inherit; height: 32px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--ink); width: 180px; outline: none;
+  }
+  .field input { padding-left: 62px; }
+  input:focus { border-color: var(--accent); background: var(--panel); }
+  button {
+    font: inherit; font-weight: 500; height: 32px; padding: 0 12px; border-radius: 6px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  }
+  button:hover { background: var(--row-hover); }
+  button.primary { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+  button.icon { width: 32px; padding: 0; display: grid; place-items: center; color: var(--ink-2); }
+
+  main { max-width: 1400px; margin: 0 auto; padding: 24px 20px 40px; display: grid; gap: 20px; }
+
+  .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .page-head h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.015em; margin: 0 0 2px; }
+  .page-head .owner { color: var(--ink-2); }
+  .sync { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-3); font-size: 12px; }
+  .sync .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--live); box-shadow: 0 0 0 3px color-mix(in srgb, var(--live) 18%, transparent); }
+  .sync.err { color: var(--neg); }
+  .sync.err .dot { background: var(--neg); box-shadow: none; }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px 0; flex-wrap: wrap; }
+  .panel-head h2 { font-size: 13px; font-weight: 600; margin: 0; }
+  .panel-head .meta { color: var(--ink-3); font-size: 12px; }
+
+  /* KPI strip */
+  .kpis { display: grid; grid-template-columns: repeat(5, 1fr); }
+  .kpi { padding: 16px; border-left: 1px solid var(--line); min-width: 0; }
+  .kpi:first-child { border-left: 0; }
+  .kpi .label { color: var(--ink-2); font-size: 12px; font-weight: 500; }
+  .kpi .value { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; margin: 6px 0 2px; }
+  .kpi .sub { color: var(--ink-3); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kpi svg { display: block; width: 100%; margin-top: 10px; }
+  .pos { color: var(--pos); }
+
+  /* chart */
+  .chart-wrap { position: relative; padding: 8px 16px 12px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12px; color: var(--ink-2); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; max-width: 220px; }
+  .legend span em { font-style: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .key { width: 12px; height: 3px; border-radius: 2px; flex: none; }
+  .axis text { fill: var(--ink-3); font-size: 11px; font-family: inherit; }
+  .tooltip {
+    position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 6px; padding: 8px 10px; font-size: 12px; display: none; min-width: 180px; z-index: 2;
+    box-shadow: 0 6px 20px rgb(0 0 0 / .10);
+  }
+  .tooltip .when { color: var(--ink-3); margin-bottom: 6px; }
+  .tooltip .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 1px 0; }
+  .tooltip .row span { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); }
+  .tooltip .row b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .seg[hidden] { display: none; }
+  .seg button { height: 26px; border: 0; border-radius: 0; padding: 0 10px; font-size: 12px; color: var(--ink-3); background: transparent; }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button[aria-pressed="true"] { background: var(--bg); color: var(--ink); }
+  .head-right { display: flex; align-items: center; gap: 12px; }
+  body.static .topbar form .field, body.static .topbar form .primary { display: none; }
+  .empty { color: var(--ink-3); padding: 48px 16px; text-align: center; }
+
+  /* table */
+  .table-tools { display: flex; align-items: center; gap: 8px; }
+  .table-tools input { width: 220px; height: 30px; }
+  .table-scroll { overflow-x: auto; margin-top: 12px; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { padding: 0 16px; height: 48px; text-align: right; white-space: nowrap; border-top: 1px solid var(--line-soft); }
+  th:nth-child(-n+2), td:nth-child(-n+2) { text-align: left; }
+  th {
+    height: 34px; font-size: 12px; font-weight: 500; color: var(--ink-3); cursor: pointer; user-select: none;
+    background: var(--bg); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+  th:hover { color: var(--ink); }
+  th[aria-sort] { color: var(--ink); }
+  th[aria-sort="descending"]::after { content: "↓"; margin-left: 4px; }
+  th[aria-sort="ascending"]::after { content: "↑"; margin-left: 4px; }
+  thead + tbody tr:first-child td { border-top: 0; }
+  tbody tr:hover td { background: var(--row-hover); }
+  td.rank { color: var(--ink-3); width: 1%; padding-right: 0; }
+  .game { display: flex; align-items: center; gap: 12px; }
+  .game img, .game .noimg { width: 32px; height: 32px; border-radius: 6px; flex: none; background: var(--track); object-fit: cover; }
+  .game a { color: var(--ink); text-decoration: none; font-weight: 500; display: block; max-width: 300px; overflow: hidden; text-overflow: ellipsis; }
+  .game a:hover { color: var(--accent); }
+  .game .genre { color: var(--ink-3); font-size: 12px; }
+  .ccu { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; }
+  .ccu .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--live); }
+  .ccu.idle { color: var(--ink-3); font-weight: 400; }
+  .ccu.idle .dot { background: var(--track); }
+  .faint { color: var(--ink-3); }
+  .ratio { display: inline-flex; align-items: center; gap: 10px; }
+  .bar { width: 56px; height: 4px; border-radius: 2px; background: var(--track); overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--ink-2); }
+  .series-tag { display: inline-block; width: 3px; height: 16px; border-radius: 2px; vertical-align: middle; }
+
+  .onboard { padding: 56px 24px; text-align: center; }
+  .onboard h2 { font-size: 16px; margin: 0 0 6px; }
+  .onboard p { color: var(--ink-2); margin: 0 auto; max-width: 440px; }
+
+  @media (max-width: 1000px) {
+    .kpis { grid-template-columns: repeat(3, 1fr); }
+    .kpi:nth-child(4) { border-left: 0; }
+    .kpi:nth-child(n+4) { border-top: 1px solid var(--line); }
+  }
+  @media (max-width: 720px) {
+    .topbar { height: auto; flex-wrap: wrap; padding: 10px 16px; }
+    .topbar form { margin-left: 0; width: 100%; flex-wrap: wrap; }
+    .field { flex: 1 1 100%; }
+    .topbar form button.primary { flex: 1; }
+    .field input { width: 100%; }
+    main { padding: 16px; }
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .kpi { border-left: 0; border-top: 1px solid var(--line); }
+    .kpi:nth-child(even) { border-left: 1px solid var(--line); }
+    .kpi:nth-child(-n+2) { border-top: 0; }
+    .kpi:last-child { grid-column: span 2; border-left: 0; }
+    .kpi .value { font-size: 22px; }
+    .table-tools input { width: 150px; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="mark"></span>Experience Overview<span class="divider"></span><span class="section">Analytics</span></div>
+  <form id="form">
+    <div class="field"><label for="user">Creator</label><input id="user" placeholder="Username or ID" autocomplete="off"></div>
+    <div class="field"><label for="groups">Groups</label><input id="groups" placeholder="IDs, comma-separated" autocomplete="off"></div>
+    <button class="primary" type="submit">Load</button>
+    <button class="icon" type="button" id="theme" title="Switch theme" aria-label="Switch theme">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 2a6 6 0 0 0 0 12z" fill="currentColor"/></svg>
+    </button>
+  </form>
+</header>
+
+<main id="main">
+  <section class="panel onboard" id="onboard">
+    <h2>Connect a creator</h2>
+    <p>Enter a Roblox username or user ID above. Add group IDs to include games your groups own.</p>
+  </section>
+</main>
+
+<template id="dashboard">
+  <div class="page-head">
+    <div>
+      <h1>Overview</h1>
+      <div class="owner" id="owner"></div>
+    </div>
+    <div class="sync" id="sync"><span class="dot"></span><span id="sync-text"></span></div>
+  </div>
+
+  <section class="panel kpis" id="kpis"></section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Concurrent users</h2>
+      <div class="head-right">
+        <span class="meta" id="chart-meta"></span>
+        <div class="seg" id="range" hidden><button type="button" data-range="24">24h</button><button type="button" data-range="168">7d</button></div>
+      </div>
+    </div>
+    <div class="chart-wrap" id="chart"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Experiences <span class="faint num" id="count"></span></h2>
+      <div class="table-tools"><input id="filter" placeholder="Filter by name" autocomplete="off"></div>
+    </div>
+    <div class="table-scroll"><table id="table"></table></div>
+  </section>
+</template>
+
+<script>
+const SERIES = ['--series-1', '--series-2', '--series-3', '--series-4', '--series-5'];
+const REFRESH_MS = 60 * 1000;
+const $ = (id) => document.getElementById(id);
+const fmt = new Intl.NumberFormat();
+const compact = new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 });
+const timeFmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
+const dayFmt = new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric' });
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+let data = null;
+let sort = { key: 'playing', dir: -1 };
+let filter = '';
+let timer = null;
+let staticMode = false; // true when served as a static site with a published data.json
+let rangeHours = 24;
+const DAY = 24 * 60 * 60 * 1000;
+
+// ---- settings: URL query wins, then localStorage ----
+function store(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} }
+function load(k) { try { return localStorage.getItem(k); } catch { return null; } }
+const qs = new URLSearchParams(location.search);
+$('user').value = qs.get('user') ?? load('rgo.user') ?? '';
+$('groups').value = qs.get('groups') ?? load('rgo.groups') ?? '';
+const savedTheme = load('rgo.theme');
+if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+
+$('theme').onclick = () => {
+  const dark = document.documentElement.dataset.theme
+    ? document.documentElement.dataset.theme === 'dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+  store('rgo.theme', document.documentElement.dataset.theme);
+  render();
+};
+
+$('form').onsubmit = (e) => {
+  e.preventDefault();
+  store('rgo.user', $('user').value.trim());
+  store('rgo.groups', $('groups').value.trim());
+  const p = new URLSearchParams();
+  if ($('user').value.trim()) p.set('user', $('user').value.trim());
+  if ($('groups').value.trim()) p.set('groups', $('groups').value.trim());
+  history.replaceState(null, '', `?${p}`);
+  refresh(true);
+};
+
+function mountDashboard() {
+  if ($('kpis')) return;
+  $('main').replaceChildren($('dashboard').content.cloneNode(true));
+  $('filter').oninput = (e) => { filter = e.target.value.trim().toLowerCase(); render(); };
+  $('range').hidden = !staticMode;
+  $('range').querySelectorAll('button').forEach((b) => {
+    b.onclick = () => { rangeHours = Number(b.dataset.range); render(); };
+  });
+}
+
+function setSync(text, isError) {
+  if (!$('sync')) {
+    $('onboard').querySelector('p').textContent = text;
+    return;
+  }
+  $('sync-text').textContent = text;
+  $('sync').classList.toggle('err', !!isError);
+}
+
+function ago(t) {
+  const m = Math.round((Date.now() - t) / 60000);
+  return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : `${Math.round(m / 60)}h ago`;
+}
+
+async function loadStatic() {
+  try {
+    const res = await fetch(`data.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (!res.ok) return false;
+    data = await res.json();
+  } catch { return false; }
+  staticMode = true;
+  document.body.classList.add('static');
+  mountDashboard();
+  $('owner').innerHTML = data.owners.map((o) => esc(o.type === 'group' ? o.name : o.displayName || o.name)).join(' · ');
+  setSync(`Updated ${ago(data.fetchedAt)} · refreshes every ${data.intervalMinutes || 15} min`);
+  render();
+  timer = setTimeout(loadStatic, 5 * 60 * 1000);
+  return true;
+}
+
+async function refresh(showLoading) {
+  clearTimeout(timer);
+  const user = $('user').value.trim();
+  const groups = $('groups').value.trim();
+  if (!user && !groups) return;
+  if (showLoading) setSync('Loading…');
+  try {
+    const res = await fetch(`/api/overview?${new URLSearchParams({ user, groups })}`);
+    const body = await res.json();
+    if (!res.ok) throw new Error(body.error || res.statusText);
+    data = body;
+    mountDashboard();
+    const names = body.owners.map((o) => (o.type === 'group' ? `${esc(o.name)} <span class="faint">(group)</span>` : esc(o.displayName || o.name)));
+    $('owner').innerHTML = names.join(' · ');
+    setSync(`Synced ${timeFmt.format(body.fetchedAt)}`);
+    render();
+  } catch (e) {
+    setSync(`Sync failed: ${e.message}`, true);
+  }
+  timer = setTimeout(refresh, REFRESH_MS);
+}
+
+// ---- derived numbers ----
+const rating = (g) => (g.upVotes + g.downVotes ? g.upVotes / (g.upVotes + g.downVotes) : null);
+const within = (g, hours) => g.history.filter((h) => h[0] >= data.fetchedAt - hours * 3600000);
+const last24 = (g) => within(g, 24);
+const peak = (g) => Math.max(g.playing, ...last24(g).map((h) => h[1]));
+const visitsGained = (g) => { const h = last24(g); return h.length ? g.visits - h[0][2] : 0; };
+
+// Sum player counts across games, bucketed to the minute.
+function totalSeries(games, hours = 24) {
+  const buckets = new Map();
+  for (const g of games) {
+    const seen = new Map();
+    for (const [t, p] of within(g, hours)) seen.set(Math.round(t / 60000) * 60000, p);
+    for (const [t, p] of seen) buckets.set(t, (buckets.get(t) || 0) + p);
+  }
+  return [...buckets].sort((a, b) => a[0] - b[0]);
+}
+
+function render() {
+  if (!data || !$('kpis')) return;
+  const games = data.games;
+  const ranked = [...games].sort((a, b) => b.playing - a.playing || b.visits - a.visits);
+  const top = ranked.slice(0, 5);
+  const colorOf = new Map(top.map((g, i) => [g.universeId, SERIES[i]]));
+  const rankOf = new Map(ranked.map((g, i) => [g.universeId, i + 1]));
+  renderKpis(games);
+  renderChart(games, top, colorOf);
+  renderTable(games, colorOf, rankOf);
+}
+
+function sparkline(points, w, h, color, fluid) {
+  const size = fluid ? `viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" height="${h}"` : `width="${w}" height="${h}"`;
+  if (points.length < 2) return `<svg ${size} aria-hidden="true"><line x1="0" x2="${w}" y1="${h - 1}" y2="${h - 1}" stroke="var(--line)" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`;
+  const t0 = points[0][0], t1 = points[points.length - 1][0];
+  const max = Math.max(1, ...points.map((p) => p[1]));
+  const xy = points.map((p) => [((p[0] - t0) / (t1 - t0 || 1)) * (w - 2) + 1, h - 2 - (p[1] / max) * (h - 4)]);
+  const d = xy.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join('');
+  const area = fluid ? `<path d="${d}L${xy[xy.length - 1][0]},${h}L${xy[0][0]},${h}Z" fill="${color}" opacity=".08"/>` : '';
+  return `<svg ${size} aria-hidden="true">${area}<path d="${d}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`;
+}
+
+function renderKpis(games) {
+  const playing = games.reduce((s, g) => s + g.playing, 0);
+  const visits = games.reduce((s, g) => s + g.visits, 0);
+  const gained = games.reduce((s, g) => s + visitsGained(g), 0);
+  const favs = games.reduce((s, g) => s + g.favorites, 0);
+  const up = games.reduce((s, g) => s + g.upVotes, 0);
+  const down = games.reduce((s, g) => s + g.downVotes, 0);
+  const live = games.filter((g) => g.playing > 0).length;
+  const total = totalSeries(games);
+  const peakTotal = Math.max(playing, ...total.map((p) => p[1]));
+  const tiles = [
+    { label: 'Concurrent users', value: fmt.format(playing), sub: `24h peak ${fmt.format(peakTotal)}`, spark: sparkline(total, 200, 32, cssVar('--accent'), true) },
+    { label: 'Visits', value: compact.format(visits), sub: gained ? `<span class="pos">+${fmt.format(gained)}</span> past 24h` : fmt.format(visits) },
+    { label: 'Favorites', value: compact.format(favs), sub: fmt.format(favs) },
+    { label: 'Like ratio', value: up + down ? `${(up / (up + down) * 100).toFixed(1)}%` : '—', sub: `${compact.format(up)} up · ${compact.format(down)} down` },
+    { label: 'Experiences', value: fmt.format(games.length), sub: `${live} live now` },
+  ];
+  $('kpis').innerHTML = tiles.map((t) => `
+    <div class="kpi">
+      <div class="label">${t.label}</div>
+      <div class="value num">${t.value}</div>
+      <div class="sub num">${t.sub}</div>
+      ${t.spark || ''}
+    </div>`).join('');
+}
+
+function renderChart(games, top, colorOf) {
+  const box = $('chart');
+  const topIds = new Set(top.map((g) => g.universeId));
+  const others = games.filter((g) => !topIds.has(g.universeId));
+  $('range').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', Number(b.dataset.range) === rangeHours));
+  const step = staticMode ? `${data.intervalMinutes || 15}-minute` : '1-minute';
+  $('chart-meta').textContent = `${rangeHours === 24 ? 'Last 24 hours' : 'Last 7 days'} · ${step} samples`;
+  const series = top.filter((g) => within(g, rangeHours).length).map((g) => ({
+    name: g.name, color: cssVar(colorOf.get(g.universeId)), points: within(g, rangeHours).map((h) => [h[0], h[1]]),
+  }));
+  if (others.length) {
+    const pts = totalSeries(others, rangeHours);
+    if (pts.length) series.push({ name: `All others (${others.length})`, color: cssVar('--series-other'), points: pts });
+  }
+  const all = series.flatMap((s) => s.points);
+  const t0 = Math.min(...all.map((p) => p[0])), t1 = Math.max(...all.map((p) => p[0]));
+  if (!series.length || t1 - t0 < 60000) {
+    box.innerHTML = staticMode
+      ? `<div class="empty">Collecting samples. The chart appears after the next couple of updates and builds up to 7 days of history.</div>`
+      : `<div class="empty">Collecting samples. The chart appears after a couple of minutes and covers up to 24 hours while the server runs.</div>`;
+    return;
+  }
+
+  const W = Math.max(300, box.clientWidth - 32), H = 240;
+  const m = { l: 40, r: 4, t: 12, b: 26 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const rawMax = Math.max(1, ...all.map((p) => p[1]));
+  const yStep = niceStep(rawMax / 4);
+  const yMax = Math.ceil(rawMax / yStep) * yStep;
+  const x = (t) => m.l + ((t - t0) / (t1 - t0)) * iw;
+  const y = (v) => m.t + ih - (v / yMax) * ih;
+
+  let grid = '';
+  for (let v = 0; v <= yMax; v += yStep) {
+    grid += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line-soft)"${v === 0 ? ' style="stroke:var(--line)"' : ''}/>`;
+    grid += `<text x="${m.l - 10}" y="${y(v) + 4}" text-anchor="end">${compact.format(v)}</text>`;
+  }
+  const ticks = Math.min(6, Math.floor(iw / 100));
+  let lastLabel = '';
+  for (let i = 0; i <= ticks; i++) {
+    const t = t0 + ((t1 - t0) * i) / ticks;
+    const label = t1 - t0 > 1.5 * DAY ? dayFmt.format(t) : timeFmt.format(t);
+    if (label === lastLabel) continue;
+    lastLabel = label;
+    grid += `<text x="${x(t)}" y="${H - 6}" text-anchor="${i === 0 ? 'start' : i === ticks ? 'end' : 'middle'}">${lastLabel}</text>`;
+  }
+  const lines = series.map((s) => {
+    const d = s.points.map((p, i) => `${i ? 'L' : 'M'}${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join('');
+    return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/>`;
+  }).join('');
+
+  box.innerHTML = `
+    <div class="legend">${series.map((s) => `<span><i class="key" style="background:${s.color}"></i><em>${esc(s.name)}</em></span>`).join('')}</div>
+    <svg width="${W}" height="${H}" role="img" aria-label="Concurrent users over the last 24 hours" style="display:block;margin-top:8px">
+      <g class="axis">${grid}</g>
+      ${lines}
+      <line id="xhair" y1="${m.t}" y2="${m.t + ih}" stroke="var(--ink-3)" stroke-width="1" visibility="hidden"/>
+      <g id="dots"></g>
+      <rect x="${m.l}" y="${m.t}" width="${iw}" height="${ih}" fill="transparent" id="hit"/>
+    </svg>
+    <div class="tooltip" id="tip"></div>`;
+
+  const hit = box.querySelector('#hit'), tip = box.querySelector('#tip');
+  const xh = box.querySelector('#xhair'), dots = box.querySelector('#dots');
+  const nearest = (pts, t) => pts.reduce((best, p) => (Math.abs(p[0] - t) < Math.abs(best[0] - t) ? p : best), pts[0]);
+  hit.onpointermove = (e) => {
+    const r = hit.getBoundingClientRect();
+    const t = t0 + ((e.clientX - r.left) / r.width) * (t1 - t0);
+    const rows = series.map((s) => ({ s, p: nearest(s.points, t) })).sort((a, b) => b.p[1] - a.p[1]);
+    const px = x(rows[0].p[0]);
+    xh.setAttribute('x1', px); xh.setAttribute('x2', px); xh.setAttribute('visibility', 'visible');
+    dots.innerHTML = rows.map(({ s, p }) => `<circle cx="${x(p[0])}" cy="${y(p[1])}" r="4" fill="${s.color}" stroke="var(--panel)" stroke-width="2"/>`).join('');
+    const when = new Date(rows[0].p[0]);
+    tip.innerHTML = `<div class="when">${t1 - t0 > 1.5 * DAY ? `${dayFmt.format(when)}, ` : ''}${timeFmt.format(when)}</div>` +
+      rows.map(({ s, p }) => `<div class="row"><span><i class="key" style="background:${s.color}"></i>${esc(s.name)}</span><b>${fmt.format(p[1])}</b></div>`).join('');
+    tip.style.display = 'block';
+    const bx = box.getBoundingClientRect();
+    let left = e.clientX - bx.left + 16;
+    if (left + tip.offsetWidth > bx.width) left = e.clientX - bx.left - tip.offsetWidth - 16;
+    tip.style.left = `${Math.max(0, left)}px`;
+    tip.style.top = `${e.clientY - bx.top - 12}px`;
+  };
+  hit.onpointerleave = () => { tip.style.display = 'none'; xh.setAttribute('visibility', 'hidden'); dots.innerHTML = ''; };
+}
+
+function niceStep(raw) {
+  const p = 10 ** Math.floor(Math.log10(Math.max(raw, 1)));
+  const n = raw / p;
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p;
+}
+
+const COLUMNS = [
+  { key: 'rank', label: '#', get: (g) => g.playing },
+  { key: 'name', label: 'Experience', get: (g) => g.name.toLowerCase() },
+  { key: 'playing', label: 'CCU', get: (g) => g.playing },
+  { key: 'peak', label: '24h peak', get: peak },
+  { key: 'trend', label: '24h trend', get: (g) => g.playing },
+  { key: 'visits', label: 'Visits', get: (g) => g.visits },
+  { key: 'gained', label: '24h visits', get: visitsGained },
+  { key: 'favorites', label: 'Favorites', get: (g) => g.favorites },
+  { key: 'rating', label: 'Like ratio', get: (g) => rating(g) ?? -1 },
+  { key: 'updated', label: 'Updated', get: (g) => Date.parse(g.updated) || 0 },
+];
+
+function agoIso(iso) {
+  const s = (Date.now() - Date.parse(iso)) / 1000;
+  if (!isFinite(s)) return '—';
+  if (s < 3600) return `${Math.max(1, Math.round(s / 60))}m ago`;
+  if (s < 86400) return `${Math.round(s / 3600)}h ago`;
+  if (s < 86400 * 60) return `${Math.round(s / 86400)}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+function renderTable(games, colorOf, rankOf) {
+  const col = COLUMNS.find((c) => c.key === sort.key);
+  const rows = games
+    .filter((g) => !filter || g.name.toLowerCase().includes(filter))
+    .sort((a, b) => {
+      const va = col.get(a), vb = col.get(b);
+      return (va < vb ? -1 : va > vb ? 1 : 0) * sort.dir || rankOf.get(a.universeId) - rankOf.get(b.universeId);
+    });
+  $('count').textContent = filter ? `${rows.length} of ${games.length}` : games.length;
+  const head = `<thead><tr>${COLUMNS.map((c) => `<th data-key="${c.key}"${c.key === sort.key ? ` aria-sort="${sort.dir < 0 ? 'descending' : 'ascending'}"` : ''}>${c.label}</th>`).join('')}</tr></thead>`;
+  const body = rows.map((g) => {
+    const r = rating(g);
+    const color = colorOf.has(g.universeId) ? cssVar(colorOf.get(g.universeId)) : cssVar('--ink-3');
+    const gained = visitsGained(g);
+    return `<tr>
+      <td class="rank">${rankOf.get(g.universeId)}</td>
+      <td><div class="game">
+        ${g.icon ? `<img src="${esc(g.icon)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'noimg' }))">` : '<div class="noimg"></div>'}
+        <div>
+          <a href="https://www.roblox.com/games/${g.placeId}" target="_blank" rel="noopener" title="${esc(g.name)}">${esc(g.name)}</a>
+          <div class="genre">${esc([g.genre && g.genre !== 'All' ? g.genre : '', g.ownerType === 'group' ? g.ownerName : ''].filter(Boolean).join(' · ') || 'No genre')}</div>
+        </div>
+      </div></td>
+      <td><span class="ccu${g.playing ? '' : ' idle'}"><span class="dot"></span>${fmt.format(g.playing)}</span></td>
+      <td>${fmt.format(peak(g))}</td>
+      <td>${sparkline(last24(g), 88, 22, color)}</td>
+      <td>${fmt.format(g.visits)}</td>
+      <td>${gained ? `<span class="pos">+${fmt.format(gained)}</span>` : '<span class="faint">—</span>'}</td>
+      <td>${fmt.format(g.favorites)}</td>
+      <td>${r == null ? '<span class="faint">—</span>' : `<span class="ratio">${(r * 100).toFixed(1)}%<span class="bar"><i style="width:${(r * 100).toFixed(1)}%"></i></span></span>`}</td>
+      <td class="faint">${agoIso(g.updated)}</td>
+    </tr>`;
+  }).join('');
+  const emptyMsg = filter ? 'No experiences match that filter.' : 'No public experiences found for this account.';
+  $('table').innerHTML = head + `<tbody>${body || `<tr><td colspan="${COLUMNS.length}" class="empty">${emptyMsg}</td></tr>`}</tbody>`;
+  $('table').querySelectorAll('th').forEach((th) => {
+    th.onclick = () => {
+      const key = th.dataset.key;
+      sort = sort.key === key ? { key, dir: -sort.dir } : { key, dir: key === 'name' ? 1 : -1 };
+      render();
+    };
+  });
+}
+
+let resizeTimer;
+addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+loadStatic().then((ok) => { if (!ok) refresh(true); });
+</script>
+</body>
+</html>
