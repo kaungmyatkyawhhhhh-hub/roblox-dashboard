@@ -1,13 +1,13 @@
 # Roblox Experience Overview
 
-A single-screen analytics dashboard for every Roblox experience owned by the accounts in [`config.json`](config.json). It's currently set to the **Myanmar Builders Club** group.
+A black-and-white, Apple-style analytics dashboard for every Roblox experience owned by the accounts in [`config.json`](config.json). It's currently set to the **Myanmar Builders Club** group.
 
 - **Totals:** players right now (with a 24h trend), visits and visits gained, favorites, like ratio, and how many experiences are live. The browser tab shows the live player count.
 - **Concurrent users:** your top 5 experiences plus all others, over the last 12 hours, 24 hours, 7 days or month.
 - **When players are online:** a day-by-hour heatmap of average players in your local time.
 - **Highlights:** busiest hour and day, peak since tracking began, visits per day, and the most played experience this week.
 - **Visits per day** for the last 14 days, and **next milestones** for visits and favorites, with an estimate of when you'll reach each one at your current pace.
-- **Music player:** the floating disc in the corner plays relaxing music that is generated live in your browser (no audio files), in three moods: Midnight Drift, Neon Rain and Aurora. The background glow pulses to the beat.
+- **Music player:** the vinyl disc in the corner opens a player. Paste YouTube video or playlist links to build a queue; they play through YouTube's official embedded player, and your queue is remembered in your browser. There are also three relaxing moods generated live in the browser (Midnight Drift, Neon Rain, Aurora). Videos whose owners block embedding are skipped automatically.
 - **Experience cards:** click any card for a detail panel with its own player chart, daily visits, favorites over time, milestones, and details. Each panel has its own link (`#game-<id>`).
 
 ## Hosted automatically (GitHub Pages)

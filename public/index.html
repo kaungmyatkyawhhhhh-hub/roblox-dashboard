@@ -12,85 +12,88 @@
   :root {
     color-scheme: light;
     --bg: #f5f5f7;
-    --glow: rgb(42 120 214 / .10);
     --panel: #ffffff;
-    --panel-2: #fafafb;
-    --line: #e7e7ea;
-    --line-soft: #f0f0f2;
-    --ink: #0f0f12;
-    --ink-2: #55555c;
-    --ink-3: #8b8b93;
-    --accent: #2a78d6;
-    --series-1: #2a78d6;
-    --series-2: #eb6834;
-    --series-3: #1baf7a;
-    --series-4: #eda100;
-    --series-5: #e87ba4;
-    --series-other: #a9a9b0;
-    --pos: #12803a;
-    --live: #1f9d45;
-    --track: #ececef;
-    --shadow: 0 1px 2px rgb(16 16 24 / .04), 0 4px 16px rgb(16 16 24 / .04);
-    --glow: rgb(42 120 214 / .16);
+    --panel-2: #f2f2f4;
+    --line: #e3e3e6;
+    --line-soft: #ededf0;
+    --ink: #0a0a0b;
+    --ink-2: #4a4a4f;
+    --ink-3: #8a8a8f;
+    --accent: #0a0a0b;
+    --series-1: #0a0a0b;
+    --series-2: #8e8e93;
+    --series-3: #0a0a0b;
+    --series-4: #8e8e93;
+    --series-5: #b8b8bd;
+    --series-other: #c7c7cc;
+    --pos: #0a0a0b;
+    --live: #0a0a0b;
+    --track: #e8e8eb;
+    --shadow: 0 1px 2px rgb(0 0 0 / .04), 0 6px 24px rgb(0 0 0 / .05);
+    --glow: rgb(0 0 0 / .10);
     --sheen: rgb(255 255 255 / 0);
     --glass: rgb(255 255 255 / .72);
-    --glass-line: rgb(16 16 24 / .08);
+    --glass-line: rgb(0 0 0 / .08);
+    --blob: #000;
+    --aurora-o: .05;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       color-scheme: dark;
-      --bg: #0a0a0c;
-      --glow: rgb(57 135 229 / .16);
-      --panel: #131316;
-      --panel-2: #18181c;
-      --line: #24242a;
-      --line-soft: #1d1d22;
-      --ink: #f2f2f4;
-      --ink-2: #b4b4bc;
-      --ink-3: #7c7c86;
-      --accent: #3987e5;
-      --series-1: #3987e5;
-      --series-2: #d95926;
-      --series-3: #199e70;
-      --series-4: #c98500;
-      --series-5: #d55181;
-      --series-other: #5c5c66;
-      --pos: #4cc06a;
-      --live: #3fcf6a;
-      --track: #26262c;
-      --shadow: 0 1px 0 rgb(255 255 255 / .03) inset, 0 8px 24px rgb(0 0 0 / .25);
-      --glow: rgb(57 135 229 / .42);
-      --sheen: rgb(255 255 255 / .025);
-      --glass: rgb(22 22 28 / .62);
-      --glass-line: rgb(255 255 255 / .09);
+    --bg: #000000;
+    --panel: #0c0c0d;
+    --panel-2: #141416;
+    --line: #232326;
+    --line-soft: #19191b;
+    --ink: #f5f5f7;
+    --ink-2: #a1a1a6;
+    --ink-3: #6e6e73;
+    --accent: #f5f5f7;
+    --series-1: #f5f5f7;
+    --series-2: #8e8e93;
+    --series-3: #f5f5f7;
+    --series-4: #8e8e93;
+    --series-5: #c7c7cc;
+    --series-other: #48484a;
+    --pos: #f5f5f7;
+    --live: #f5f5f7;
+    --track: #1c1c1e;
+    --shadow: 0 1px 0 rgb(255 255 255 / .04) inset, 0 10px 30px rgb(0 0 0 / .5);
+    --glow: rgb(255 255 255 / .18);
+    --sheen: rgb(255 255 255 / .03);
+    --glass: rgb(18 18 20 / .66);
+    --glass-line: rgb(255 255 255 / .10);
+    --blob: #fff;
+    --aurora-o: .07;
     }
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --bg: #0a0a0c;
-    --glow: rgb(57 135 229 / .16);
-    --panel: #131316;
-    --panel-2: #18181c;
-    --line: #24242a;
-    --line-soft: #1d1d22;
-    --ink: #f2f2f4;
-    --ink-2: #b4b4bc;
-    --ink-3: #7c7c86;
-    --accent: #3987e5;
-    --series-1: #3987e5;
-    --series-2: #d95926;
-    --series-3: #199e70;
-    --series-4: #c98500;
-    --series-5: #d55181;
-    --series-other: #5c5c66;
-    --pos: #4cc06a;
-    --live: #3fcf6a;
-    --track: #26262c;
-    --shadow: 0 1px 0 rgb(255 255 255 / .03) inset, 0 8px 24px rgb(0 0 0 / .25);
-      --glow: rgb(57 135 229 / .42);
-      --sheen: rgb(255 255 255 / .025);
-      --glass: rgb(22 22 28 / .62);
-      --glass-line: rgb(255 255 255 / .09);
+    --bg: #000000;
+    --panel: #0c0c0d;
+    --panel-2: #141416;
+    --line: #232326;
+    --line-soft: #19191b;
+    --ink: #f5f5f7;
+    --ink-2: #a1a1a6;
+    --ink-3: #6e6e73;
+    --accent: #f5f5f7;
+    --series-1: #f5f5f7;
+    --series-2: #8e8e93;
+    --series-3: #f5f5f7;
+    --series-4: #8e8e93;
+    --series-5: #c7c7cc;
+    --series-other: #48484a;
+    --pos: #f5f5f7;
+    --live: #f5f5f7;
+    --track: #1c1c1e;
+    --shadow: 0 1px 0 rgb(255 255 255 / .04) inset, 0 10px 30px rgb(0 0 0 / .5);
+    --glow: rgb(255 255 255 / .18);
+    --sheen: rgb(255 255 255 / .03);
+    --glass: rgb(18 18 20 / .66);
+    --glass-line: rgb(255 255 255 / .10);
+    --blob: #fff;
+    --aurora-o: .07;
   }
 
   * { box-sizing: border-box; }
@@ -572,6 +575,131 @@
     .cards { grid-template-columns: 1fr; }
     .table-tools input { width: 150px; }
   }
+
+  /* ================= black & white, Apple-style ================= */
+  .aurora i:nth-child(1), .aurora i:nth-child(2), .aurora i:nth-child(3) { background: var(--blob); }
+  .aurora i { opacity: var(--aurora-o); }
+  .aurora i:nth-child(3) { opacity: calc(var(--aurora-o) * .6); }
+  body { background: radial-gradient(1200px 500px at 50% -200px, var(--glow), transparent 70%), var(--bg); font-feature-settings: "cv11", "ss01", "ss03"; }
+  .progress { background: var(--ink); box-shadow: 0 0 14px var(--glow), 0 0 4px var(--ink); }
+  .ms-bar i { background: linear-gradient(90deg, var(--ink-2), var(--ink)); }
+  .play { background: var(--ink); color: var(--bg); box-shadow: 0 8px 24px -8px var(--glow), 0 0 30px -6px var(--glow); }
+  .play:hover { box-shadow: 0 10px 30px -6px var(--glow), 0 0 40px -4px var(--glow); }
+  .badge.ccu.on .dot { background: #fff; box-shadow: 0 0 0 3px rgb(255 255 255 / .25), 0 0 10px #fff; }
+  .like-split { background: var(--track); }
+  .like-split i { background: var(--ink); }
+  .pill.live { box-shadow: var(--shadow), 0 0 22px -4px var(--glow); border-color: var(--glass-line); }
+  .pill.err .dot { background: var(--ink-3); }
+  @keyframes flashDown { 20% { color: var(--ink-3); transform: translateY(2px); } }
+  @keyframes badgeUp { 20% { background: rgb(255 255 255 / .35); box-shadow: 0 0 24px rgb(255 255 255 / .5); } }
+  .key-line { flex: none; }
+  .thumb img.banner { filter: grayscale(1) contrast(1.06); transition: filter .7s ease, transform .4s ease; transform: scale(calc(var(--z, 1) * var(--hz, 1))); }
+  .exp:hover .thumb img.banner { filter: none; transform: scale(calc(var(--z, 1) * var(--hz, 1))); --hz: 1.04; }
+  .thumb img.icon-fallback, .game img { filter: grayscale(1); }
+
+  /* sticky top bar */
+  .bar { position: sticky; top: 0; z-index: 30; max-width: none; padding: 12px max(24px, calc((100vw - 1280px) / 2 + 24px));
+    background: color-mix(in srgb, var(--bg) 72%, transparent); backdrop-filter: blur(20px) saturate(1.8); -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
+  .bar .pill { height: 30px; }
+  body:not(.mounted) .bar .pill { display: none; }
+
+  /* pinned hero that shrinks away as you scroll */
+  main { padding-top: 0; }
+  .stage { height: 165vh; height: 165svh; position: relative; margin-bottom: -55vh; margin-bottom: -55svh; z-index: 0; }
+  .stage ~ * { position: relative; z-index: 1; }
+  .stage-inner {
+    position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 10px;
+    transform: translateY(calc(var(--p, 0) * -80px)) scale(calc(1 - var(--p, 0) * .2)); opacity: calc(1 - var(--p, 0) * 1.15); filter: blur(calc(var(--p, 0) * 14px));
+    will-change: transform, opacity, filter;
+  }
+  .stage .avatar { width: 76px; height: 76px; border-radius: 20px; margin-bottom: 10px; filter: grayscale(1); }
+  .eyebrow { font-size: 14px; font-weight: 500; letter-spacing: .02em; color: var(--ink-3); }
+  .stage-title {
+    font-size: clamp(44px, 8.6vw, 124px); font-weight: 700; letter-spacing: -0.05em; line-height: .95; margin: 0; max-width: 14ch;
+    background: linear-gradient(180deg, var(--ink) 35%, color-mix(in srgb, var(--ink) 45%, transparent)); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 40px var(--glow));
+  }
+  .stage-stat { display: flex; align-items: baseline; gap: 14px; margin-top: 28px; flex-wrap: wrap; justify-content: center; }
+  .stage-stat .num { font-size: clamp(56px, 11vw, 150px); font-weight: 700; letter-spacing: -0.06em; line-height: 1; text-shadow: 0 0 60px var(--glow); }
+  .stage-unit { font-size: clamp(16px, 2vw, 22px); color: var(--ink-2); font-weight: 500; letter-spacing: -0.01em; }
+  .scroll-cue { position: absolute; bottom: 36px; display: flex; flex-direction: column; align-items: center; gap: 10px; color: var(--ink-3); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
+  .scroll-cue i { width: 1px; height: 44px; background: linear-gradient(var(--ink-3), transparent); position: relative; overflow: hidden; }
+  .scroll-cue i::after { content: ""; position: absolute; left: 0; top: -40%; width: 1px; height: 40%; background: var(--ink); box-shadow: 0 0 8px var(--ink); animation: cue 1.8s ease-in-out infinite; }
+  @keyframes cue { to { top: 100%; } }
+
+  /* headlines that light up word by word as you scroll */
+  .headline, .statement { margin: 56px 0 8px; letter-spacing: -0.04em; line-height: 1.05; font-weight: 700; }
+  .headline { font-size: clamp(34px, 5.4vw, 72px); max-width: 16ch; }
+  .statement { font-size: clamp(26px, 3.8vw, 52px); max-width: 24ch; margin: 80px 0 40px; line-height: 1.12; }
+  .headline .w, .statement .w { opacity: .14; transition: opacity .35s ease, text-shadow .35s ease; }
+  .headline .w.lit, .statement .w.lit { opacity: 1; text-shadow: 0 0 30px var(--glow); }
+  .section-title { margin: 0 0 -8px; }
+
+  /* Apple-style reveal: longer travel, softer ease */
+  .reveal { opacity: 0; transform: translateY(70px) scale(.96); filter: blur(10px); transition: opacity 1.1s cubic-bezier(.16, 1, .3, 1), transform 1.3s cubic-bezier(.16, 1, .3, 1), filter 1.1s ease; }
+  .reveal.in { opacity: 1; transform: none; filter: none; }
+  @keyframes rise { from { opacity: 0; transform: translateY(60px) scale(.95); filter: blur(8px); } }
+  .reveal-group.in:not(.done) > * { animation: rise 1.2s cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(var(--i, 0) * 110ms); }
+
+  /* music player in black & white */
+  .disc {
+    background:
+      radial-gradient(circle, transparent 0 33%, rgb(255 255 255 / .06) 33.5% 34%, transparent 34.5%),
+      conic-gradient(from 30deg, rgb(255 255 255 / .22), transparent 12%, transparent 38%, rgb(255 255 255 / .16) 50%, transparent 62%, transparent 88%, rgb(255 255 255 / .22)),
+      repeating-radial-gradient(circle, #0d0d0e 0 1.5px, #1a1a1c 1.5px 3px);
+    box-shadow: 0 0 26px -4px var(--glow), inset 0 0 0 1px rgb(255 255 255 / .14);
+  }
+  .disc::before { display: none; }
+  .disc::after { background: radial-gradient(circle, #0a0a0b 0 12%, #f5f5f7 13%); box-shadow: inset 0 0 0 1px rgb(0 0 0 / .3); inset: 33%; }
+  .p-art::after { background: radial-gradient(circle, rgb(255 255 255 / .9), transparent 70%); opacity: calc(.08 + var(--beat, 0) * .5); }
+  .p-card { width: 360px; max-height: calc(100vh - 40px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+  .p-card::-webkit-scrollbar { display: none; }
+  .p-card::before { background: linear-gradient(140deg, rgb(255 255 255 / .35), transparent 35%, transparent 65%, rgb(255 255 255 / .18)); }
+  .p-controls .p-play, .p-controls .p-play:hover { background: var(--ink); color: var(--bg); box-shadow: 0 8px 24px -8px var(--glow), 0 0 34px -4px var(--glow); }
+  .p-vol input { background: linear-gradient(90deg, var(--ink) 0 var(--v, 60%), var(--track) var(--v, 60%)); }
+  .p-vol input::-webkit-slider-thumb { box-shadow: 0 0 10px var(--glow), 0 0 0 3px rgb(255 255 255 / .2); }
+  .p-stations button[aria-pressed="true"] { border-color: var(--ink-2); background: color-mix(in srgb, var(--ink) 10%, transparent); }
+  .p-video { margin-top: 14px; border-radius: 14px; overflow: hidden; background: #000; height: 200px; box-shadow: 0 0 40px -12px var(--glow); }
+  .p-video[hidden] { display: none; }
+  .p-video iframe, .p-video > div { width: 100%; height: 200px; display: block; border: 0; }
+  .p-add { display: flex; gap: 8px; margin-top: 14px; }
+  .p-add input { flex: 1; width: auto; min-width: 0; height: 36px; border-radius: 12px; background: color-mix(in srgb, var(--panel-2) 80%, transparent); border-color: var(--glass-line); }
+  .p-add button { height: 36px; border-radius: 12px; background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .p-msg { font-size: 12px; color: var(--ink-3); min-height: 0; margin-top: 6px; }
+  .p-msg:empty { display: none; }
+  .p-list-head { display: flex; justify-content: space-between; align-items: center; margin: 16px 0 8px; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+  .p-list-head button { height: 22px; padding: 0 8px; font-size: 11px; border-radius: 99px; background: transparent; border-color: transparent; color: var(--ink-3); text-transform: none; letter-spacing: 0; }
+  .p-list-head button:hover { color: var(--ink); border-color: var(--glass-line); }
+  .p-queue { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .p-queue li { display: flex; align-items: center; gap: 10px; padding: 6px; border-radius: 12px; cursor: pointer; transition: background .15s; }
+  .p-queue li:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+  .p-queue li.on { background: color-mix(in srgb, var(--ink) 10%, transparent); box-shadow: inset 0 0 0 1px var(--glass-line); }
+  .p-queue img, .p-queue .ph { width: 48px; height: 36px; border-radius: 8px; object-fit: cover; flex: none; background: var(--track); filter: grayscale(1); }
+  .p-queue li.on img { filter: none; }
+  .p-queue .qt { min-width: 0; flex: 1; }
+  .p-queue .qt b { display: block; font-weight: 550; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .p-queue .qt span { color: var(--ink-3); font-size: 11.5px; }
+  .p-queue .rm { width: 26px; height: 26px; padding: 0; border-radius: 50%; display: grid; place-items: center; background: transparent; border-color: transparent; color: var(--ink-3); opacity: 0; }
+  .p-queue li:hover .rm, .p-queue .rm:focus-visible { opacity: 1; }
+  .p-queue .rm:hover { color: var(--ink); border-color: var(--glass-line); }
+  .p-empty { color: var(--ink-3); font-size: 12px; padding: 4px 2px; }
+  .player.yt #p-viz { display: none; }
+
+  @media (max-width: 720px) {
+    .stage { height: 150vh; height: 150svh; margin-bottom: -50vh; margin-bottom: -50svh; }
+    .brand-text { display: none; }
+    .bar { flex-wrap: nowrap; }
+    .headline { margin-top: 40px; }
+    .statement { margin: 56px 0 24px; }
+    .p-card { width: calc(100vw - 28px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stage { height: auto; margin-bottom: 0; }
+    .stage-inner { position: static; height: auto; padding: 80px 0 40px; transform: none; opacity: 1; filter: none; }
+    .scroll-cue { display: none; }
+    .headline .w, .statement .w { opacity: 1; }
+  }
 </style>
 </head>
 <body>
@@ -579,13 +707,14 @@
 <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
 <div class="grain" aria-hidden="true"></div>
 <header class="bar">
-  <div class="brand"><span class="mark"></span>Experience Overview</div>
+  <div class="brand"><span class="mark"></span><span class="brand-text">Experience Overview</span></div>
   <span class="spacer"></span>
   <form id="form">
     <div class="field"><label for="user">Creator</label><input id="user" placeholder="Username or ID" autocomplete="off"></div>
     <div class="field"><label for="groups">Groups</label><input id="groups" placeholder="IDs, comma-separated" autocomplete="off"></div>
     <button class="primary" type="submit">Load</button>
   </form>
+  <div class="pill" id="sync"><span class="dot"></span><span id="sync-text"></span></div>
   <button class="icon" type="button" id="theme" title="Switch theme" aria-label="Switch theme">
     <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 2a6 6 0 0 0 0 12z" fill="currentColor"/></svg>
   </button>
@@ -604,19 +733,25 @@
     <div class="p-top">
       <div class="p-art"><span class="disc"></span></div>
       <div class="p-meta">
-        <div class="p-kicker">Generated live</div>
+        <div class="p-kicker" id="p-kicker">Now playing</div>
         <div class="p-title" id="p-title"></div>
         <div class="p-sub" id="p-sub"></div>
       </div>
       <button class="p-min" id="p-min" type="button" aria-label="Minimize player"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
+    <div class="p-video" id="p-video" hidden><div id="yt-frame"></div></div>
     <canvas id="p-viz" aria-hidden="true"></canvas>
     <div class="p-controls">
-      <button id="p-prev" type="button" aria-label="Previous mood"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 3v12M15 3.5v11L6.5 9z" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button>
+      <button id="p-prev" type="button" aria-label="Previous"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 3v12M15 3.5v11L6.5 9z" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button>
       <button id="p-play" class="p-play" type="button" aria-label="Play"><svg id="p-icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M7 4.5v13l11-6.5z" fill="currentColor"/></svg></button>
-      <button id="p-next" type="button" aria-label="Next mood"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M14 3v12M3 3.5v11L11.5 9z" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button>
+      <button id="p-next" type="button" aria-label="Next"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M14 3v12M3 3.5v11L11.5 9z" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button>
     </div>
     <div class="p-vol"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6h3l4-3v10l-4-3H2z" fill="currentColor"/><path d="M11 5.5a3.5 3.5 0 0 1 0 5M12.8 3.5a6 6 0 0 1 0 9" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg><input type="range" id="p-vol" min="0" max="1" step="0.01" aria-label="Volume"></div>
+    <form class="p-add" id="p-add"><input id="p-url" placeholder="Paste a YouTube link" autocomplete="off" aria-label="YouTube link"><button type="submit">Add</button></form>
+    <div class="p-msg" id="p-msg" role="status"></div>
+    <div class="p-list-head"><span>Your queue</span><button type="button" id="p-clear" hidden>Clear</button></div>
+    <ul class="p-queue" id="p-queue"></ul>
+    <div class="p-list-head"><span>Ambient · generated live</span></div>
     <div class="p-stations" id="p-stations"></div>
   </div>
 </div>
@@ -630,18 +765,21 @@
 </div>
 
 <template id="dashboard">
-  <div class="hero reveal">
-    <div class="who">
+  <section class="stage" id="stage">
+    <div class="stage-inner">
       <img class="avatar" id="avatar" alt="" hidden>
-      <div>
-        <h1 id="owner"></h1>
-        <div class="sub" id="owner-sub"></div>
-      </div>
+      <div class="eyebrow" id="owner-sub"></div>
+      <h1 class="stage-title" id="owner"></h1>
+      <div class="stage-stat"><span class="num" id="stage-ccu">0</span><span class="stage-unit" id="stage-unit">playing right now</span></div>
+      <div class="scroll-cue" aria-hidden="true"><span>Scroll</span><i></i></div>
     </div>
-    <div class="pill" id="sync"><span class="dot"></span><span id="sync-text"></span></div>
-  </div>
+  </section>
 
   <section class="kpis reveal-group" id="kpis"></section>
+
+  <p class="statement" id="statement" data-words></p>
+
+  <h2 class="headline" data-words>Every player, every minute.</h2>
 
   <section class="panel reveal">
     <div class="panel-head">
@@ -659,6 +797,7 @@
     <div class="chart-wrap" id="chart"></div>
   </section>
 
+  <h2 class="headline" data-words>Know when they show up.</h2>
   <div class="grid-2-1">
     <section class="panel reveal">
       <div class="panel-head"><h2>When players are online</h2><span class="meta" id="heat-meta"></span></div>
@@ -670,6 +809,7 @@
     </section>
   </div>
 
+  <h2 class="headline" data-words>Watch your games grow.</h2>
   <div class="grid-1-1">
     <section class="panel reveal">
       <div class="panel-head"><h2>Visits per day</h2><span class="meta">Last 14 days · today so far</span></div>
@@ -681,7 +821,8 @@
     </section>
   </div>
 
-  <div class="section-title reveal"><h2>Experiences</h2><span class="meta" id="cards-meta"></span></div>
+  <h2 class="headline" data-words>Your experiences.</h2>
+  <div class="section-title reveal"><span class="meta" id="cards-meta"></span></div>
   <section class="cards reveal-group" id="cards"></section>
 
   <section class="panel reveal" id="table-panel" hidden>
@@ -695,6 +836,8 @@
 
 <script>
 const SERIES = ['--series-1', '--series-2', '--series-3', '--series-4', '--series-5'];
+// Black & white theme: series 3-5 reuse the first greys, told apart by line style.
+const DASHES = ['', '', '7 5', '7 5', '2 4'];
 const CARD_LIMIT = 6; // experiences shown as cards; the table appears when there are more
 const REFRESH_MS = 60 * 1000;
 const $ = (id) => document.getElementById(id);
@@ -751,6 +894,8 @@ $('form').onsubmit = (e) => {
 function mountDashboard() {
   if ($('kpis')) return;
   $('main').replaceChildren($('dashboard').content.cloneNode(true));
+  document.body.classList.add('mounted');
+  $('main').querySelectorAll('[data-words]').forEach(splitWords);
   observeReveals($('main'));
   animateChart = true;
   $('filter').oninput = (e) => { filter = e.target.value.trim().toLowerCase(); render(); };
@@ -774,10 +919,7 @@ function showOwners(owners, count) {
 }
 
 function setSync(html, state) {
-  if (!$('sync')) {
-    $('onboard').querySelector('p').innerHTML = html;
-    return;
-  }
+  if (!$('kpis') && $('onboard')) $('onboard').querySelector('p').innerHTML = html;
   $('sync-text').innerHTML = html;
   $('sync').className = `pill ${state || ''}`;
 }
@@ -930,6 +1072,7 @@ function render() {
   renderCards(ranked, colorOf);
   renderDrawer();
   const ccu = games.reduce((s, g) => s + g.playing, 0);
+  renderStage(games, ccu);
   document.title = `${ccu ? `(${fmt.format(ccu)}) ` : ''}${data.owners.map((o) => o.name).join(', ')} · Experience Overview`;
   $('table-panel').hidden = games.length <= CARD_LIMIT;
   if (games.length > CARD_LIMIT) renderTable(games, colorOf, rankOf);
@@ -989,11 +1132,11 @@ function renderChart(games, top, colorOf) {
   const step = staticMode ? `${data.intervalMinutes || 5}-min samples` : '1-min samples';
   $('chart-meta').textContent = `${RANGE_NAMES[rangeHours]} · ${step}`;
   const series = top.filter((g) => within(g, rangeHours).length).map((g) => ({
-    name: g.name, color: cssVar(colorOf.get(g.universeId)), points: within(g, rangeHours).map((h) => [h[0], h[1]]),
+    name: g.name, color: cssVar(colorOf.get(g.universeId)), dash: DASHES[SERIES.indexOf(colorOf.get(g.universeId))], points: within(g, rangeHours).map((h) => [h[0], h[1]]),
   }));
   if (others.length) {
     const pts = totalSeries(others, rangeHours);
-    if (pts.length) series.push({ name: `All others (${others.length})`, color: cssVar('--series-other'), points: pts });
+    if (pts.length) series.push({ name: `All others (${others.length})`, color: cssVar('--series-other'), dash: '1 5', points: pts });
   }
   lineChart($('chart'), series, { animate: animateChart, label: `Concurrent users, ${RANGE_NAMES[rangeHours].toLowerCase()}` });
   animateChart = false;
@@ -1067,13 +1210,13 @@ function lineChart(box, series, { animate = false, label = '', height, floor = 4
     const d = smoothPath(pts);
     const last = pts[pts.length - 1];
     return `<path class="area" d="${d}L${last[0]},${y(yMin)}L${pts[0][0]},${y(yMin)}Z" fill="url(#${id}g${i})"/>
-      <path class="line" d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" filter="url(#${id}glow)"/>
+      <path class="line" d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" filter="url(#${id}glow)"${s.dash ? ` style="stroke-dasharray:${s.dash}"` : ''}/>
       <g class="end">${liveNow ? `<circle class="ping" cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${s.color}"/>` : ''}
       <circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${s.color}" stroke="var(--panel)" stroke-width="2"/></g>`;
   }).join('');
 
   box.innerHTML = `
-    ${legend ? `<div class="legend">${series.map((s) => `<span><i class="key" style="background:${s.color}"></i><em>${esc(s.name)}</em></span>`).join('')}</div>` : ''}
+    ${legend ? `<div class="legend">${series.map((s) => `<span><svg class="key-line" width="20" height="6" aria-hidden="true"><line x1="1" y1="3" x2="19" y2="3" stroke="${s.color}" stroke-width="2" stroke-linecap="round" ${s.dash ? `stroke-dasharray="${s.dash}"` : ''}/></svg><em>${esc(s.name)}</em></span>`).join('')}</div>` : ''}
     <svg class="${animate ? 'draw' : ''}" width="${W}" height="${H}" role="img" aria-label="${esc(label)}" style="display:block;margin-top:10px;overflow:visible">
       <defs>${defs}</defs>
       <g class="axis">${grid}</g>
@@ -1559,9 +1702,9 @@ const revealObserver = 'IntersectionObserver' in window && !reduceMotion
       if (!e.isIntersecting) continue;
       e.target.classList.add('in');
       revealObserver.unobserve(e.target);
-      setTimeout(() => e.target.classList.add('done'), 1800);
+      setTimeout(() => e.target.classList.add('done'), 2000);
     }
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' })
+  }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' })
   : null;
 
 function observeReveals(root) {
@@ -1571,17 +1714,75 @@ function observeReveals(root) {
   });
 }
 
+function splitWords(el) {
+  const text = el.textContent;
+  if (el.dataset.text === text) return;
+  el.dataset.text = text;
+  el.innerHTML = text.split(/(\s+)/).map((w) => (/^\s+$/.test(w) ? w : `<span class="w">${esc(w)}</span>`)).join('');
+}
+
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+
+// Scroll-linked effects: shrinking hero, words lighting up, thumbnails settling.
+function updateScrollFx() {
+  const root = document.documentElement, vh = innerHeight;
+  const max = root.scrollHeight - vh;
+  root.style.setProperty('--sp', max > 0 ? (scrollY / max).toFixed(4) : 0);
+  if (reduceMotion) return;
+  root.style.setProperty('--sy', Math.round(scrollY));
+  const stage = $('stage');
+  if (stage) {
+    const r = stage.getBoundingClientRect();
+    stage.style.setProperty('--p', clamp01(-r.top / Math.max(1, r.height - vh)).toFixed(4));
+  }
+  document.querySelectorAll('[data-words]').forEach((el) => {
+    const r = el.getBoundingClientRect();
+    if (r.bottom < -200 || r.top > vh + 200) return;
+    const p = clamp01((vh * 0.88 - r.top) / (vh * 0.45));
+    const words = el.querySelectorAll('.w');
+    const lit = Math.round(p * words.length);
+    words.forEach((w, i) => w.classList.toggle('lit', i < lit));
+  });
+  document.querySelectorAll('.thumb img.banner').forEach((img) => {
+    const r = img.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > vh) return;
+    img.style.setProperty('--z', (1 + 0.16 * clamp01((r.top - vh * 0.25) / (vh * 0.75))).toFixed(4));
+  });
+}
+
 let scrollQueued = false;
 addEventListener('scroll', () => {
   if (scrollQueued) return;
   scrollQueued = true;
-  requestAnimationFrame(() => {
-    scrollQueued = false;
-    const max = document.documentElement.scrollHeight - innerHeight;
-    document.documentElement.style.setProperty('--sp', max > 0 ? (scrollY / max).toFixed(4) : 0);
-    if (!reduceMotion) document.documentElement.style.setProperty('--sy', Math.round(scrollY));
-  });
+  requestAnimationFrame(() => { scrollQueued = false; updateScrollFx(); });
 }, { passive: true });
+
+function renderStage(games, ccu) {
+  if (!$('stage-ccu')) return;
+  const el = $('stage-ccu');
+  const prev = Number(el.dataset.v || 0);
+  el.dataset.v = ccu;
+  countUp(el, prev, ccu, (v) => fmt.format(Math.round(v)));
+  $('stage-unit').textContent = ccu === 1 ? 'player right now' : 'playing right now';
+  // A one-sentence summary, lit word by word as it scrolls into view.
+  const visits = games.reduce((s, g) => s + g.visits, 0);
+  const favs = games.reduce((s, g) => s + g.favorites, 0);
+  const up = games.reduce((s, g) => s + g.upVotes, 0), down = games.reduce((s, g) => s + g.downVotes, 0);
+  let hours = 0;
+  for (const g of games) {
+    const h = within(g, 168);
+    for (let i = 1; i < h.length; i++) hours += ((h[i][1] + h[i - 1][1]) / 2) * ((h[i][0] - h[i - 1][0]) / 3600000);
+  }
+  const n = games.length;
+  let text = `${n} experience${n === 1 ? '' : 's'}. ${fmt.format(visits)} visits. ${fmt.format(favs)} favorites.`;
+  if (up + down) text += ` ${Math.round((up / (up + down)) * 100)}% of players like what you made.`;
+  if (hours >= 1) text += ` And this week, people spent ${fmt.format(Math.round(hours))} hours playing.`;
+  const st = $('statement');
+  st.textContent = text;
+  st.dataset.text = '';
+  splitWords(st);
+  updateScrollFx();
+}
 
 // ---- music: ambient tracks generated live with Web Audio (no audio files) ----
 const hz = (m) => 440 * 2 ** ((m - 69) / 12);
@@ -1806,31 +2007,212 @@ class Ambient {
   }
 }
 
+
 const music = new Ambient();
 music.vol = Math.min(1, Math.max(0, Number(load('rgo.vol') ?? 0.6)));
 music.mood = Math.min(MOODS.length - 1, Math.max(0, Number(load('rgo.mood')) || 0));
 
+// ---- YouTube: paste links, play them through the official embedded player ----
+function parseYouTube(text) {
+  const raw = text.trim();
+  if (/^[\w-]{11}$/.test(raw)) return { v: raw };
+  let u;
+  try { u = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`); } catch { return null; }
+  const host = u.hostname.replace(/^(www|m|music)\./, '');
+  let v = null;
+  if (host === 'youtu.be') v = u.pathname.split('/')[1];
+  else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+    if (u.pathname === '/watch') v = u.searchParams.get('v');
+    else { const m = u.pathname.match(/^\/(shorts|embed|live|v)\/([\w-]{11})/); if (m) v = m[2]; }
+  } else return null;
+  const list = u.searchParams.get('list');
+  if (v && !/^[\w-]{11}$/.test(v)) v = null;
+  if (!v && !list) return null;
+  const start = parseInt(u.searchParams.get('t') || u.searchParams.get('start'), 10) || 0;
+  return v ? { v, start } : { list };
+}
+
+let queue = [];
+try { queue = JSON.parse(load('rgo.queue') || '[]').filter((q) => q && (q.v || q.list)); } catch { queue = []; }
+const saveQueue = () => store('rgo.queue', JSON.stringify(queue));
+let src = 'mood';      // 'mood' (generated) or 'yt'
+let ytIndex = -1;
+let yt = null, ytReady = null, ytPlaying = false, ytErrors = 0;
+
+function loadYouTubeApi() {
+  if (ytReady) return ytReady;
+  ytReady = new Promise((resolve, reject) => {
+    if (window.YT && window.YT.Player) return resolve();
+    const prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => { if (prev) prev(); resolve(); };
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    tag.onerror = () => { ytReady = null; reject(new Error('YouTube could not be reached')); };
+    document.head.appendChild(tag);
+  });
+  return ytReady;
+}
+
+function setMsg(text) {
+  $('p-msg').textContent = text || '';
+  clearTimeout(setMsg.t);
+  if (text) setMsg.t = setTimeout(() => { $('p-msg').textContent = ''; }, 5000);
+}
+
+async function fetchTitle(item) {
+  try {
+    const url = item.v ? `https://www.youtube.com/watch?v=${item.v}` : `https://www.youtube.com/playlist?list=${item.list}`;
+    const res = await fetch(`https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(url)}`);
+    if (!res.ok) return;
+    const j = await res.json();
+    item.title = j.title || item.title;
+    item.author = j.author_name || item.author;
+    saveQueue();
+    renderPlayer();
+  } catch { /* titles fill in once the video loads instead */ }
+}
+
+function addLink(text) {
+  const parsed = parseYouTube(text);
+  if (!parsed) { setMsg("That doesn't look like a YouTube link."); return; }
+  const existing = queue.findIndex((q) => (parsed.v ? q.v === parsed.v : q.list === parsed.list));
+  if (existing >= 0) { playYT(existing); return; }
+  const item = { ...parsed, title: parsed.v ? 'YouTube video' : 'YouTube playlist', author: '' };
+  queue.push(item);
+  saveQueue();
+  fetchTitle(item);
+  playYT(queue.length - 1);
+}
+
+async function playYT(i) {
+  if (!queue.length) return;
+  ytIndex = (i + queue.length) % queue.length;
+  const item = queue[ytIndex];
+  src = 'yt';
+  music.stop();
+  $('player').classList.add('yt');
+  $('p-video').hidden = false;
+  renderPlayer();
+  try { await loadYouTubeApi(); } catch (e) { setMsg(`${e.message}. Check your connection and try again.`); return; }
+  yt?.setVolume?.(Math.round(music.vol * 100));
+  if (!yt) {
+    yt = new YT.Player('yt-frame', {
+      width: '100%', height: '200',
+      videoId: item.v || undefined,
+      playerVars: { autoplay: 1, playsinline: 1, rel: 0, start: item.start || 0, ...(item.list ? { listType: 'playlist', list: item.list } : {}) },
+      events: {
+        onReady: (e) => { e.target.setVolume(Math.round(music.vol * 100)); e.target.playVideo(); },
+        onStateChange: onYTState,
+        onError: onYTError,
+      },
+    });
+  } else if (item.v) {
+    yt.loadVideoById({ videoId: item.v, startSeconds: item.start || 0 });
+  } else {
+    yt.loadPlaylist({ list: item.list, listType: 'playlist' });
+  }
+}
+
+function onYTState(e) {
+  const S = YT.PlayerState;
+  ytPlaying = e.data === S.PLAYING || e.data === S.BUFFERING;
+  if (e.data === S.PLAYING) {
+    ytErrors = 0;
+    const d = yt.getVideoData && yt.getVideoData();
+    const item = queue[ytIndex];
+    if (d && item && d.title) {
+      if (item.v) { item.title = d.title; item.author = d.author || item.author; saveQueue(); }
+      item.now = d.title;
+      item.nowAuthor = d.author;
+    }
+  }
+  if (e.data === S.ENDED) {
+    const item = queue[ytIndex];
+    const pl = item && item.list && yt.getPlaylist && yt.getPlaylist();
+    const atEnd = !pl || yt.getPlaylistIndex() >= pl.length - 1;
+    if (atEnd && queue.length > 1) playYT(ytIndex + 1);
+    else if (atEnd && item && item.v) { yt.seekTo(0); yt.pauseVideo(); }
+  }
+  renderPlayer();
+  if (ytPlaying) drawViz();
+}
+
+function onYTError(e) {
+  ytErrors++;
+  const blocked = e.data === 101 || e.data === 150;
+  setMsg(blocked ? "This video's owner doesn't allow playing it outside YouTube, so it was skipped." : "This video couldn't be played, so it was skipped.");
+  ytPlaying = false;
+  renderPlayer();
+  if (queue.length > 1 && ytErrors < queue.length) setTimeout(() => playYT(ytIndex + 1), 1200);
+}
+
+function removeItem(i) {
+  const wasCurrent = src === 'yt' && i === ytIndex;
+  queue.splice(i, 1);
+  saveQueue();
+  if (i < ytIndex) ytIndex--;
+  if (wasCurrent) {
+    if (queue.length) playYT(Math.min(i, queue.length - 1));
+    else { yt?.stopVideo?.(); ytPlaying = false; ytIndex = -1; src = 'mood'; $('player').classList.remove('yt'); $('p-video').hidden = true; }
+  }
+  renderPlayer();
+}
+
+const isPlaying = () => (src === 'yt' ? ytPlaying : music.playing);
+
 function renderPlayer() {
+  const item = src === 'yt' ? queue[ytIndex] : null;
   const m = MOODS[music.mood];
-  $('p-title').textContent = m.name;
-  $('p-sub').textContent = m.sub;
-  $('player').classList.toggle('playing', music.playing);
-  $('p-play').setAttribute('aria-label', music.playing ? 'Pause' : 'Play');
-  $('p-icon').innerHTML = music.playing
+  $('p-kicker').textContent = item ? (ytPlaying ? 'Now playing · YouTube' : 'YouTube') : 'Generated live';
+  $('p-title').textContent = item ? (item.now || item.title) : m.name;
+  $('p-sub').textContent = item ? (item.nowAuthor || item.author || (item.list ? 'Playlist' : 'YouTube')) : m.sub;
+  $('player').classList.toggle('playing', isPlaying());
+  $('player').classList.toggle('yt', src === 'yt');
+  $('p-video').hidden = src !== 'yt';
+  $('p-play').setAttribute('aria-label', isPlaying() ? 'Pause' : 'Play');
+  $('p-icon').innerHTML = isPlaying()
     ? '<rect x="6" y="4.5" width="3.5" height="13" rx="1" fill="currentColor"/><rect x="12.5" y="4.5" width="3.5" height="13" rx="1" fill="currentColor"/>'
     : '<path d="M7 4.5v13l11-6.5z" fill="currentColor"/>';
-  $('p-stations').innerHTML = MOODS.map((x, i) => `<button type="button" data-mood="${i}" aria-pressed="${i === music.mood}">${x.name}</button>`).join('');
+  $('p-stations').innerHTML = MOODS.map((x, i) => `<button type="button" data-mood="${i}" aria-pressed="${src === 'mood' && i === music.mood}">${x.name}</button>`).join('');
+  $('p-queue').innerHTML = queue.length
+    ? queue.map((q, i) => `<li class="${src === 'yt' && i === ytIndex ? 'on' : ''}" data-q="${i}">
+        ${q.v ? `<img src="https://i.ytimg.com/vi/${esc(q.v)}/mqdefault.jpg" alt="" loading="lazy">` : '<span class="ph"></span>'}
+        <span class="qt"><b>${esc(q.title)}</b><span>${esc(q.author || (q.list ? 'Playlist' : 'YouTube'))}</span></span>
+        <button class="rm" type="button" data-rm="${i}" aria-label="Remove ${esc(q.title)}">✕</button>
+      </li>`).join('')
+    : '<li class="p-empty">Paste a YouTube video or playlist link above.</li>';
+  $('p-clear').hidden = !queue.length;
   $('p-vol').value = music.vol;
   $('p-vol').style.setProperty('--v', `${music.vol * 100}%`);
 }
 
 function togglePlay() {
+  if (src === 'yt' && yt && yt.getPlayerState) {
+    if (ytPlaying) yt.pauseVideo(); else yt.playVideo();
+    return;
+  }
+  if (src === 'yt' && queue.length) { playYT(Math.max(0, ytIndex)); return; }
   if (music.playing) music.stop(); else music.start();
   renderPlayer();
   if (music.playing) drawViz();
 }
 
+function step(dir) {
+  if (src === 'yt' && queue.length) {
+    const item = queue[ytIndex];
+    const pl = item && item.list && yt && yt.getPlaylist && yt.getPlaylist();
+    if (pl && pl.length) {
+      const k = yt.getPlaylistIndex();
+      if (dir > 0 && k < pl.length - 1) return yt.nextVideo();
+      if (dir < 0 && k > 0) return yt.previousVideo();
+    }
+    return playYT(ytIndex + dir);
+  }
+  changeMood(music.mood + dir);
+}
+
 function changeMood(i) {
+  if (src === 'yt') { yt?.pauseVideo?.(); ytPlaying = false; src = 'mood'; }
   music.setMood(i);
   store('rgo.mood', music.mood);
   if (!music.playing) music.start();
@@ -1841,11 +2223,28 @@ function changeMood(i) {
 $('p-orb').onclick = () => { $('player').classList.add('open'); store('rgo.player', 'open'); drawViz(); };
 $('p-min').onclick = () => { $('player').classList.remove('open'); store('rgo.player', 'min'); };
 $('p-play').onclick = togglePlay;
-$('p-prev').onclick = () => changeMood(music.mood - 1);
-$('p-next').onclick = () => changeMood(music.mood + 1);
+$('p-prev').onclick = () => step(-1);
+$('p-next').onclick = () => step(1);
 $('p-stations').onclick = (e) => { const b = e.target.closest('[data-mood]'); if (b) changeMood(Number(b.dataset.mood)); };
+$('p-add').onsubmit = (e) => { e.preventDefault(); const v = $('p-url').value; if (!v.trim()) return; $('p-url').value = ''; addLink(v); };
+$('p-url').addEventListener('paste', (e) => {
+  const text = (e.clipboardData || window.clipboardData).getData('text');
+  if (parseYouTube(text)) { e.preventDefault(); $('p-url').value = ''; addLink(text); }
+});
+$('p-queue').onclick = (e) => {
+  const rm = e.target.closest('[data-rm]');
+  if (rm) { e.stopPropagation(); removeItem(Number(rm.dataset.rm)); return; }
+  const li = e.target.closest('[data-q]');
+  if (li) playYT(Number(li.dataset.q));
+};
+$('p-clear').onclick = () => {
+  queue = []; saveQueue();
+  if (src === 'yt') { yt?.stopVideo?.(); ytPlaying = false; ytIndex = -1; src = 'mood'; }
+  renderPlayer();
+};
 $('p-vol').oninput = (e) => {
   music.setVolume(Number(e.target.value));
+  yt?.setVolume?.(Math.round(music.vol * 100));
   store('rgo.vol', music.vol);
   e.target.style.setProperty('--v', `${music.vol * 100}%`);
 };
@@ -1853,6 +2252,8 @@ if (load('rgo.player') === 'open') $('player').classList.add('open');
 renderPlayer();
 
 // Visualizer bars, plus a --beat value the background glow pulses to.
+// YouTube audio can't be analyzed (it plays in YouTube's own frame), so the
+// glow follows a gentle pulse while a video plays.
 let vizRunning = false, beat = 0, idleT = 0;
 function drawViz() {
   if (vizRunning) return;
@@ -1861,41 +2262,45 @@ function drawViz() {
   const bins = new Uint8Array(128);
   const frame = () => {
     const open = $('player').classList.contains('open');
-    if (!music.playing && beat < 0.01 && !open) { vizRunning = false; document.documentElement.style.setProperty('--beat', 0); return; }
-    const dpr = devicePixelRatio || 1, w = canvas.clientWidth, h = canvas.clientHeight;
-    if (canvas.width !== Math.round(w * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
-    g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    g.clearRect(0, 0, w, h);
-    if (music.analyser && music.playing) music.analyser.getByteFrequencyData(bins); else bins.fill(0);
-    const low = (bins[1] + bins[2] + bins[3] + bins[4]) / (4 * 255);
-    beat += ((music.playing ? low : 0) - beat) * 0.25;
-    document.documentElement.style.setProperty('--beat', beat.toFixed(3));
-    const n = 36, gap = 3, bw = (w - gap * (n - 1)) / n;
-    const grad = g.createLinearGradient(0, 0, w, 0);
-    grad.addColorStop(0, cssVar('--accent'));
-    grad.addColorStop(0.55, '#7c5cff');
-    grad.addColorStop(1, '#e87ba4');
-    g.fillStyle = grad;
-    g.shadowColor = cssVar('--accent');
-    g.shadowBlur = 12;
+    if (!isPlaying() && beat < 0.01 && !open) { vizRunning = false; document.documentElement.style.setProperty('--beat', 0); return; }
     idleT += 0.03;
-    for (let i = 0; i < n; i++) {
-      // Log-spaced bins, with highs lifted so the whole bar row moves.
-      const idx = Math.floor((i / n) ** 1.35 * 72) + 2;
-      let v = Math.min(1, (bins[idx] / 255) * (0.75 + (i / n) * 1.4));
-      if (!music.playing) v = 0.04 + Math.sin(idleT + i * 0.45) * 0.025;
-      const bh = Math.max(3, v * (h - 4));
-      const x = i * (bw + gap), y = (h - bh) / 2;
-      g.beginPath();
-      g.roundRect ? g.roundRect(x, y, bw, bh, Math.min(bw / 2, 3)) : g.rect(x, y, bw, bh);
-      g.fill();
+    let target = 0;
+    if (src === 'yt') target = ytPlaying ? 0.25 + 0.35 * Math.max(0, Math.sin(idleT * 3.4)) ** 3 : 0;
+    else {
+      if (music.analyser && music.playing) music.analyser.getByteFrequencyData(bins); else bins.fill(0);
+      target = music.playing ? (bins[1] + bins[2] + bins[3] + bins[4]) / (4 * 255) : 0;
+    }
+    beat += (target - beat) * 0.25;
+    document.documentElement.style.setProperty('--beat', beat.toFixed(3));
+    if (src !== 'yt' && canvas.clientWidth) {
+      const dpr = devicePixelRatio || 1, w = canvas.clientWidth, h = canvas.clientHeight;
+      if (canvas.width !== Math.round(w * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      g.clearRect(0, 0, w, h);
+      const n = 36, gap = 3, bw = (w - gap * (n - 1)) / n;
+      const grad = g.createLinearGradient(0, 0, w, 0);
+      grad.addColorStop(0, cssVar('--ink'));
+      grad.addColorStop(1, cssVar('--ink-3'));
+      g.fillStyle = grad;
+      g.shadowColor = cssVar('--ink');
+      g.shadowBlur = 10;
+      for (let i = 0; i < n; i++) {
+        // Log-spaced bins, with highs lifted so the whole bar row moves.
+        const idx = Math.floor((i / n) ** 1.35 * 72) + 2;
+        let v = Math.min(1, (bins[idx] / 255) * (0.75 + (i / n) * 1.4));
+        if (!music.playing) v = 0.04 + Math.sin(idleT + i * 0.45) * 0.025;
+        const bh = Math.max(3, v * (h - 4));
+        g.beginPath();
+        if (g.roundRect) g.roundRect(i * (bw + gap), (h - bh) / 2, bw, bh, Math.min(bw / 2, 3)); else g.rect(i * (bw + gap), (h - bh) / 2, bw, bh);
+        g.fill();
+      }
     }
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);
 }
 if ($('player').classList.contains('open')) drawViz();
-document.addEventListener('visibilitychange', () => { if (!document.hidden && (music.playing || $('player').classList.contains('open'))) drawViz(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && (isPlaying() || $('player').classList.contains('open'))) drawViz(); });
 
 let resizeTimer;
 addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
