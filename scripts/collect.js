@@ -8,7 +8,31 @@ const fs = require('fs');
 const path = require('path');
 const { resolveUser, resolveGroup, fetchOwnerGames } = require('../lib/roblox');
 
-const HISTORY_MS = 30 * 24 * 60 * 60 * 1000;
+const HOUR = 60 * 60 * 1000;
+const HISTORY_MS = 30 * 24 * HOUR;
+const FULL_RES_MS = 48 * HOUR; // older samples are thinned to one per hour
+
+// history[universeId] = [[time, playing, visits, favorites, upVotes, downVotes], ...]
+// Keeps every sample from the last 48 hours and the hourly peak before that,
+// so 30 days of history stays small.
+function thin(h, now) {
+  const out = [];
+  let bucket = null;
+  for (const p of h) {
+    if (now - p[0] > HISTORY_MS) continue;
+    if (now - p[0] <= FULL_RES_MS) { out.push(p); continue; }
+    const b = Math.floor(p[0] / HOUR);
+    const last = out[out.length - 1];
+    if (bucket === b && last) {
+      // Keep the busiest moment of the hour, with the latest totals.
+      out[out.length - 1] = [last[1] >= p[1] ? last[0] : p[0], Math.max(last[1], p[1]), ...p.slice(2)];
+    } else {
+      out.push(p);
+      bucket = b;
+    }
+  }
+  return out;
+}
 const [historyFile = 'history.json', outFile = 'site/data.json'] = process.argv.slice(2);
 
 async function main() {
@@ -28,9 +52,8 @@ async function main() {
     for (const g of await fetchOwnerGames(owner)) {
       if (seen.has(g.universeId)) continue;
       seen.add(g.universeId);
-      const h = (history[g.universeId] ||= []);
-      h.push([now, g.playing, g.visits]);
-      while (h.length && now - h[0][0] > HISTORY_MS) h.shift();
+      const h = thin([...(history[g.universeId] || []), [now, g.playing, g.visits, g.favorites, g.upVotes, g.downVotes]], now);
+      history[g.universeId] = h;
       games.push({ ...g, ownerType: owner.type, ownerName: owner.name, history: h });
     }
   }
@@ -39,7 +62,7 @@ async function main() {
 
   fs.writeFileSync(historyFile, JSON.stringify(history));
   fs.mkdirSync(path.dirname(outFile), { recursive: true });
-  fs.writeFileSync(outFile, JSON.stringify({ fetchedAt: now, intervalMinutes: 15, liveProxy: config.liveProxy || '', owners, games }));
+  fs.writeFileSync(outFile, JSON.stringify({ fetchedAt: now, intervalMinutes: 5, liveProxy: config.liveProxy || '', owners, games }));
   const ccu = games.reduce((s, g) => s + g.playing, 0);
   console.log(`${games.length} experiences, ${ccu} playing, ${owners.map((o) => o.name).join(', ')}`);
 }

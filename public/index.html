@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Experience Overview</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='5' width='22' height='22' rx='5' transform='rotate(-12 16 16)' fill='%233987e5'/%3E%3Crect x='12' y='12' width='8' height='8' rx='1.5' transform='rotate(-12 16 16)' fill='white'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -317,6 +318,121 @@
     .exp:hover .thumb::before { transition: none; }
   }
 
+
+  /* ---------- insights ---------- */
+  .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .grid-1-1 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .chart-wrap.tight { padding: 4px 0 0; }
+
+  .heat { display: grid; grid-template-columns: 34px repeat(24, minmax(0, 1fr)); gap: 3px; margin-top: 12px; }
+  .heat .hl { font-size: 10.5px; color: var(--ink-3); white-space: nowrap; overflow: visible; height: 16px; }
+  .heat .dl { font-size: 11px; color: var(--ink-3); display: flex; align-items: center; }
+  .heat .cell {
+    aspect-ratio: 1; border-radius: 4px; min-height: 10px;
+    background: color-mix(in srgb, var(--accent) var(--k), var(--panel-2));
+    transition: transform .15s, box-shadow .15s;
+  }
+  .heat .cell.none { background: var(--line-soft); }
+  .heat .cell:hover { transform: scale(1.35); box-shadow: 0 0 0 2px var(--panel), 0 0 16px color-mix(in srgb, var(--accent) 60%, transparent); position: relative; z-index: 2; }
+  .intro .heat .cell { animation: pop .5s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(500ms + var(--d)); }
+  @keyframes pop { from { opacity: 0; transform: scale(.4); } }
+  .heat-legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 14px; font-size: 11px; color: var(--ink-3); }
+  .heat-legend i { width: 12px; height: 12px; border-radius: 3px; background: color-mix(in srgb, var(--accent) var(--k), var(--panel-2)); }
+  .heat-legend span { margin: 0 4px; }
+
+  .highlights { list-style: none; margin: 0; padding: 10px 22px 18px; display: grid; }
+  .highlights li { display: flex; gap: 14px; align-items: flex-start; padding: 11px 0; border-top: 1px solid var(--line-soft); }
+  .highlights li:first-child { border-top: 0; }
+  .hi-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--panel-2); border: 1px solid var(--line); font-size: 16px; flex: none; }
+  .hi-text { min-width: 0; }
+  .hi-label { color: var(--ink-3); font-size: 12px; }
+  .hi-value { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hi-sub { color: var(--ink-3); font-size: 12px; }
+
+  .milestones { list-style: none; margin: 0; padding: 14px 22px 20px; display: grid; gap: 16px; }
+  .d-sec .milestones { padding: 4px 0 0; }
+  .ms-top { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
+  .ms-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .ms-val { white-space: nowrap; }
+  .ms-bar { height: 8px; border-radius: 99px; background: var(--track); margin: 8px 0 6px; overflow: hidden; }
+  .ms-bar i {
+    display: block; height: 100%; width: var(--w); border-radius: 99px; position: relative; overflow: hidden;
+    background: linear-gradient(90deg, var(--accent), #7c5cff);
+    animation: grow 1.2s cubic-bezier(.2, .8, .2, 1) both;
+  }
+  .ms-bar i::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgb(255 255 255 / .35), transparent); transform: translateX(-100%); animation: shimmer 2.6s ease-in-out infinite 1.2s; }
+  @keyframes grow { from { width: 0; } }
+  @keyframes shimmer { 60%, 100% { transform: translateX(100%); } }
+  .ms-sub { color: var(--ink-3); font-size: 12px; }
+
+  .bars .bar { transform-box: fill-box; transform-origin: bottom; transition: opacity .15s; }
+  .bars .bar.partial { opacity: .55; }
+  .intro .bars .bar, .drawer.open .bars .bar { animation: barUp .7s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(400ms + var(--i) * 30ms); }
+  @keyframes barUp { from { transform: scaleY(0); } }
+
+  /* cards open details */
+  .exp { cursor: pointer; }
+  .exp:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .exp-title .t { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .badge.more { right: 12px; bottom: 12px; opacity: 0; transform: translateY(6px); transition: opacity .25s, transform .25s; }
+  .exp:hover .badge.more, .exp:focus-visible .badge.more { opacity: 1; transform: none; }
+
+  /* ---------- detail drawer ---------- */
+  .drawer { position: fixed; inset: 0; z-index: 50; }
+  .drawer[hidden] { display: none; }
+  .drawer-scrim { position: absolute; inset: 0; background: rgb(0 0 0 / .45); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; transition: opacity .35s; }
+  .drawer-panel {
+    position: absolute; top: 0; right: 0; bottom: 0; width: min(580px, 100vw); background: var(--panel);
+    border-left: 1px solid var(--line); box-shadow: -24px 0 64px rgb(0 0 0 / .35);
+    transform: translateX(100%); transition: transform .4s cubic-bezier(.2, .8, .2, 1); display: flex;
+  }
+  .drawer.open .drawer-scrim { opacity: 1; }
+  .drawer.open .drawer-panel { transform: none; }
+  body.drawer-open { overflow: hidden; }
+  .drawer-body { overflow-y: auto; flex: 1; overscroll-behavior: contain; }
+  .drawer-close { position: absolute; top: 14px; right: 14px; z-index: 3; border-radius: 50%; background: rgb(10 10 12 / .55); color: #fff; border-color: rgb(255 255 255 / .18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .d-banner { position: relative; aspect-ratio: 16 / 9; max-height: 300px; width: 100%; background: linear-gradient(135deg, var(--panel-2), var(--track)); overflow: hidden; }
+  .d-banner img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .d-banner img.icon-fallback { position: absolute; inset: 0; margin: auto; width: 96px; height: 96px; border-radius: 20px; }
+  .d-banner::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, var(--panel), transparent 55%); }
+  .d-banner .badge { left: 22px; bottom: 18px; }
+  .d-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 4px 24px 0; }
+  .d-title { min-width: 0; }
+  .d-head h2 { font-size: 22px; letter-spacing: -0.02em; margin: 0 0 4px; line-height: 1.2; overflow-wrap: anywhere; }
+  .play {
+    display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 18px; border-radius: 12px; flex: none;
+    background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; font-weight: 600; text-decoration: none;
+    box-shadow: 0 6px 20px rgb(34 197 94 / .35); transition: transform .15s, box-shadow .15s;
+  }
+  .play:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgb(34 197 94 / .45); }
+  .d-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin: 20px 24px 0; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .d-stats > div { background: var(--panel); padding: 14px 16px; min-width: 0; }
+  .d-stats .k { color: var(--ink-3); font-size: 11.5px; }
+  .d-stats .v { font-weight: 650; font-size: 20px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .like-split { height: 4px; border-radius: 2px; background: #e66767; margin: 6px 0 4px; overflow: hidden; }
+  .like-split i { display: block; height: 100%; background: var(--pos); }
+  .d-sec { padding: 22px 24px 0; }
+  .d-sec:last-child { padding-bottom: 32px; }
+  .d-sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .d-sec h3 { font-size: 14px; margin: 0; letter-spacing: -0.01em; }
+  .d-sec-head .faint { font-size: 12px; }
+  .d-details { display: grid; grid-template-columns: auto 1fr; gap: 8px 20px; margin: 10px 0 0; font-size: 13px; }
+  .d-details dt { color: var(--ink-3); }
+  .d-details dd { margin: 0; }
+
+  @media (max-width: 1080px) { .grid-2-1, .grid-1-1 { grid-template-columns: 1fr; } }
+  @media (max-width: 720px) {
+    .heat { grid-template-columns: 28px repeat(24, minmax(0, 1fr)); gap: 2px; }
+    .heat .hl { font-size: 9px; }
+    .heat .cell { border-radius: 2px; min-height: 0; }
+    .highlights, .milestones { padding-left: 16px; padding-right: 16px; }
+    .d-stats { grid-template-columns: repeat(2, 1fr); margin: 16px 16px 0; }
+    .d-head, .d-sec { padding-left: 16px; padding-right: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .intro .heat .cell, .ms-bar i, .ms-bar i::after, .intro .bars .bar, .drawer.open .bars .bar { animation: none !important; }
+    .drawer-panel, .drawer-scrim { transition: none; }
+  }
   @media (max-width: 1080px) {
     .kpis { grid-template-columns: repeat(2, 1fr); }
     .kpi.hero-kpi { grid-column: span 2; }
@@ -362,6 +478,14 @@
   </section>
 </main>
 
+<div class="drawer" id="drawer" hidden>
+  <div class="drawer-scrim" data-close></div>
+  <aside class="drawer-panel" role="dialog" aria-modal="true" aria-label="Experience details">
+    <button class="icon drawer-close" type="button" data-close aria-label="Close">✕</button>
+    <div class="drawer-body" id="drawer-body"></div>
+  </aside>
+</div>
+
 <template id="dashboard">
   <div class="hero reveal" style="--i:0">
     <div class="who">
@@ -392,10 +516,32 @@
     <div class="chart-wrap" id="chart"></div>
   </section>
 
-  <div class="section-title reveal" style="--i:7"><h2>Experiences</h2><span class="meta" id="cards-meta"></span></div>
+  <div class="grid-2-1">
+    <section class="panel reveal" style="--i:7">
+      <div class="panel-head"><h2>When players are online</h2><span class="meta" id="heat-meta"></span></div>
+      <div class="chart-wrap" id="heatmap"></div>
+    </section>
+    <section class="panel reveal" style="--i:8">
+      <div class="panel-head"><h2>Highlights</h2></div>
+      <ul class="highlights" id="highlights"></ul>
+    </section>
+  </div>
+
+  <div class="grid-1-1">
+    <section class="panel reveal" style="--i:9">
+      <div class="panel-head"><h2>Visits per day</h2><span class="meta">Last 14 days · today so far</span></div>
+      <div class="chart-wrap" id="visits"></div>
+    </section>
+    <section class="panel reveal" style="--i:10">
+      <div class="panel-head"><h2>Next milestones</h2><span class="meta">Closest first</span></div>
+      <ul class="milestones" id="milestones"></ul>
+    </section>
+  </div>
+
+  <div class="section-title reveal" style="--i:11"><h2>Experiences</h2><span class="meta" id="cards-meta"></span></div>
   <section class="cards" id="cards"></section>
 
-  <section class="panel reveal" style="--i:9" id="table-panel" hidden>
+  <section class="panel reveal" style="--i:18" id="table-panel" hidden>
     <div class="panel-head">
       <h2>All experiences <span class="faint num" id="count"></span></h2>
       <div class="table-tools"><input id="filter" placeholder="Filter by name" autocomplete="off"></div>
@@ -613,6 +759,7 @@ let gradId = 0;
 function sparkline(points, w, h, color, cls = '') {
   const id = `sg${gradId++}`;
   if (points.length < 2) return `<svg class="${cls}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="${w}" y1="${h - 1.5}" y2="${h - 1.5}" stroke="var(--line)" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`;
+  points = bucketize(points, 72);
   const t0 = points[0][0], t1 = points[points.length - 1][0];
   const max = Math.max(4, ...points.map((p) => p[1]));
   const xy = points.map((p) => [((p[0] - t0) / (t1 - t0 || 1)) * w, h - 2 - (p[1] / max) * (h - 6)]);
@@ -634,7 +781,14 @@ function render() {
   const rankOf = new Map(ranked.map((g, i) => [g.universeId, i + 1]));
   renderKpis(games);
   renderChart(games, top, colorOf);
+  renderHeatmap(games);
+  renderHighlights(games);
+  barChart($('visits'), visitBars(games, colorOf, 14), { label: 'Visits per day', height: 260 });
+  $('milestones').innerHTML = milestoneHtml(milestoneRows(games).slice(0, 5)) || '<li class="faint">Every milestone reached. Legendary.</li>';
   renderCards(ranked, colorOf);
+  renderDrawer();
+  const ccu = games.reduce((s, g) => s + g.playing, 0);
+  document.title = `${ccu ? `(${fmt.format(ccu)}) ` : ''}${data.owners.map((o) => o.name).join(', ')} · Experience Overview`;
   $('table-panel').hidden = games.length <= CARD_LIMIT;
   if (games.length > CARD_LIMIT) renderTable(games, colorOf, rankOf);
 }
@@ -687,13 +841,11 @@ function countUp(el, from, to, f) {
 }
 
 function renderChart(games, top, colorOf) {
-  const box = $('chart');
   const topIds = new Set(top.map((g) => g.universeId));
   const others = games.filter((g) => !topIds.has(g.universeId));
   $('range').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', Number(b.dataset.range) === rangeHours));
-  const step = staticMode ? `${data.intervalMinutes || 15}-min samples` : '1-min samples';
-  const rangeName = { 12: 'Last 12 hours', 24: 'Last 24 hours', 168: 'Last 7 days', 720: 'Last 30 days' }[rangeHours];
-  $('chart-meta').textContent = `${rangeName} · ${step}`;
+  const step = staticMode ? `${data.intervalMinutes || 5}-min samples` : '1-min samples';
+  $('chart-meta').textContent = `${RANGE_NAMES[rangeHours]} · ${step}`;
   const series = top.filter((g) => within(g, rangeHours).length).map((g) => ({
     name: g.name, color: cssVar(colorOf.get(g.universeId)), points: within(g, rangeHours).map((h) => [h[0], h[1]]),
   }));
@@ -701,87 +853,419 @@ function renderChart(games, top, colorOf) {
     const pts = totalSeries(others, rangeHours);
     if (pts.length) series.push({ name: `All others (${others.length})`, color: cssVar('--series-other'), points: pts });
   }
+  lineChart($('chart'), series, { animate: animateChart, label: `Concurrent users, ${RANGE_NAMES[rangeHours].toLowerCase()}` });
+  animateChart = false;
+}
+
+const RANGE_NAMES = { 12: 'Last 12 hours', 24: 'Last 24 hours', 168: 'Last 7 days', 720: 'Last 30 days' };
+const EMPTY_LINE = 'Collecting samples. This chart fills in after the next couple of updates.';
+const hourName = (h) => new Intl.DateTimeFormat(undefined, { hour: 'numeric' }).format(new Date(2026, 0, 1, h));
+const avgText = (v) => (v < 10 ? v.toFixed(1) : fmt.format(Math.round(v)));
+
+// Average points into at most n time buckets, so dense, small integer counts
+// read as a smooth trend instead of a comb. Keeps the last point exact.
+function bucketize(points, n) {
+  if (points.length <= n) return points;
+  const t0 = points[0][0], span = points[points.length - 1][0] - t0 || 1;
+  const out = [];
+  let cur = null;
+  for (const [t, v] of points) {
+    const b = Math.min(n - 1, Math.floor(((t - t0) / span) * n));
+    if (!cur || cur.b !== b) { if (cur) out.push([cur.t / cur.c, cur.v / cur.c]); cur = { b, t: 0, v: 0, c: 0 }; }
+    cur.t += t; cur.v += v; cur.c++;
+  }
+  out.push([cur.t / cur.c, cur.v / cur.c]);
+  out[out.length - 1] = points[points.length - 1];
+  return out;
+}
+const numText = (v) => (Number.isInteger(v) ? fmt.format(v) : v.toFixed(1));
+
+// Multi-series line chart with gradient fills, crosshair and tooltip.
+// series: [{ name, color, points: [[time, value], ...] }]
+function lineChart(box, series, { animate = false, label = '', height, floor = 4, legend = true } = {}) {
   const all = series.flatMap((s) => s.points);
   const t0 = Math.min(...all.map((p) => p[0])), t1 = Math.max(...all.map((p) => p[0]));
-  if (!series.length || t1 - t0 < 60000) {
-    box.innerHTML = staticMode
-      ? `<div class="empty">Collecting samples. The chart appears after the next couple of updates and builds up to 30 days of history.</div>`
-      : `<div class="empty">Collecting samples. The chart appears after a couple of minutes and covers up to 24 hours while the server runs.</div>`;
-    return;
-  }
-
-  const W = Math.max(300, box.clientWidth - 44), H = W < 520 ? 220 : 280;
-  const m = { l: 34, r: 8, t: 16, b: 30 };
+  if (!series.length || t1 - t0 < 60000) { box.innerHTML = `<div class="empty">${EMPTY_LINE}</div>`; return; }
+  const W = Math.max(260, box.clientWidth - 44), H = height || (W < 520 ? 220 : 280);
+  series = series.map((s) => ({ ...s, points: bucketize(s.points, Math.max(40, Math.floor(W / 10))) }));
+  const m = { l: 40, r: 8, t: 16, b: 30 };
   const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const vals = all.map((p) => p[1]);
   // A floor on the scale keeps one or two players from filling the whole chart.
-  const rawMax = Math.max(4, ...all.map((p) => p[1]));
-  const yStep = Math.max(1, niceStep(rawMax / 4));
-  const yMax = Math.ceil(rawMax / yStep) * yStep;
+  // floor: null fits the scale to the data instead (for totals like favorites).
+  let lo = 0, hi = Math.max(floor || 0, ...vals);
+  if (floor === null) { lo = Math.min(...vals); hi = Math.max(lo + 4, ...vals); }
+  const yStep = Math.max(1, niceStep((hi - lo) / 4));
+  const yMin = Math.floor(lo / yStep) * yStep, yMax = Math.ceil(hi / yStep) * yStep;
   const x = (t) => m.l + ((t - t0) / (t1 - t0)) * iw;
-  const y = (v) => m.t + ih - (v / yMax) * ih;
+  const y = (v) => m.t + ih - ((v - yMin) / (yMax - yMin || 1)) * ih;
+  const id = `${box.id || 'c'}-${gradId++}`;
 
   let grid = '';
-  for (let v = 0; v <= yMax; v += yStep) {
-    grid += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" ${v ? 'stroke-dasharray="2 4"' : ''}/>`;
+  for (let v = yMin; v <= yMax; v += yStep) {
+    grid += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" ${v !== yMin ? 'stroke-dasharray="2 4"' : ''}/>`;
     grid += `<text x="${m.l - 12}" y="${y(v) + 4}" text-anchor="end">${compact.format(v)}</text>`;
   }
   const multiDay = t1 - t0 > 1.5 * DAY;
-  const ticks = Math.min(6, Math.floor(iw / 110));
+  const ticks = Math.max(2, Math.min(6, Math.floor(iw / 110)));
   let lastLabel = '';
   for (let i = 0; i <= ticks; i++) {
     const t = t0 + ((t1 - t0) * i) / ticks;
-    const label = multiDay ? dayFmt.format(t) : timeFmt.format(t);
-    if (label === lastLabel) continue;
-    lastLabel = label;
-    grid += `<text x="${x(t)}" y="${H - 8}" text-anchor="${i === 0 ? 'start' : i === ticks ? 'end' : 'middle'}">${label}</text>`;
+    const lbl = multiDay ? dayFmt.format(t) : timeFmt.format(t);
+    if (lbl === lastLabel) continue;
+    lastLabel = lbl;
+    grid += `<text x="${x(t)}" y="${H - 8}" text-anchor="${i === 0 ? 'start' : i === ticks ? 'end' : 'middle'}">${lbl}</text>`;
   }
   const liveNow = $('sync') && $('sync').classList.contains('live');
-  const defs = series.map((s, i) => `<linearGradient id="cg${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity=".22"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient>`).join('');
+  const defs = series.map((s, i) => `<linearGradient id="${id}g${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity=".24"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient>`).join('');
   const shapes = series.map((s, i) => {
     const pts = s.points.map((p) => [x(p[0]), y(p[1])]);
+    if (pts.length < 2) return '';
     const d = smoothPath(pts);
     const last = pts[pts.length - 1];
-    return `<path class="area" d="${d}L${last[0]},${y(0)}L${pts[0][0]},${y(0)}Z" fill="url(#cg${i})"/>
+    return `<path class="area" d="${d}L${last[0]},${y(yMin)}L${pts[0][0]},${y(yMin)}Z" fill="url(#${id}g${i})"/>
       <path class="line" d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
       <g class="end">${liveNow ? `<circle class="ping" cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${s.color}"/>` : ''}
       <circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${s.color}" stroke="var(--panel)" stroke-width="2"/></g>`;
   }).join('');
 
   box.innerHTML = `
-    <div class="legend">${series.map((s) => `<span><i class="key" style="background:${s.color}"></i><em>${esc(s.name)}</em></span>`).join('')}</div>
-    <svg class="${animateChart ? 'draw' : ''}" width="${W}" height="${H}" role="img" aria-label="Concurrent users, ${rangeName.toLowerCase()}" style="display:block;margin-top:10px;overflow:visible">
+    ${legend ? `<div class="legend">${series.map((s) => `<span><i class="key" style="background:${s.color}"></i><em>${esc(s.name)}</em></span>`).join('')}</div>` : ''}
+    <svg class="${animate ? 'draw' : ''}" width="${W}" height="${H}" role="img" aria-label="${esc(label)}" style="display:block;margin-top:10px;overflow:visible">
       <defs>${defs}</defs>
       <g class="axis">${grid}</g>
       ${shapes}
-      <line id="xhair" y1="${m.t}" y2="${m.t + ih}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="3 3" visibility="hidden"/>
-      <g id="dots"></g>
-      <rect x="${m.l}" y="${m.t}" width="${iw}" height="${ih}" fill="transparent" id="hit"/>
+      <line class="xhair" y1="${m.t}" y2="${m.t + ih}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="3 3" visibility="hidden"/>
+      <g class="dots"></g>
+      <rect class="hit" x="${m.l}" y="${m.t}" width="${iw}" height="${ih}" fill="transparent"/>
     </svg>
-    <div class="tooltip" id="tip"></div>`;
+    <div class="tooltip"></div>`;
 
-  if (animateChart) box.querySelectorAll('.line').forEach((l) => l.style.setProperty('--len', Math.ceil(l.getTotalLength()) + 1));
-  animateChart = false;
-  const hit = box.querySelector('#hit'), tip = box.querySelector('#tip');
-  const xh = box.querySelector('#xhair'), dots = box.querySelector('#dots');
+  if (animate) box.querySelectorAll('.line').forEach((l) => l.style.setProperty('--len', Math.ceil(l.getTotalLength()) + 1));
+  const hit = box.querySelector('.hit'), tip = box.querySelector('.tooltip');
+  const xh = box.querySelector('.xhair'), dots = box.querySelector('.dots');
   const nearest = (pts, t) => pts.reduce((best, p) => (Math.abs(p[0] - t) < Math.abs(best[0] - t) ? p : best), pts[0]);
   hit.onpointermove = (e) => {
     const r = hit.getBoundingClientRect();
     const t = t0 + ((e.clientX - r.left) / r.width) * (t1 - t0);
-    const rows = series.map((s) => ({ s, p: nearest(s.points, t) })).sort((a, b) => b.p[1] - a.p[1]);
+    const rows = series.filter((s) => s.points.length).map((s) => ({ s, p: nearest(s.points, t) })).sort((a, b) => b.p[1] - a.p[1]);
     const px = x(rows[0].p[0]);
     xh.setAttribute('x1', px); xh.setAttribute('x2', px); xh.setAttribute('visibility', 'visible');
     dots.innerHTML = rows.map(({ s, p }) => `<circle cx="${x(p[0])}" cy="${y(p[1])}" r="4.5" fill="${s.color}" stroke="var(--panel)" stroke-width="2"/>`).join('');
     const when = new Date(rows[0].p[0]);
     tip.innerHTML = `<div class="when">${multiDay ? `${dayFmt.format(when)}, ` : ''}${timeFmt.format(when)}</div>` +
-      rows.map(({ s, p }) => `<div class="row"><span><i class="key" style="background:${s.color}"></i>${esc(s.name)}</span><b>${fmt.format(p[1])}</b></div>`).join('');
-    tip.style.display = 'block';
-    const bx = box.getBoundingClientRect();
-    let left = e.clientX - bx.left + 18;
-    if (left + tip.offsetWidth > bx.width) left = e.clientX - bx.left - tip.offsetWidth - 18;
-    tip.style.left = `${Math.max(0, left)}px`;
-    tip.style.top = `${e.clientY - bx.top - 14}px`;
+      rows.map(({ s, p }) => `<div class="row"><span><i class="key" style="background:${s.color}"></i>${esc(s.name)}</span><b>${numText(p[1])}</b></div>`).join('');
+    placeTip(box, tip, e);
   };
   hit.onpointerleave = () => { tip.style.display = 'none'; xh.setAttribute('visibility', 'hidden'); dots.innerHTML = ''; };
+}
+
+function placeTip(box, tip, e) {
+  tip.style.display = 'block';
+  const bx = box.getBoundingClientRect();
+  let left = e.clientX - bx.left + 18;
+  if (left + tip.offsetWidth > bx.width) left = e.clientX - bx.left - tip.offsetWidth - 18;
+  tip.style.left = `${Math.max(0, left)}px`;
+  tip.style.top = `${Math.max(0, e.clientY - bx.top - tip.offsetHeight - 12)}px`;
+}
+
+// ---- daily visits ----
+const dayStart = (t) => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };
+
+// Visits gained per local calendar day: Map(dayStartMs -> visits).
+function dailyGains(g) {
+  const lastOfDay = new Map();
+  const firstOfDay = new Map();
+  for (const h of g.history) {
+    if (h[2] == null) continue;
+    const d = dayStart(h[0]);
+    if (!firstOfDay.has(d)) firstOfDay.set(d, h[2]);
+    lastOfDay.set(d, h[2]);
+  }
+  const days = [...lastOfDay.keys()].sort((a, b) => a - b);
+  const out = new Map();
+  days.forEach((d, i) => {
+    const base = i ? lastOfDay.get(days[i - 1]) : firstOfDay.get(d);
+    out.set(d, Math.max(0, lastOfDay.get(d) - base));
+  });
+  return out;
+}
+
+function roundTop(x, y, w, h, r) {
+  return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+}
+
+// Stacked daily bars. bars: [{ t, partial, parts: [{ name, color, v }] }]
+function barChart(box, bars, { height = 200, label = '' } = {}) {
+  const totals = bars.map((b) => b.parts.reduce((s, p) => s + p.v, 0));
+  if (!bars.length || totals.every((v) => !v)) { box.innerHTML = `<div class="empty">No visits recorded yet. Daily bars appear as visits come in.</div>`; return; }
+  const W = Math.max(260, box.clientWidth - 44), H = height;
+  const m = { l: 40, r: 4, t: 12, b: 28 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const top = Math.max(4, ...totals);
+  const yStep = Math.max(1, niceStep(top / 4));
+  const yMax = Math.ceil(top / yStep) * yStep;
+  const y = (v) => m.t + ih - (v / yMax) * ih;
+  const slot = iw / bars.length, bw = Math.max(3, Math.min(28, slot * 0.62));
+  let grid = '';
+  for (let v = 0; v <= yMax; v += yStep) {
+    grid += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" ${v ? 'stroke-dasharray="2 4"' : ''}/>`;
+    grid += `<text x="${m.l - 12}" y="${y(v) + 4}" text-anchor="end">${compact.format(v)}</text>`;
+  }
+  const every = Math.ceil(bars.length / Math.max(2, Math.floor(iw / 70)));
+  let rects = '';
+  bars.forEach((b, i) => {
+    const cx = m.l + slot * (i + 0.5);
+    if (i % every === 0 || i === bars.length - 1) grid += `<text x="${cx}" y="${H - 8}" text-anchor="middle">${dayFmt.format(b.t)}</text>`;
+    const parts = b.parts.filter((p) => p.v);
+    let acc = 0;
+    parts.forEach((p, j) => {
+      const top = y(acc + p.v), bottom = y(acc) - (acc ? 2 : 0); // 2px surface gap between segments
+      const h = Math.max(1, bottom - top);
+      const d = j === parts.length - 1 ? roundTop(cx - bw / 2, top, bw, h, Math.min(4, bw / 2, h)) : `M${cx - bw / 2},${top}h${bw}v${h}h${-bw}Z`;
+      rects += `<path class="bar${b.partial ? ' partial' : ''}" style="--i:${i}" d="${d}" fill="${p.color}"/>`;
+      acc += p.v;
+    });
+    rects += `<rect class="bar-hit" data-i="${i}" x="${m.l + slot * i}" y="${m.t}" width="${slot}" height="${ih}" fill="transparent"/>`;
+  });
+  box.innerHTML = `<svg class="bars" width="${W}" height="${H}" role="img" aria-label="${esc(label)}" style="display:block;overflow:visible"><g class="axis">${grid}</g>${rects}</svg><div class="tooltip"></div>`;
+  const tip = box.querySelector('.tooltip');
+  const dayLong = new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+  box.querySelectorAll('.bar-hit').forEach((r) => {
+    r.onpointermove = (e) => {
+      const b = bars[Number(r.dataset.i)];
+      const parts = b.parts.filter((p) => p.v);
+      tip.innerHTML = `<div class="when">${dayLong.format(b.t)}${b.partial ? ' · so far' : ''}</div>` +
+        (parts.length > 1 ? parts.map((p) => `<div class="row"><span><i class="key" style="background:${p.color}"></i>${esc(p.name)}</span><b>+${fmt.format(p.v)}</b></div>`).join('') : '') +
+        `<div class="row"><span>Visits</span><b>+${fmt.format(parts.reduce((s, p) => s + p.v, 0))}</b></div>`;
+      placeTip(box, tip, e);
+    };
+    r.onpointerleave = () => { tip.style.display = 'none'; };
+  });
+}
+
+function visitBars(games, colorOf, days) {
+  const gains = games.map((g) => ({ g, m: dailyGains(g) }));
+  const today = dayStart(Date.now());
+  const bars = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const t = d.getTime();
+    bars.push({
+      t, partial: i === 0,
+      parts: gains.map(({ g, m }) => ({ name: g.name, color: cssVar(colorOf.get(g.universeId) || '--series-other'), v: m.get(t) || 0 })),
+    });
+  }
+  // Drop days from before tracking started.
+  const firstTracked = Math.min(...games.map((g) => (g.history[0] ? dayStart(g.history[0][0]) : Infinity)));
+  return bars.filter((b) => b.t >= firstTracked);
+}
+
+// ---- when players are online ----
+function renderHeatmap(games) {
+  const box = $('heatmap');
+  const sums = Array.from({ length: 7 }, () => new Array(24).fill(0));
+  const counts = Array.from({ length: 7 }, () => new Array(24).fill(0));
+  for (const [t, p] of totalSeries(games, 720)) {
+    const d = new Date(t), dow = (d.getDay() + 6) % 7, hr = d.getHours();
+    sums[dow][hr] += p; counts[dow][hr]++;
+  }
+  let max = 0, filled = 0;
+  const avg = sums.map((row, i) => row.map((s, j) => {
+    if (!counts[i][j]) return null;
+    filled++;
+    const a = s / counts[i][j];
+    max = Math.max(max, a);
+    return a;
+  }));
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  $('heat-meta').textContent = filled < 7 * 24 ? `Fills in over the first week · ${Math.round((filled / 168) * 100)}% covered` : 'Average players, your local time';
+  let html = '<div class="heat"><span></span>';
+  html += Array.from({ length: 24 }, (_, h) => `<span class="hl">${h % 3 === 0 ? hourName(h).replace(/\s/g, '').toLowerCase() : ''}</span>`).join('');
+  avg.forEach((row, i) => {
+    html += `<span class="dl">${days[i]}</span>`;
+    row.forEach((v, h) => {
+      const k = v == null || !max ? 0 : v / max;
+      html += `<i class="cell${v == null ? ' none' : ''}" style="--k:${(6 + k * 94).toFixed(0)}%;--d:${(i * 24 + h) * 4}ms" data-tip="${days[i]} ${hourName(h)} · ${v == null ? 'no data yet' : `${avgText(v)} players on average`}"></i>`;
+    });
+  });
+  html += '</div><div class="heat-legend"><span>Fewer</span><i style="--k:6%"></i><i style="--k:35%"></i><i style="--k:65%"></i><i style="--k:100%"></i><span>More players</span></div><div class="tooltip"></div>';
+  box.innerHTML = html;
+  const tip = box.querySelector('.tooltip');
+  const heat = box.querySelector('.heat');
+  heat.onpointermove = (e) => {
+    const c = e.target.closest('.cell');
+    if (!c) { tip.style.display = 'none'; return; }
+    tip.textContent = c.dataset.tip;
+    placeTip(box, tip, e);
+  };
+  heat.onpointerleave = () => { tip.style.display = 'none'; };
+}
+
+// ---- highlights ----
+function renderHighlights(games) {
+  const total = totalSeries(games, 720);
+  const byHour = Array.from({ length: 24 }, () => [0, 0]);
+  const byDay = Array.from({ length: 7 }, () => [0, 0]);
+  const dayKeys = new Set();
+  for (const [t, p] of total) {
+    const d = new Date(t);
+    byHour[d.getHours()][0] += p; byHour[d.getHours()][1]++;
+    byDay[d.getDay()][0] += p; byDay[d.getDay()][1]++;
+    dayKeys.add(dayStart(t));
+  }
+  const best = (arr) => arr.reduce((b, [s, c], i) => (c && s / c > b.v ? { i, v: s / c } : b), { i: -1, v: 0 });
+  const bh = best(byHour), bd = best(byDay);
+  const peakPt = total.reduce((b, p) => (p[1] > b[1] ? p : b), [0, 0]);
+  const dayName = (d) => new Intl.DateTimeFormat(undefined, { weekday: 'long' }).format(new Date(2026, 0, 4 + d));
+  const spanH = total.length ? (total[total.length - 1][0] - total[0][0]) / 3600000 : 0;
+
+  // Visits per day over the last 7 complete days.
+  const today = dayStart(Date.now());
+  const gainsAll = games.map(dailyGains);
+  let vSum = 0, vDays = 0;
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const vals = gainsAll.map((m) => m.get(d.getTime())).filter((v) => v != null);
+    if (vals.length) { vSum += vals.reduce((a, b) => a + b, 0); vDays++; }
+  }
+  const perDay = vDays ? vSum / vDays : games.reduce((s, g) => s + visitsGained(g), 0);
+
+  // Most played over 7 days, by player-hours.
+  const mostPlayed = games.map((g) => {
+    const h = within(g, 168);
+    let area = 0;
+    for (let i = 1; i < h.length; i++) area += ((h[i][1] + h[i - 1][1]) / 2) * ((h[i][0] - h[i - 1][0]) / 3600000);
+    return { g, area };
+  }).sort((a, b) => b.area - a.area)[0];
+
+  const whenFmt = new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  const rows = [
+    spanH >= 12 && bh.v > 0
+      ? { icon: '⏰', label: 'Busiest hour', value: hourName(bh.i), sub: `${avgText(bh.v)} players on average` }
+      : { icon: '⏰', label: 'Busiest hour', value: 'Collecting…', sub: 'Needs about 12 hours of data' },
+    dayKeys.size >= 3 && bd.v > 0
+      ? { icon: '📅', label: 'Busiest day', value: dayName(bd.i), sub: `${avgText(bd.v)} players on average` }
+      : { icon: '📅', label: 'Busiest day', value: 'Collecting…', sub: 'Needs a few days of data' },
+    { icon: '🏆', label: 'Peak since tracking began', value: `${fmt.format(peakPt[1])} player${peakPt[1] === 1 ? '' : 's'}`, sub: peakPt[1] > 0 ? whenFmt.format(peakPt[0]) : 'No players recorded yet' },
+    { icon: '📈', label: 'Visits per day', value: fmt.format(Math.round(perDay)), sub: vDays ? `Average of the last ${vDays} day${vDays === 1 ? '' : 's'}` : 'Last 24 hours' },
+    mostPlayed && mostPlayed.area > 0
+      ? { icon: '🔥', label: 'Most played this week', value: mostPlayed.g.name, sub: `${avgText(mostPlayed.area)} player-hours` }
+      : { icon: '🔥', label: 'Most played this week', value: '—', sub: 'No playtime recorded yet' },
+  ];
+  $('highlights').innerHTML = rows.map((r) => `<li><span class="hi-icon" aria-hidden="true">${r.icon}</span><div class="hi-text"><div class="hi-label">${r.label}</div><div class="hi-value">${esc(r.value)}</div><div class="hi-sub">${esc(r.sub)}</div></div></li>`).join('');
+}
+
+// ---- milestones ----
+const MILESTONES = [10, 25, 50, 100, 250, 500, 1e3, 2.5e3, 5e3, 1e4, 2.5e4, 5e4, 1e5, 2.5e5, 5e5, 1e6, 2.5e6, 5e6, 1e7, 2.5e7, 5e7, 1e8, 1e9];
+
+// Daily growth of a history column (2 = visits, 3 = favorites) over the last 7 days.
+function ratePerDay(g, col) {
+  const h = within(g, 168).filter((p) => p[col] != null);
+  if (h.length < 2) return 0;
+  const days = (h[h.length - 1][0] - h[0][0]) / DAY;
+  return days > 0.04 ? (h[h.length - 1][col] - h[0][col]) / days : 0;
+}
+
+function milestoneRows(games, { includeTotal = true } = {}) {
+  const rows = [];
+  const add = (name, what, value, rate) => {
+    const next = MILESTONES.find((m) => m > value);
+    if (!next) return;
+    const prev = [...MILESTONES].reverse().find((m) => m <= value) || 0;
+    rows.push({ name, what, value, next, k: (value - prev) / (next - prev), eta: rate > 0 ? (next - value) / rate : null });
+  };
+  if (includeTotal && games.length > 1) add('All experiences', 'visits', games.reduce((s, g) => s + g.visits, 0), games.reduce((s, g) => s + ratePerDay(g, 2), 0));
+  for (const g of games) {
+    add(g.name, 'visits', g.visits, ratePerDay(g, 2));
+    add(g.name, 'favorites', g.favorites, ratePerDay(g, 3));
+  }
+  return rows.sort((a, b) => b.k - a.k);
+}
+
+function milestoneHtml(rows) {
+  const eta = (d) => {
+    if (d == null) return 'Pace not known yet';
+    if (d < 1) return 'Less than a day at this pace';
+    if (d < 60) return `About ${Math.round(d)} day${Math.round(d) === 1 ? '' : 's'} at this pace`;
+    return 'Over 2 months at this pace';
+  };
+  return rows.map((r) => `<li>
+    <div class="ms-top"><span class="ms-name">${esc(r.name)} <span class="faint">· ${r.what}</span></span><span class="num ms-val"><b>${compact.format(r.value)}</b> <span class="faint">/ ${compact.format(r.next)}</span></span></div>
+    <div class="ms-bar"><i style="--w:${(r.k * 100).toFixed(1)}%"></i></div>
+    <div class="ms-sub">${Math.round(r.k * 100)}% there · ${eta(r.eta)}</div>
+  </li>`).join('');
+}
+
+// ---- experience detail drawer ----
+let openId = null;
+
+function openGame(id, push = true) {
+  const g = data && data.games.find((x) => String(x.universeId) === String(id));
+  if (!g) return;
+  const wasOpen = openId != null;
+  openId = g.universeId;
+  if (push) history.replaceState(null, '', `#game-${g.universeId}`);
+  document.body.classList.add('drawer-open');
+  $('drawer').hidden = false;
+  requestAnimationFrame(() => $('drawer').classList.add('open'));
+  $('drawer-body').scrollTop = 0;
+  renderDrawer(!wasOpen);
+  $('drawer').querySelector('.drawer-close').focus({ preventScroll: true });
+}
+
+function closeGame() {
+  if (openId == null) return;
+  openId = null;
+  history.replaceState(null, '', location.pathname + location.search);
+  $('drawer').classList.remove('open');
+  document.body.classList.remove('drawer-open');
+  setTimeout(() => { if (openId == null) $('drawer').hidden = true; }, 400);
+}
+
+function renderDrawer(animate = false) {
+  if (openId == null || !data) return;
+  const g = data.games.find((x) => x.universeId === openId);
+  if (!g) return closeGame();
+  const r = rating(g);
+  const tracked = Math.max(g.playing, ...g.history.map((h) => h[1]));
+  const date = (iso) => (iso ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(iso)) : '—');
+  const body = $('drawer-body');
+  const scroll = body.scrollTop;
+  body.innerHTML = `
+    <div class="d-banner">${g.thumbnail ? `<img src="${esc(g.thumbnail)}" alt="" onerror="this.remove()">` : g.icon ? `<img class="icon-fallback" src="${esc(g.icon)}" alt="" onerror="this.remove()">` : ''}
+      <span class="badge ccu ${g.playing ? 'on' : ''}"><span class="dot"></span>${fmt.format(g.playing)} playing now</span></div>
+    <div class="d-head">
+      <div class="d-title"><h2>${esc(g.name)}</h2><div class="faint">${esc(genreLine(g))}${g.maxPlayers ? ` · up to ${g.maxPlayers} per server` : ''}</div></div>
+      <a class="play" href="https://www.roblox.com/games/${g.placeId}" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg>Play</a>
+    </div>
+    <div class="d-stats">
+      <div><div class="k">Playing now</div><div class="v">${fmt.format(g.playing)}</div></div>
+      <div><div class="k">24h peak</div><div class="v">${fmt.format(peak(g))}</div></div>
+      <div><div class="k">Tracked peak</div><div class="v">${fmt.format(tracked)}</div></div>
+      <div><div class="k">Visits</div><div class="v">${fmt.format(g.visits)}</div></div>
+      <div><div class="k">Favorites</div><div class="v">${fmt.format(g.favorites)}</div></div>
+      <div><div class="k">Like ratio</div><div class="v">${r == null ? '—' : `${Math.round(r * 100)}%`}</div><div class="like-split"><i style="width:${r == null ? 0 : (r * 100).toFixed(1)}%"></i></div><div class="k">${fmt.format(g.upVotes)} likes · ${fmt.format(g.downVotes)} dislikes</div></div>
+    </div>
+    <section class="d-sec"><div class="d-sec-head"><h3>Players</h3><span class="faint">${RANGE_NAMES[rangeHours]}</span></div><div class="chart-wrap tight" id="d-ccu"></div></section>
+    <section class="d-sec"><div class="d-sec-head"><h3>Visits per day</h3><span class="faint">Last 30 days</span></div><div class="chart-wrap tight" id="d-visits"></div></section>
+    <section class="d-sec"><div class="d-sec-head"><h3>Favorites over time</h3><span class="faint">Last 30 days</span></div><div class="chart-wrap tight" id="d-favs"></div></section>
+    <section class="d-sec"><div class="d-sec-head"><h3>Next milestones</h3></div><ul class="milestones">${milestoneHtml(milestoneRows([g], { includeTotal: false })) || '<li class="faint">Every milestone reached. Legendary.</li>'}</ul></section>
+    <section class="d-sec"><div class="d-sec-head"><h3>Details</h3></div>
+      <dl class="d-details">
+        <dt>Created</dt><dd>${date(g.created)}</dd>
+        <dt>Last updated</dt><dd>${date(g.updated)} <span class="faint">· ${agoIso(g.updated)}</span></dd>
+        <dt>Owner</dt><dd>${esc(g.ownerName || g.creator || '—')}</dd>
+        <dt>Universe ID</dt><dd class="num">${g.universeId}</dd>
+        <dt>Place ID</dt><dd class="num">${g.placeId}</dd>
+      </dl>
+    </section>`;
+  body.scrollTop = scroll;
+  const h = within(g, rangeHours);
+  lineChart($('d-ccu'), [{ name: 'Players', color: cssVar('--accent'), points: h.map((p) => [p[0], p[1]]) }], { animate, legend: false, height: 190, label: 'Players' });
+  barChart($('d-visits'), visitBars([g], new Map([[g.universeId, '--accent']]), 30), { height: 170, label: 'Visits per day' });
+  const fav = within(g, 720).filter((p) => p[3] != null).map((p) => [p[0], p[3]]);
+  lineChart($('d-favs'), [{ name: 'Favorites', color: cssVar('--series-5'), points: fav }], { animate, legend: false, height: 150, floor: null, label: 'Favorites over time' });
 }
 
 function niceStep(raw) {
@@ -802,15 +1286,16 @@ function renderCards(ranked, colorOf) {
     const prev = ccuPrev.get(g.universeId);
     ccuPrev.set(g.universeId, g.playing);
     const flash = prev != null && g.playing > prev ? ' flash-up' : '';
-    return `<article class="panel exp reveal" style="--i:${8 + i}">
-      <a class="thumb" href="https://www.roblox.com/games/${g.placeId}" target="_blank" rel="noopener" aria-label="Open ${esc(g.name)} on Roblox">
+    return `<article class="panel exp reveal" style="--i:${12 + i}" data-id="${g.universeId}" tabindex="0" role="button" aria-label="Show details for ${esc(g.name)}">
+      <div class="thumb">
         ${media}
         <span class="badge rank">#${i + 1}</span>
         <span class="badge ccu ${g.playing ? 'on' : ''}${flash}"><span class="dot"></span>${fmt.format(g.playing)} playing</span>
-      </a>
+        <span class="badge more">Details →</span>
+      </div>
       <div class="exp-body">
         <div class="exp-title">
-          <a href="https://www.roblox.com/games/${g.placeId}" target="_blank" rel="noopener" title="${esc(g.name)}">${esc(g.name)}</a>
+          <span class="t" title="${esc(g.name)}">${esc(g.name)}</span>
           <div class="genre">${esc(genreLine(g))}</div>
         </div>
         <div class="exp-stats">
@@ -907,10 +1392,26 @@ document.addEventListener('pointermove', (e) => {
   }
 }, { passive: true });
 
+// Experience cards open the detail drawer.
+document.addEventListener('click', (e) => {
+  if (e.target.closest('[data-close]')) return closeGame();
+  const card = e.target.closest('.exp[data-id]');
+  if (card) openGame(card.dataset.id);
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && openId) closeGame();
+  const card = (e.key === 'Enter' || e.key === ' ') && e.target.closest && e.target.closest('.exp[data-id]');
+  if (card) { e.preventDefault(); openGame(card.dataset.id); }
+});
+
 let resizeTimer;
 addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
-loadStatic().then((ok) => { if (!ok) refresh(true); });
+loadStatic().then((ok) => {
+  if (!ok) return refresh(true);
+  const m = location.hash.match(/^#game-(\d+)$/);
+  if (m) openGame(m[1], false);
+});
 </script>
 </body>
 </html>
