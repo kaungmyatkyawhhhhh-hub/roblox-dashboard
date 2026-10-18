@@ -125,6 +125,9 @@
   .page-head .owner { color: var(--ink-2); }
   .sync { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-3); font-size: 12px; }
   .sync .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--live); box-shadow: 0 0 0 3px color-mix(in srgb, var(--live) 18%, transparent); }
+  .sync.live .dot { animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--live) 0%, transparent); } }
+  @media (prefers-reduced-motion: reduce) { .sync.live .dot { animation: none; } }
   .sync.err { color: var(--neg); }
   .sync.err .dot { background: var(--neg); box-shadow: none; }
 
@@ -263,7 +266,7 @@
       <h2>Concurrent users</h2>
       <div class="head-right">
         <span class="meta" id="chart-meta"></span>
-        <div class="seg" id="range" hidden><button type="button" data-range="24">24h</button><button type="button" data-range="168">7d</button></div>
+        <div class="seg" id="range" hidden><button type="button" data-range="12">12h</button><button type="button" data-range="24">24h</button><button type="button" data-range="168">7d</button><button type="button" data-range="720" title="Last 30 days">1M</button></div>
       </div>
     </div>
     <div class="chart-wrap" id="chart"></div>
@@ -285,6 +288,7 @@ const $ = (id) => document.getElementById(id);
 const fmt = new Intl.NumberFormat();
 const compact = new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 });
 const timeFmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
+const secFmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit' });
 const dayFmt = new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric' });
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -336,13 +340,14 @@ function mountDashboard() {
   });
 }
 
-function setSync(text, isError) {
+function setSync(text, isError, isLive) {
   if (!$('sync')) {
     $('onboard').querySelector('p').textContent = text;
     return;
   }
   $('sync-text').textContent = text;
   $('sync').classList.toggle('err', !!isError);
+  $('sync').classList.toggle('live', !!isLive);
 }
 
 function ago(t) {
@@ -363,8 +368,44 @@ async function loadStatic() {
   setSync(`Updated ${ago(data.fetchedAt)} · refreshes every ${data.intervalMinutes || 15} min`);
   render();
   timer = setTimeout(loadStatic, 5 * 60 * 1000);
+  if (data.liveProxy) pollLive();
   return true;
 }
+
+// Live mode: when config.json names a liveProxy (see worker/worker.js), poll it
+// for current numbers between the scheduled 15-minute snapshots.
+const LIVE_MS = 15 * 1000;
+const livePoints = new WeakSet();
+let liveTimer = null;
+
+async function pollLive() {
+  clearTimeout(liveTimer);
+  liveTimer = setTimeout(pollLive, LIVE_MS);
+  if (document.hidden || !data || !data.liveProxy) return;
+  try {
+    const ids = data.games.map((g) => g.universeId).join(',');
+    const res = await fetch(`${data.liveProxy.replace(/\/$/, '')}/live?ids=${ids}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status);
+    const live = await res.json();
+    const now = live.fetchedAt || Date.now();
+    const byId = new Map(live.games.map((g) => [g.universeId, g]));
+    for (const g of data.games) {
+      const l = byId.get(g.universeId);
+      if (!l) continue;
+      Object.assign(g, { playing: l.playing, visits: l.visits, favorites: l.favorites, upVotes: l.upVotes, downVotes: l.downVotes });
+      // Extend the chart with at most one live point per minute.
+      const last = g.history[g.history.length - 1];
+      if (last && livePoints.has(last) && now - last[0] < 60000) last.splice(1, 2, l.playing, l.visits);
+      else { const p = [now, l.playing, l.visits]; livePoints.add(p); g.history.push(p); }
+    }
+    data.fetchedAt = now;
+    render();
+    setSync(`Live · updated ${secFmt.format(now)} · every 15s`, false, true);
+  } catch {
+    setSync(`Updated ${ago(data.fetchedAt)} · live updates unavailable`);
+  }
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && staticMode) pollLive(); });
 
 async function refresh(showLoading) {
   clearTimeout(timer);
@@ -441,7 +482,7 @@ function renderKpis(games) {
   const peakTotal = Math.max(playing, ...total.map((p) => p[1]));
   const tiles = [
     { label: 'Concurrent users', value: fmt.format(playing), sub: `24h peak ${fmt.format(peakTotal)}`, spark: sparkline(total, 200, 32, cssVar('--accent'), true) },
-    { label: 'Visits', value: compact.format(visits), sub: gained ? `<span class="pos">+${fmt.format(gained)}</span> past 24h` : fmt.format(visits) },
+    { label: 'Visits', value: compact.format(visits), sub: gained > 0 ? `<span class="pos">+${fmt.format(gained)}</span> past 24h` : fmt.format(visits) },
     { label: 'Favorites', value: compact.format(favs), sub: fmt.format(favs) },
     { label: 'Like ratio', value: up + down ? `${(up / (up + down) * 100).toFixed(1)}%` : '—', sub: `${compact.format(up)} up · ${compact.format(down)} down` },
     { label: 'Experiences', value: fmt.format(games.length), sub: `${live} live now` },
@@ -461,7 +502,8 @@ function renderChart(games, top, colorOf) {
   const others = games.filter((g) => !topIds.has(g.universeId));
   $('range').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', Number(b.dataset.range) === rangeHours));
   const step = staticMode ? `${data.intervalMinutes || 15}-minute` : '1-minute';
-  $('chart-meta').textContent = `${rangeHours === 24 ? 'Last 24 hours' : 'Last 7 days'} · ${step} samples`;
+  const rangeName = { 12: 'Last 12 hours', 24: 'Last 24 hours', 168: 'Last 7 days', 720: 'Last 30 days' }[rangeHours];
+  $('chart-meta').textContent = `${rangeName} · ${step} samples`;
   const series = top.filter((g) => within(g, rangeHours).length).map((g) => ({
     name: g.name, color: cssVar(colorOf.get(g.universeId)), points: within(g, rangeHours).map((h) => [h[0], h[1]]),
   }));
@@ -473,7 +515,7 @@ function renderChart(games, top, colorOf) {
   const t0 = Math.min(...all.map((p) => p[0])), t1 = Math.max(...all.map((p) => p[0]));
   if (!series.length || t1 - t0 < 60000) {
     box.innerHTML = staticMode
-      ? `<div class="empty">Collecting samples. The chart appears after the next couple of updates and builds up to 7 days of history.</div>`
+      ? `<div class="empty">Collecting samples. The chart appears after the next couple of updates and builds up to 30 days of history.</div>`
       : `<div class="empty">Collecting samples. The chart appears after a couple of minutes and covers up to 24 hours while the server runs.</div>`;
     return;
   }
@@ -595,7 +637,7 @@ function renderTable(games, colorOf, rankOf) {
       <td>${fmt.format(peak(g))}</td>
       <td>${sparkline(last24(g), 88, 22, color)}</td>
       <td>${fmt.format(g.visits)}</td>
-      <td>${gained ? `<span class="pos">+${fmt.format(gained)}</span>` : '<span class="faint">—</span>'}</td>
+      <td>${gained > 0 ? `<span class="pos">+${fmt.format(gained)}</span>` : gained < 0 ? fmt.format(gained) : '<span class="faint">—</span>'}</td>
       <td>${fmt.format(g.favorites)}</td>
       <td>${r == null ? '<span class="faint">—</span>' : `<span class="ratio">${(r * 100).toFixed(1)}%<span class="bar"><i style="width:${(r * 100).toFixed(1)}%"></i></span></span>`}</td>
       <td class="faint">${agoIso(g.updated)}</td>

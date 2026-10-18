@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const { resolveUser, resolveGroup, fetchOwnerGames } = require('../lib/roblox');
 
-const HISTORY_MS = 7 * 24 * 60 * 60 * 1000;
+const HISTORY_MS = 30 * 24 * 60 * 60 * 1000;
 const [historyFile = 'history.json', outFile = 'site/data.json'] = process.argv.slice(2);
 
 async function main() {
@@ -39,7 +39,7 @@ async function main() {
 
   fs.writeFileSync(historyFile, JSON.stringify(history));
   fs.mkdirSync(path.dirname(outFile), { recursive: true });
-  fs.writeFileSync(outFile, JSON.stringify({ fetchedAt: now, intervalMinutes: 15, owners, games }));
+  fs.writeFileSync(outFile, JSON.stringify({ fetchedAt: now, intervalMinutes: 15, liveProxy: config.liveProxy || '', owners, games }));
   const ccu = games.reduce((s, g) => s + g.playing, 0);
   console.log(`${games.length} experiences, ${ccu} playing, ${owners.map((o) => o.name).join(', ')}`);
 }
