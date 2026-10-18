@@ -246,6 +246,77 @@
   .onboard h2 { font-size: 18px; margin: 0 0 6px; letter-spacing: -0.01em; }
   .onboard p { color: var(--ink-2); margin: 0 auto; max-width: 440px; }
 
+
+  /* ---------- visual effects ---------- */
+  /* drifting aurora behind everything */
+  .aurora { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .aurora i { position: absolute; width: 46vmax; height: 46vmax; border-radius: 50%; filter: blur(90px); opacity: var(--aurora-o, .32); will-change: transform; }
+  .aurora i:nth-child(1) { background: var(--series-1); top: -22vmax; left: -10vmax; animation: drift1 26s ease-in-out infinite alternate; }
+  .aurora i:nth-child(2) { background: #7c5cff; top: -18vmax; right: -16vmax; animation: drift2 32s ease-in-out infinite alternate; }
+  .aurora i:nth-child(3) { background: var(--series-3); bottom: -30vmax; left: 30vw; opacity: calc(var(--aurora-o, .32) * .6); animation: drift3 38s ease-in-out infinite alternate; }
+  @keyframes drift1 { to { transform: translate(18vmax, 10vmax) scale(1.15); } }
+  @keyframes drift2 { to { transform: translate(-14vmax, 16vmax) scale(.9); } }
+  @keyframes drift3 { to { transform: translate(-20vmax, -12vmax) scale(1.2); } }
+  .grain { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+  /* staggered entrance on first load */
+  .intro .reveal { animation: rise .8s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i, 0) * 70ms); }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px) scale(.985); filter: blur(4px); } }
+
+  /* glow that follows the cursor across panels */
+  .panel { position: relative; }
+  .panel::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .3s; z-index: 0;
+    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--accent) 10%, transparent), transparent 60%);
+  }
+  .panel::after {
+    content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .3s; padding: 1px;
+    background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--accent) 70%, transparent), transparent 70%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  }
+  .panel:hover::before, .panel:hover::after { opacity: 1; }
+  .panel > * { position: relative; z-index: 1; }
+  .kpi svg.spark { z-index: 0; }
+
+  /* cards: 3D tilt + light sweep */
+  .cards { perspective: 1200px; }
+  .exp { transform-style: preserve-3d; transition: transform .35s cubic-bezier(.2, .8, .2, 1), border-color .2s, box-shadow .35s; }
+  .exp:hover { transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-4px); box-shadow: 0 24px 48px rgb(0 0 0 / .28); }
+  .thumb::before {
+    content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; transform: translateX(-120%);
+    background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / .28) 50%, transparent 65%);
+  }
+  .exp:hover .thumb::before { transform: translateX(120%); transition: transform .9s ease; }
+
+  /* numbers that just changed */
+  .flash-up { animation: flashUp 1.2s ease; }
+  .flash-down { animation: flashDown 1.2s ease; }
+  @keyframes flashUp { 20% { color: var(--pos); text-shadow: 0 0 18px color-mix(in srgb, var(--pos) 60%, transparent); transform: translateY(-2px); } }
+  @keyframes flashDown { 20% { color: #e66767; text-shadow: 0 0 18px rgb(230 103 103 / .5); transform: translateY(2px); } }
+  .badge.flash-up { animation: badgeUp 1.2s ease; }
+  @keyframes badgeUp { 20% { background: rgb(34 160 80 / .75); box-shadow: 0 0 24px rgb(74 222 128 / .6); } }
+  .value { display: inline-block; }
+
+  /* chart: lines draw in, live endpoints ping */
+  .draw .line { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); animation: draw 1.4s cubic-bezier(.4, 0, .2, 1) forwards; }
+  .draw .area { opacity: 0; animation: fadeIn 1s ease .5s forwards; }
+  .draw .end { opacity: 0; animation: fadeIn .4s ease 1.3s forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes fadeIn { to { opacity: 1; } }
+  .ping { transform-box: fill-box; transform-origin: center; animation: ping 2s ease-out infinite; }
+  @keyframes ping { from { transform: scale(1); opacity: .55; } to { transform: scale(4); opacity: 0; } }
+
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --aurora-o: .12; } }
+  :root[data-theme="light"] { --aurora-o: .12; }
+  @media (prefers-reduced-motion: reduce) {
+    .aurora i, .intro .reveal, .draw .line, .draw .area, .draw .end, .ping, .flash-up, .flash-down, .badge.flash-up { animation: none !important; }
+    .draw .line { stroke-dasharray: none; }
+    .draw .area, .draw .end { opacity: 1; }
+    .exp:hover { transform: translateY(-2px); }
+    .exp:hover .thumb::before { transition: none; }
+  }
+
   @media (max-width: 1080px) {
     .kpis { grid-template-columns: repeat(2, 1fr); }
     .kpi.hero-kpi { grid-column: span 2; }
@@ -269,6 +340,8 @@
 </style>
 </head>
 <body>
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="grain" aria-hidden="true"></div>
 <header class="bar">
   <div class="brand"><span class="mark"></span>Experience Overview</div>
   <span class="spacer"></span>
@@ -290,7 +363,7 @@
 </main>
 
 <template id="dashboard">
-  <div class="hero">
+  <div class="hero reveal" style="--i:0">
     <div class="who">
       <img class="avatar" id="avatar" alt="" hidden>
       <div>
@@ -303,7 +376,7 @@
 
   <section class="kpis" id="kpis"></section>
 
-  <section class="panel">
+  <section class="panel reveal" style="--i:6">
     <div class="panel-head">
       <h2>Concurrent users</h2>
       <div class="head-right">
@@ -319,10 +392,10 @@
     <div class="chart-wrap" id="chart"></div>
   </section>
 
-  <div class="section-title"><h2>Experiences</h2><span class="meta" id="cards-meta"></span></div>
+  <div class="section-title reveal" style="--i:7"><h2>Experiences</h2><span class="meta" id="cards-meta"></span></div>
   <section class="cards" id="cards"></section>
 
-  <section class="panel" id="table-panel" hidden>
+  <section class="panel reveal" style="--i:9" id="table-panel" hidden>
     <div class="panel-head">
       <h2>All experiences <span class="faint num" id="count"></span></h2>
       <div class="table-tools"><input id="filter" placeholder="Filter by name" autocomplete="off"></div>
@@ -351,6 +424,10 @@ let timer = null;
 let staticMode = false; // true when served as a static site with a published data.json
 let rangeHours = 24;
 const DAY = 24 * 60 * 60 * 1000;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let animateChart = false;      // draw chart lines in on the next render (first load, range change)
+const kpiPrev = new Map();     // last shown KPI values, for count-up and change flashes
+const ccuPrev = new Map();     // last shown players per experience
 
 // ---- settings: URL query wins, then localStorage ----
 function store(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} }
@@ -385,11 +462,14 @@ $('form').onsubmit = (e) => {
 function mountDashboard() {
   if ($('kpis')) return;
   $('main').replaceChildren($('dashboard').content.cloneNode(true));
+  $('main').classList.add('intro');
+  setTimeout(() => $('main').classList.remove('intro'), 2000);
+  animateChart = true;
   $('filter').oninput = (e) => { filter = e.target.value.trim().toLowerCase(); render(); };
   $('range').hidden = !staticMode;
   if (!staticMode) rangeHours = 24;
   $('range').querySelectorAll('button').forEach((b) => {
-    b.onclick = () => { rangeHours = Number(b.dataset.range); store('rgo.range', rangeHours); render(); };
+    b.onclick = () => { rangeHours = Number(b.dataset.range); store('rgo.range', rangeHours); animateChart = true; render(); };
   });
 }
 
@@ -570,19 +650,40 @@ function renderKpis(games) {
   const total = totalSeries(games);
   const peakTotal = Math.max(playing, ...total.map((p) => p[1]));
   const tiles = [
-    { cls: 'hero-kpi', label: 'Playing right now', value: fmt.format(playing), sub: `24h peak <b>${fmt.format(peakTotal)}</b> · ${live} of ${games.length} live`, extra: sparkline(total, 400, 52, cssVar('--accent'), 'spark') },
-    { label: 'Total visits', value: compact.format(visits), sub: gained > 0 ? `<span class="pos">+${fmt.format(gained)}</span> in 24h` : fmt.format(visits) },
-    { label: 'Favorites', value: compact.format(favs), sub: `${fmt.format(favs)} total` },
-    { label: 'Like ratio', value: up + down ? `${Math.round((up / (up + down)) * 100)}%` : '—', sub: `${compact.format(up)} likes · ${compact.format(down)} dislikes` },
-    { label: 'Experiences', value: fmt.format(games.length), sub: `${live} with players` },
+    { cls: 'hero-kpi', label: 'Playing right now', n: playing, f: (v) => fmt.format(Math.round(v)), sub: `24h peak <b>${fmt.format(peakTotal)}</b> · ${live} of ${games.length} live`, extra: sparkline(total, 400, 52, cssVar('--accent'), 'spark') },
+    { label: 'Total visits', n: visits, f: (v) => compact.format(Math.round(v)), sub: gained > 0 ? `<span class="pos">+${fmt.format(gained)}</span> in 24h` : fmt.format(visits) },
+    { label: 'Favorites', n: favs, f: (v) => compact.format(Math.round(v)), sub: `${fmt.format(favs)} total` },
+    { label: 'Like ratio', n: up + down ? (up / (up + down)) * 100 : null, f: (v) => `${Math.round(v)}%`, sub: `${compact.format(up)} likes · ${compact.format(down)} dislikes` },
+    { label: 'Experiences', n: games.length, f: (v) => fmt.format(Math.round(v)), sub: `${live} with players` },
   ];
-  $('kpis').innerHTML = tiles.map((t) => `
-    <div class="panel kpi ${t.cls || ''}">
+  $('kpis').innerHTML = tiles.map((t, i) => `
+    <div class="panel kpi reveal ${t.cls || ''}" style="--i:${i + 1}">
       <div class="label">${t.label}</div>
-      <div class="value num">${t.value}</div>
+      <div><span class="value num">${t.n == null ? '—' : t.f(kpiPrev.has(t.label) ? kpiPrev.get(t.label) : 0)}</span></div>
       <div class="sub num">${t.sub}</div>
       ${t.extra || ''}
     </div>`).join('');
+  $('kpis').querySelectorAll('.value').forEach((el, i) => {
+    const t = tiles[i];
+    if (t.n == null) return;
+    const seen = kpiPrev.has(t.label);
+    const from = seen ? kpiPrev.get(t.label) : 0;
+    kpiPrev.set(t.label, t.n);
+    if (seen && from !== t.n) el.classList.add(t.n > from ? 'flash-up' : 'flash-down');
+    countUp(el, from, t.n, t.f);
+  });
+}
+
+// Animate a number from one value to another (easeOutCubic).
+function countUp(el, from, to, f) {
+  if (reduceMotion || from === to) { el.textContent = f(to); return; }
+  const start = performance.now(), dur = from === 0 ? 1200 : 700;
+  const step = (now) => {
+    const k = Math.min(1, (now - start) / dur), e = 1 - (1 - k) ** 3;
+    el.textContent = f(from + (to - from) * e);
+    if (k < 1 && el.isConnected) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 
 function renderChart(games, top, colorOf) {
@@ -634,19 +735,21 @@ function renderChart(games, top, colorOf) {
     lastLabel = label;
     grid += `<text x="${x(t)}" y="${H - 8}" text-anchor="${i === 0 ? 'start' : i === ticks ? 'end' : 'middle'}">${label}</text>`;
   }
+  const liveNow = $('sync') && $('sync').classList.contains('live');
   const defs = series.map((s, i) => `<linearGradient id="cg${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity=".22"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient>`).join('');
   const shapes = series.map((s, i) => {
     const pts = s.points.map((p) => [x(p[0]), y(p[1])]);
     const d = smoothPath(pts);
     const last = pts[pts.length - 1];
-    return `<path d="${d}L${last[0]},${y(0)}L${pts[0][0]},${y(0)}Z" fill="url(#cg${i})"/>
-      <path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-      <circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${s.color}" stroke="var(--panel)" stroke-width="2"/>`;
+    return `<path class="area" d="${d}L${last[0]},${y(0)}L${pts[0][0]},${y(0)}Z" fill="url(#cg${i})"/>
+      <path class="line" d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      <g class="end">${liveNow ? `<circle class="ping" cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${s.color}"/>` : ''}
+      <circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${s.color}" stroke="var(--panel)" stroke-width="2"/></g>`;
   }).join('');
 
   box.innerHTML = `
     <div class="legend">${series.map((s) => `<span><i class="key" style="background:${s.color}"></i><em>${esc(s.name)}</em></span>`).join('')}</div>
-    <svg width="${W}" height="${H}" role="img" aria-label="Concurrent users, ${rangeName.toLowerCase()}" style="display:block;margin-top:10px;overflow:visible">
+    <svg class="${animateChart ? 'draw' : ''}" width="${W}" height="${H}" role="img" aria-label="Concurrent users, ${rangeName.toLowerCase()}" style="display:block;margin-top:10px;overflow:visible">
       <defs>${defs}</defs>
       <g class="axis">${grid}</g>
       ${shapes}
@@ -656,6 +759,8 @@ function renderChart(games, top, colorOf) {
     </svg>
     <div class="tooltip" id="tip"></div>`;
 
+  if (animateChart) box.querySelectorAll('.line').forEach((l) => l.style.setProperty('--len', Math.ceil(l.getTotalLength()) + 1));
+  animateChart = false;
   const hit = box.querySelector('#hit'), tip = box.querySelector('#tip');
   const xh = box.querySelector('#xhair'), dots = box.querySelector('#dots');
   const nearest = (pts, t) => pts.reduce((best, p) => (Math.abs(p[0] - t) < Math.abs(best[0] - t) ? p : best), pts[0]);
@@ -694,11 +799,14 @@ function renderCards(ranked, colorOf) {
     const media = g.thumbnail
       ? `<img class="banner" src="${esc(g.thumbnail)}" alt="" loading="lazy" onerror="this.remove()">`
       : g.icon ? `<img class="icon-fallback" src="${esc(g.icon)}" alt="" loading="lazy" onerror="this.remove()">` : '';
-    return `<article class="panel exp">
+    const prev = ccuPrev.get(g.universeId);
+    ccuPrev.set(g.universeId, g.playing);
+    const flash = prev != null && g.playing > prev ? ' flash-up' : '';
+    return `<article class="panel exp reveal" style="--i:${8 + i}">
       <a class="thumb" href="https://www.roblox.com/games/${g.placeId}" target="_blank" rel="noopener" aria-label="Open ${esc(g.name)} on Roblox">
         ${media}
         <span class="badge rank">#${i + 1}</span>
-        <span class="badge ccu ${g.playing ? 'on' : ''}"><span class="dot"></span>${fmt.format(g.playing)} playing</span>
+        <span class="badge ccu ${g.playing ? 'on' : ''}${flash}"><span class="dot"></span>${fmt.format(g.playing)} playing</span>
       </a>
       <div class="exp-body">
         <div class="exp-title">
@@ -782,6 +890,22 @@ function renderTable(games, colorOf, rankOf) {
     };
   });
 }
+
+// Cursor glow on panels and a gentle 3D tilt on experience cards.
+document.addEventListener('pointermove', (e) => {
+  const panel = e.target.closest && e.target.closest('.panel');
+  if (panel) {
+    const r = panel.getBoundingClientRect();
+    panel.style.setProperty('--mx', `${e.clientX - r.left}px`);
+    panel.style.setProperty('--my', `${e.clientY - r.top}px`);
+  }
+  const card = !reduceMotion && e.target.closest && e.target.closest('.exp');
+  if (card) {
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--ry', `${((e.clientX - r.left) / r.width - 0.5) * 7}deg`);
+    card.style.setProperty('--rx', `${(0.5 - (e.clientY - r.top) / r.height) * 7}deg`);
+  }
+}, { passive: true });
 
 let resizeTimer;
 addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
