@@ -18,7 +18,7 @@
     --line-soft: #ededf0;
     --ink: #0a0a0b;
     --ink-2: #4a4a4f;
-    --ink-3: #8a8a8f;
+    --ink-3: #6b6b70;
     --accent: #0a0a0b;
     --series-1: #0a0a0b;
     --series-2: #8e8e93;
@@ -46,8 +46,8 @@
     --line: #232326;
     --line-soft: #19191b;
     --ink: #f5f5f7;
-    --ink-2: #a1a1a6;
-    --ink-3: #6e6e73;
+    --ink-2: #c7c7cc;
+    --ink-3: #9d9da3;
     --accent: #f5f5f7;
     --series-1: #f5f5f7;
     --series-2: #8e8e93;
@@ -75,8 +75,8 @@
     --line: #232326;
     --line-soft: #19191b;
     --ink: #f5f5f7;
-    --ink-2: #a1a1a6;
-    --ink-3: #6e6e73;
+    --ink-2: #c7c7cc;
+    --ink-3: #9d9da3;
     --accent: #f5f5f7;
     --series-1: #f5f5f7;
     --series-2: #8e8e93;
@@ -1046,6 +1046,18 @@
   .player.open .p-card { visibility: visible; transition: transform .45s cubic-bezier(.2, .9, .2, 1.05), opacity .3s ease, visibility 0s; }
   .p-card { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: color-mix(in srgb, var(--panel) 94%, transparent); }
   .drawer-scrim { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgb(0 0 0 / .6); }
+
+  /* readability over the video, and a brighter backdrop */
+  :root[data-theme="dark"] { --bg: #0b0b0d; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0b0b0d; } }
+  body.art-on .ambient-bg { opacity: .7; }
+  body.art-on.eq-on .ambient-bg { opacity: 1; }
+  body.art-on .panel { background-color: color-mix(in srgb, var(--panel) 86%, transparent); }
+  /* text that sits directly on the backdrop gets a soft shadow */
+  .section-title, .section-title .meta, .bar .who-bar span, .bar .who-bar b { text-shadow: 0 1px 2px rgb(0 0 0 / .55), 0 0 14px rgb(0 0 0 / .45); }
+  .section-title .meta { color: var(--ink-2); }
+  :root[data-theme="light"] .section-title, :root[data-theme="light"] .section-title .meta, :root[data-theme="light"] .bar .who-bar span, :root[data-theme="light"] .bar .who-bar b { text-shadow: 0 0 12px rgb(255 255 255 / .8); }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .section-title, :root:not([data-theme="dark"]) .section-title .meta, :root:not([data-theme="dark"]) .bar .who-bar span, :root:not([data-theme="dark"]) .bar .who-bar b { text-shadow: 0 0 12px rgb(255 255 255 / .8); } }
 </style>
 </head>
 <body>
@@ -2902,7 +2914,7 @@ function paintAmbient(c, img) {
   g.drawImage(img, sx, sy, sw, sh, -8, -8, c.width + 16, c.height + 16);
   g.filter = 'none';
   const light = !matchMedia('(prefers-color-scheme: dark)').matches && document.documentElement.dataset.theme !== 'dark' || document.documentElement.dataset.theme === 'light';
-  g.fillStyle = light ? 'rgb(255 255 255 / .45)' : 'rgb(0 0 0 / .42)';
+  g.fillStyle = light ? 'rgb(255 255 255 / .2)' : 'rgb(0 0 0 / .1)';
   g.fillRect(0, 0, c.width, c.height);
 }
 
