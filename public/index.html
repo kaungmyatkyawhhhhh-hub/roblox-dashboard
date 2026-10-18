@@ -31,6 +31,10 @@
     --live: #1f9d45;
     --track: #ececef;
     --shadow: 0 1px 2px rgb(16 16 24 / .04), 0 4px 16px rgb(16 16 24 / .04);
+    --glow: rgb(42 120 214 / .16);
+    --sheen: rgb(255 255 255 / 0);
+    --glass: rgb(255 255 255 / .72);
+    --glass-line: rgb(16 16 24 / .08);
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -55,6 +59,10 @@
       --live: #3fcf6a;
       --track: #26262c;
       --shadow: 0 1px 0 rgb(255 255 255 / .03) inset, 0 8px 24px rgb(0 0 0 / .25);
+      --glow: rgb(57 135 229 / .42);
+      --sheen: rgb(255 255 255 / .025);
+      --glass: rgb(22 22 28 / .62);
+      --glass-line: rgb(255 255 255 / .09);
     }
   }
   :root[data-theme="dark"] {
@@ -79,6 +87,10 @@
     --live: #3fcf6a;
     --track: #26262c;
     --shadow: 0 1px 0 rgb(255 255 255 / .03) inset, 0 8px 24px rgb(0 0 0 / .25);
+      --glow: rgb(57 135 229 / .42);
+      --sheen: rgb(255 255 255 / .025);
+      --glass: rgb(22 22 28 / .62);
+      --glass-line: rgb(255 255 255 / .09);
   }
 
   * { box-sizing: border-box; }
@@ -262,8 +274,6 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 
   /* staggered entrance on first load */
-  .intro .reveal { animation: rise .8s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i, 0) * 70ms); }
-  @keyframes rise { from { opacity: 0; transform: translateY(14px) scale(.985); filter: blur(4px); } }
 
   /* glow that follows the cursor across panels */
   .panel { position: relative; }
@@ -311,7 +321,7 @@
   @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --aurora-o: .12; } }
   :root[data-theme="light"] { --aurora-o: .12; }
   @media (prefers-reduced-motion: reduce) {
-    .aurora i, .intro .reveal, .draw .line, .draw .area, .draw .end, .ping, .flash-up, .flash-down, .badge.flash-up { animation: none !important; }
+    .aurora i, .draw .line, .draw .area, .draw .end, .ping, .flash-up, .flash-down, .badge.flash-up { animation: none !important; }
     .draw .line { stroke-dasharray: none; }
     .draw .area, .draw .end { opacity: 1; }
     .exp:hover { transform: translateY(-2px); }
@@ -334,7 +344,7 @@
   }
   .heat .cell.none { background: var(--line-soft); }
   .heat .cell:hover { transform: scale(1.35); box-shadow: 0 0 0 2px var(--panel), 0 0 16px color-mix(in srgb, var(--accent) 60%, transparent); position: relative; z-index: 2; }
-  .intro .heat .cell { animation: pop .5s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(500ms + var(--d)); }
+  .panel.in:not(.done) .heat .cell { animation: pop .5s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(500ms + var(--d)); }
   @keyframes pop { from { opacity: 0; transform: scale(.4); } }
   .heat-legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 14px; font-size: 11px; color: var(--ink-3); }
   .heat-legend i { width: 12px; height: 12px; border-radius: 3px; background: color-mix(in srgb, var(--accent) var(--k), var(--panel-2)); }
@@ -367,7 +377,7 @@
 
   .bars .bar { transform-box: fill-box; transform-origin: bottom; transition: opacity .15s; }
   .bars .bar.partial { opacity: .55; }
-  .intro .bars .bar, .drawer.open .bars .bar { animation: barUp .7s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(400ms + var(--i) * 30ms); }
+  .panel.in:not(.done) .bars .bar, .drawer.fresh .bars .bar { animation: barUp .7s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(400ms + var(--i) * 30ms); }
   @keyframes barUp { from { transform: scaleY(0); } }
 
   /* cards open details */
@@ -420,6 +430,115 @@
   .d-details dt { color: var(--ink-3); }
   .d-details dd { margin: 0; }
 
+
+  /* ---------- glow ---------- */
+  .panel { background-image: linear-gradient(180deg, var(--sheen), transparent 120px); box-shadow: var(--shadow), 0 0 48px -18px var(--glow); }
+  .who h1 {
+    background: linear-gradient(92deg, var(--ink) 30%, color-mix(in srgb, var(--accent) 70%, var(--ink)));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 22px var(--glow));
+  }
+  .avatar { box-shadow: 0 0 0 1px var(--line), 0 0 28px -4px var(--glow); }
+  .kpi .value { text-shadow: 0 0 26px var(--glow); }
+  .kpi svg.spark, .exp-trend svg { filter: drop-shadow(0 0 6px var(--glow)); }
+  .pill.live { box-shadow: var(--shadow), 0 0 22px -4px rgb(63 207 106 / .45); border-color: rgb(63 207 106 / .35); }
+  .seg button[aria-pressed="true"] { box-shadow: 0 1px 3px rgb(0 0 0 / .12), 0 0 16px -4px var(--glow); }
+  .heat .cell.hot { box-shadow: 0 0 14px -2px var(--glow); }
+  .ms-bar i { box-shadow: 0 0 14px var(--glow); }
+  .hi-icon { box-shadow: 0 0 18px -6px var(--glow); }
+  .exp:hover { box-shadow: 0 24px 48px rgb(0 0 0 / .28), 0 0 60px -16px var(--glow); }
+
+  /* ---------- scroll animations ---------- */
+  .reveal { opacity: 0; transform: translateY(32px) scale(.98); filter: blur(8px); transition: opacity .9s ease, transform 1s cubic-bezier(.2, .8, .2, 1), filter .9s ease; }
+  .reveal.in { opacity: 1; transform: none; filter: none; }
+  .reveal-group:not(.in) > * { opacity: 0; }
+  .reveal-group.in:not(.done) > * { animation: rise .9s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i, 0) * 90ms); }
+  @keyframes rise { from { opacity: 0; transform: translateY(26px) scale(.97); filter: blur(6px); } }
+  .progress { position: fixed; top: 0; left: 0; height: 2px; width: 100%; z-index: 60; pointer-events: none; transform-origin: left; transform: scaleX(var(--sp, 0));
+    background: linear-gradient(90deg, var(--accent), #7c5cff, #e87ba4); box-shadow: 0 0 12px var(--glow), 0 0 4px var(--accent); }
+  .aurora { transform: translateY(calc(var(--sy, 0) * -0.15px)); }
+  .aurora { opacity: calc(.85 + var(--beat, 0) * .6); transition: opacity .12s linear; }
+
+  /* ---------- music player ---------- */
+  .player { position: fixed; right: 20px; bottom: 20px; z-index: 40; font-size: 13px; }
+  .orb {
+    width: 58px; height: 58px; padding: 0; border-radius: 50%; border: 1px solid var(--glass-line); display: grid; place-items: center; position: relative;
+    background: var(--glass); backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    box-shadow: 0 10px 30px rgb(0 0 0 / .3), 0 0 32px -6px var(--glow); transition: transform .25s cubic-bezier(.2, .8, .2, 1), box-shadow .25s;
+  }
+  .orb:hover { transform: scale(1.06); border-color: var(--glass-line); box-shadow: 0 12px 36px rgb(0 0 0 / .35), 0 0 44px -4px var(--glow); }
+  .orb .disc { width: 40px; height: 40px; }
+  .orb .eq { position: absolute; display: flex; gap: 2px; align-items: flex-end; height: 12px; }
+  .orb .eq i { width: 3px; height: 4px; border-radius: 2px; background: #fff; box-shadow: 0 0 6px #fff; }
+  .player.playing .orb .eq i { animation: eq 0.9s ease-in-out infinite; }
+  .player.playing .orb .eq i:nth-child(2) { animation-delay: -.3s; }
+  .player.playing .orb .eq i:nth-child(3) { animation-delay: -.6s; }
+  @keyframes eq { 50% { height: 12px; } }
+  .disc {
+    display: block; border-radius: 50%; position: relative;
+    background: conic-gradient(from 0deg, var(--accent), #7c5cff, #e87ba4, var(--series-2), var(--accent));
+    box-shadow: 0 0 24px -2px var(--glow), inset 0 0 0 1px rgb(255 255 255 / .18);
+    animation: spin 8s linear infinite; animation-play-state: paused;
+  }
+  .disc::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: repeating-radial-gradient(circle, rgb(0 0 0 / .12) 0 1px, transparent 1px 4px); }
+  .disc::after { content: ""; position: absolute; inset: 36%; border-radius: 50%; background: var(--panel); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .2); }
+  .player.playing .disc { animation-play-state: running; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .p-card {
+    position: absolute; right: 0; bottom: 0; width: 330px; padding: 16px; border-radius: 22px;
+    background: var(--glass); border: 1px solid var(--glass-line);
+    backdrop-filter: blur(22px) saturate(1.5); -webkit-backdrop-filter: blur(22px) saturate(1.5);
+    box-shadow: 0 24px 60px rgb(0 0 0 / .4), 0 0 70px -18px var(--glow);
+    transform-origin: bottom right; transform: scale(.6) translateY(20px); opacity: 0; pointer-events: none;
+    transition: transform .45s cubic-bezier(.2, .9, .2, 1.05), opacity .3s ease;
+  }
+  .p-card::before { content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none;
+    background: linear-gradient(140deg, color-mix(in srgb, var(--accent) 70%, transparent), transparent 40%, transparent 60%, color-mix(in srgb, #e87ba4 60%, transparent));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+  .player.open .p-card { transform: none; opacity: 1; pointer-events: auto; }
+  .player.open .orb { transform: scale(.4); opacity: 0; pointer-events: none; }
+  .p-top { display: flex; gap: 14px; align-items: center; }
+  .p-art { width: 64px; height: 64px; flex: none; position: relative; }
+  .p-art .disc { width: 64px; height: 64px; }
+  .p-art::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; background: conic-gradient(from 0deg, var(--accent), #7c5cff, #e87ba4, var(--accent)); filter: blur(16px); opacity: calc(.25 + var(--beat, 0) * .9); z-index: -1; }
+  .p-meta { min-width: 0; flex: 1; }
+  .p-kicker { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+  .p-title { font-weight: 650; font-size: 16px; letter-spacing: -0.01em; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 0 18px var(--glow); }
+  .p-sub { color: var(--ink-3); font-size: 12px; }
+  .p-min { width: 30px; height: 30px; padding: 0; border-radius: 50%; align-self: flex-start; display: grid; place-items: center; color: var(--ink-3); background: transparent; border-color: transparent; }
+  .p-min:hover { color: var(--ink); border-color: var(--glass-line); }
+  #p-viz { display: block; width: 100%; height: 64px; margin: 14px 0 6px; }
+  .p-controls { display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .p-controls button { width: 40px; height: 40px; padding: 0; border-radius: 50%; display: grid; place-items: center; background: transparent; border-color: transparent; color: var(--ink-2); }
+  .p-controls button:hover { color: var(--ink); background: var(--glass-line); }
+  .p-controls .p-play {
+    width: 56px; height: 56px; color: #fff; border: 0;
+    background: linear-gradient(135deg, var(--accent), #7c5cff);
+    box-shadow: 0 8px 24px -6px var(--accent), 0 0 32px -4px var(--glow);
+    transition: transform .15s, box-shadow .2s;
+  }
+  .p-controls .p-play:hover { transform: scale(1.06); background: linear-gradient(135deg, var(--accent), #7c5cff); box-shadow: 0 10px 30px -6px var(--accent), 0 0 44px 0 var(--glow); }
+  .p-vol { display: flex; align-items: center; gap: 10px; margin-top: 12px; color: var(--ink-3); }
+  .p-vol input { -webkit-appearance: none; appearance: none; flex: 1; height: 4px; padding: 0; border: 0; border-radius: 99px; width: auto;
+    background: linear-gradient(90deg, var(--accent) 0 var(--v, 60%), var(--track) var(--v, 60%)); }
+  .p-vol input::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 0 10px var(--glow), 0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent); }
+  .p-vol input::-moz-range-thumb { width: 14px; height: 14px; border: 0; border-radius: 50%; background: #fff; box-shadow: 0 0 10px var(--glow); }
+  .p-stations { display: flex; gap: 6px; margin-top: 14px; }
+  .p-stations button { flex: 1; height: 30px; padding: 0 6px; font-size: 11.5px; border-radius: 99px; background: transparent; border-color: var(--glass-line); color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .p-stations button[aria-pressed="true"] { color: var(--ink); border-color: color-mix(in srgb, var(--accent) 60%, transparent); background: color-mix(in srgb, var(--accent) 14%, transparent); box-shadow: 0 0 16px -4px var(--glow); }
+  body.drawer-open .player { opacity: 0; pointer-events: none; }
+  .player { transition: opacity .3s; }
+
+  @media (max-width: 720px) {
+    .player { right: 14px; bottom: 14px; }
+    .p-card { width: calc(100vw - 28px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .reveal-group > * { opacity: 1 !important; transform: none !important; filter: none !important; transition: none !important; animation: none !important; }
+    .disc, .player.playing .orb .eq i { animation: none !important; }
+    .aurora { transform: none; }
+  }
   @media (max-width: 1080px) { .grid-2-1, .grid-1-1 { grid-template-columns: 1fr; } }
   @media (max-width: 720px) {
     .heat { grid-template-columns: 28px repeat(24, minmax(0, 1fr)); gap: 2px; }
@@ -430,7 +549,7 @@
     .d-head, .d-sec { padding-left: 16px; padding-right: 16px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .intro .heat .cell, .ms-bar i, .ms-bar i::after, .intro .bars .bar, .drawer.open .bars .bar { animation: none !important; }
+    .heat .cell, .ms-bar i, .ms-bar i::after, .bars .bar { animation: none !important; }
     .drawer-panel, .drawer-scrim { transition: none; }
   }
   @media (max-width: 1080px) {
@@ -456,6 +575,7 @@
 </style>
 </head>
 <body>
+<div class="progress" aria-hidden="true"></div>
 <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
 <div class="grain" aria-hidden="true"></div>
 <header class="bar">
@@ -478,6 +598,29 @@
   </section>
 </main>
 
+<div class="player" id="player">
+  <button class="orb" id="p-orb" type="button" aria-label="Open music player"><span class="disc"></span><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span></button>
+  <div class="p-card" role="region" aria-label="Music player">
+    <div class="p-top">
+      <div class="p-art"><span class="disc"></span></div>
+      <div class="p-meta">
+        <div class="p-kicker">Generated live</div>
+        <div class="p-title" id="p-title"></div>
+        <div class="p-sub" id="p-sub"></div>
+      </div>
+      <button class="p-min" id="p-min" type="button" aria-label="Minimize player"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <canvas id="p-viz" aria-hidden="true"></canvas>
+    <div class="p-controls">
+      <button id="p-prev" type="button" aria-label="Previous mood"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 3v12M15 3.5v11L6.5 9z" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button>
+      <button id="p-play" class="p-play" type="button" aria-label="Play"><svg id="p-icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M7 4.5v13l11-6.5z" fill="currentColor"/></svg></button>
+      <button id="p-next" type="button" aria-label="Next mood"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M14 3v12M3 3.5v11L11.5 9z" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button>
+    </div>
+    <div class="p-vol"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6h3l4-3v10l-4-3H2z" fill="currentColor"/><path d="M11 5.5a3.5 3.5 0 0 1 0 5M12.8 3.5a6 6 0 0 1 0 9" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg><input type="range" id="p-vol" min="0" max="1" step="0.01" aria-label="Volume"></div>
+    <div class="p-stations" id="p-stations"></div>
+  </div>
+</div>
+
 <div class="drawer" id="drawer" hidden>
   <div class="drawer-scrim" data-close></div>
   <aside class="drawer-panel" role="dialog" aria-modal="true" aria-label="Experience details">
@@ -487,7 +630,7 @@
 </div>
 
 <template id="dashboard">
-  <div class="hero reveal" style="--i:0">
+  <div class="hero reveal">
     <div class="who">
       <img class="avatar" id="avatar" alt="" hidden>
       <div>
@@ -498,9 +641,9 @@
     <div class="pill" id="sync"><span class="dot"></span><span id="sync-text"></span></div>
   </div>
 
-  <section class="kpis" id="kpis"></section>
+  <section class="kpis reveal-group" id="kpis"></section>
 
-  <section class="panel reveal" style="--i:6">
+  <section class="panel reveal">
     <div class="panel-head">
       <h2>Concurrent users</h2>
       <div class="head-right">
@@ -517,31 +660,31 @@
   </section>
 
   <div class="grid-2-1">
-    <section class="panel reveal" style="--i:7">
+    <section class="panel reveal">
       <div class="panel-head"><h2>When players are online</h2><span class="meta" id="heat-meta"></span></div>
       <div class="chart-wrap" id="heatmap"></div>
     </section>
-    <section class="panel reveal" style="--i:8">
+    <section class="panel reveal" style="transition-delay:.12s">
       <div class="panel-head"><h2>Highlights</h2></div>
       <ul class="highlights" id="highlights"></ul>
     </section>
   </div>
 
   <div class="grid-1-1">
-    <section class="panel reveal" style="--i:9">
+    <section class="panel reveal">
       <div class="panel-head"><h2>Visits per day</h2><span class="meta">Last 14 days · today so far</span></div>
       <div class="chart-wrap" id="visits"></div>
     </section>
-    <section class="panel reveal" style="--i:10">
+    <section class="panel reveal" style="transition-delay:.12s">
       <div class="panel-head"><h2>Next milestones</h2><span class="meta">Closest first</span></div>
       <ul class="milestones" id="milestones"></ul>
     </section>
   </div>
 
-  <div class="section-title reveal" style="--i:11"><h2>Experiences</h2><span class="meta" id="cards-meta"></span></div>
-  <section class="cards" id="cards"></section>
+  <div class="section-title reveal"><h2>Experiences</h2><span class="meta" id="cards-meta"></span></div>
+  <section class="cards reveal-group" id="cards"></section>
 
-  <section class="panel reveal" style="--i:18" id="table-panel" hidden>
+  <section class="panel reveal" id="table-panel" hidden>
     <div class="panel-head">
       <h2>All experiences <span class="faint num" id="count"></span></h2>
       <div class="table-tools"><input id="filter" placeholder="Filter by name" autocomplete="off"></div>
@@ -608,8 +751,7 @@ $('form').onsubmit = (e) => {
 function mountDashboard() {
   if ($('kpis')) return;
   $('main').replaceChildren($('dashboard').content.cloneNode(true));
-  $('main').classList.add('intro');
-  setTimeout(() => $('main').classList.remove('intro'), 2000);
+  observeReveals($('main'));
   animateChart = true;
   $('filter').oninput = (e) => { filter = e.target.value.trim().toLowerCase(); render(); };
   $('range').hidden = !staticMode;
@@ -811,7 +953,7 @@ function renderKpis(games) {
     { label: 'Experiences', n: games.length, f: (v) => fmt.format(Math.round(v)), sub: `${live} with players` },
   ];
   $('kpis').innerHTML = tiles.map((t, i) => `
-    <div class="panel kpi reveal ${t.cls || ''}" style="--i:${i + 1}">
+    <div class="panel kpi ${t.cls || ''}" style="--i:${i}">
       <div class="label">${t.label}</div>
       <div><span class="value num">${t.n == null ? '—' : t.f(kpiPrev.has(t.label) ? kpiPrev.get(t.label) : 0)}</span></div>
       <div class="sub num">${t.sub}</div>
@@ -917,14 +1059,15 @@ function lineChart(box, series, { animate = false, label = '', height, floor = 4
     grid += `<text x="${x(t)}" y="${H - 8}" text-anchor="${i === 0 ? 'start' : i === ticks ? 'end' : 'middle'}">${lbl}</text>`;
   }
   const liveNow = $('sync') && $('sync').classList.contains('live');
-  const defs = series.map((s, i) => `<linearGradient id="${id}g${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity=".24"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient>`).join('');
+  const glow = `<filter id="${id}glow" x="-10%" y="-40%" width="120%" height="180%"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+  const defs = glow + series.map((s, i) => `<linearGradient id="${id}g${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity=".24"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient>`).join('');
   const shapes = series.map((s, i) => {
     const pts = s.points.map((p) => [x(p[0]), y(p[1])]);
     if (pts.length < 2) return '';
     const d = smoothPath(pts);
     const last = pts[pts.length - 1];
     return `<path class="area" d="${d}L${last[0]},${y(yMin)}L${pts[0][0]},${y(yMin)}Z" fill="url(#${id}g${i})"/>
-      <path class="line" d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      <path class="line" d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" filter="url(#${id}glow)"/>
       <g class="end">${liveNow ? `<circle class="ping" cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${s.color}"/>` : ''}
       <circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${s.color}" stroke="var(--panel)" stroke-width="2"/></g>`;
   }).join('');
@@ -1028,7 +1171,8 @@ function barChart(box, bars, { height = 200, label = '' } = {}) {
     });
     rects += `<rect class="bar-hit" data-i="${i}" x="${m.l + slot * i}" y="${m.t}" width="${slot}" height="${ih}" fill="transparent"/>`;
   });
-  box.innerHTML = `<svg class="bars" width="${W}" height="${H}" role="img" aria-label="${esc(label)}" style="display:block;overflow:visible"><g class="axis">${grid}</g>${rects}</svg><div class="tooltip"></div>`;
+  const bid = `${box.id || 'b'}-${gradId++}`;
+  box.innerHTML = `<svg class="bars" width="${W}" height="${H}" role="img" aria-label="${esc(label)}" style="display:block;overflow:visible"><defs><filter id="${bid}glow" x="-50%" y="-20%" width="200%" height="140%"><feGaussianBlur stdDeviation="4" result="b"/><feComponentTransfer in="b" result="s"><feFuncA type="linear" slope=".6"/></feComponentTransfer><feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g class="axis">${grid}</g><g filter="url(#${bid}glow)">${rects}</g></svg><div class="tooltip"></div>`;
   const tip = box.querySelector('.tooltip');
   const dayLong = new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
   box.querySelectorAll('.bar-hit').forEach((r) => {
@@ -1086,7 +1230,7 @@ function renderHeatmap(games) {
     html += `<span class="dl">${days[i]}</span>`;
     row.forEach((v, h) => {
       const k = v == null || !max ? 0 : v / max;
-      html += `<i class="cell${v == null ? ' none' : ''}" style="--k:${(6 + k * 94).toFixed(0)}%;--d:${(i * 24 + h) * 4}ms" data-tip="${days[i]} ${hourName(h)} · ${v == null ? 'no data yet' : `${avgText(v)} players on average`}"></i>`;
+      html += `<i class="cell${v == null ? ' none' : ''}${k > 0.55 ? ' hot' : ''}" style="--k:${(6 + k * 94).toFixed(0)}%;--d:${(i * 24 + h) * 4}ms" data-tip="${days[i]} ${hourName(h)} · ${v == null ? 'no data yet' : `${avgText(v)} players on average`}"></i>`;
     });
   });
   html += '</div><div class="heat-legend"><span>Fewer</span><i style="--k:6%"></i><i style="--k:35%"></i><i style="--k:65%"></i><i style="--k:100%"></i><span>More players</span></div><div class="tooltip"></div>';
@@ -1210,6 +1354,10 @@ function openGame(id, push = true) {
   $('drawer').hidden = false;
   requestAnimationFrame(() => $('drawer').classList.add('open'));
   $('drawer-body').scrollTop = 0;
+  if (!wasOpen) {
+    $('drawer').classList.add('fresh');
+    setTimeout(() => $('drawer').classList.remove('fresh'), 1600);
+  }
   renderDrawer(!wasOpen);
   $('drawer').querySelector('.drawer-close').focus({ preventScroll: true });
 }
@@ -1286,7 +1434,7 @@ function renderCards(ranked, colorOf) {
     const prev = ccuPrev.get(g.universeId);
     ccuPrev.set(g.universeId, g.playing);
     const flash = prev != null && g.playing > prev ? ' flash-up' : '';
-    return `<article class="panel exp reveal" style="--i:${12 + i}" data-id="${g.universeId}" tabindex="0" role="button" aria-label="Show details for ${esc(g.name)}">
+    return `<article class="panel exp" style="--i:${i}" data-id="${g.universeId}" tabindex="0" role="button" aria-label="Show details for ${esc(g.name)}">
       <div class="thumb">
         ${media}
         <span class="badge rank">#${i + 1}</span>
@@ -1403,6 +1551,351 @@ document.addEventListener('keydown', (e) => {
   const card = (e.key === 'Enter' || e.key === ' ') && e.target.closest && e.target.closest('.exp[data-id]');
   if (card) { e.preventDefault(); openGame(card.dataset.id); }
 });
+
+// ---- scroll animations ----
+const revealObserver = 'IntersectionObserver' in window && !reduceMotion
+  ? new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      e.target.classList.add('in');
+      revealObserver.unobserve(e.target);
+      setTimeout(() => e.target.classList.add('done'), 1800);
+    }
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' })
+  : null;
+
+function observeReveals(root) {
+  root.querySelectorAll('.reveal:not(.in), .reveal-group:not(.in)').forEach((el) => {
+    if (revealObserver) revealObserver.observe(el);
+    else el.classList.add('in', 'done');
+  });
+}
+
+let scrollQueued = false;
+addEventListener('scroll', () => {
+  if (scrollQueued) return;
+  scrollQueued = true;
+  requestAnimationFrame(() => {
+    scrollQueued = false;
+    const max = document.documentElement.scrollHeight - innerHeight;
+    document.documentElement.style.setProperty('--sp', max > 0 ? (scrollY / max).toFixed(4) : 0);
+    if (!reduceMotion) document.documentElement.style.setProperty('--sy', Math.round(scrollY));
+  });
+}, { passive: true });
+
+// ---- music: ambient tracks generated live with Web Audio (no audio files) ----
+const hz = (m) => 440 * 2 ** ((m - 69) / 12);
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+
+const MOODS = [
+  {
+    name: 'Midnight Drift', sub: 'Ambient · 68 BPM', bpm: 68, swing: 0,
+    chords: [[50, 53, 57, 60, 64], [46, 50, 53, 57, 62], [53, 57, 60, 64, 67], [48, 52, 55, 57, 62]],
+    scale: [62, 65, 67, 69, 72, 74, 77, 79],
+    play(a, step, t, spb) {
+      const bar = Math.floor(step / 16), chord = this.chords[Math.floor(bar / 2) % 4];
+      if (step % 32 === 0) { a.pad(chord, t, spb * 32, 0.05); a.bass(chord[0] - 12, t, spb * 30, 0.12); }
+      if (step % 4 === 0 && Math.random() < 0.3) a.pluck(pick(this.scale), t, 0.16, 1.6);
+      if (step % 16 === 8 && Math.random() < 0.25) a.pluck(pick(this.scale) + 12, t, 0.07, 2.4);
+    },
+  },
+  {
+    name: 'Neon Rain', sub: 'Lo-fi · 82 BPM', bpm: 82, swing: 0.16,
+    chords: [[53, 57, 60, 64], [52, 55, 59, 62], [50, 53, 57, 60], [48, 52, 55, 59]],
+    roots: [41, 40, 38, 36],
+    scale: [72, 74, 76, 79, 81, 84],
+    play(a, step, t, spb) {
+      const i = Math.floor(step / 16) % 4, s = step % 16;
+      if (s === 0) { this.chords[i].forEach((n, k) => a.keys(n, t + k * 0.025, spb * 15, 0.07)); }
+      if (s === 0 || s === 10) a.bass(this.roots[i], t, spb * (s ? 5 : 9), 0.2);
+      if (s === 0 || s === 10 || (s === 7 && Math.random() < 0.4)) a.kick(t, 0.55);
+      if (s === 4 || s === 12) a.snare(t, 0.22);
+      if (s % 2 === 0 && Math.random() < 0.9) a.hat(t, s % 4 === 2 ? 0.07 : 0.04);
+      if (s % 2 === 0 && Math.random() < 0.14) a.pluck(pick(this.scale), t, 0.08, 0.9);
+      if (Math.random() < 0.35) a.crackle(t + Math.random() * spb);
+    },
+  },
+  {
+    name: 'Aurora', sub: 'Synthwave · 96 BPM', bpm: 96, swing: 0,
+    chords: [[57, 60, 64], [53, 57, 60], [55, 60, 64], [55, 59, 62]],
+    roots: [45, 41, 48, 43],
+    play(a, step, t, spb) {
+      const i = Math.floor(step / 16) % 4, s = step % 16, c = this.chords[i];
+      if (s === 0) a.pad(c.map((n) => n + 12), t, spb * 16, 0.03);
+      if (s === 0 || s === 8) a.bass(this.roots[i], t, spb * 7, 0.18);
+      const arp = [c[0], c[1], c[2], c[0] + 12, c[2], c[1]].map((n) => n + 12);
+      a.pluck(arp[s % arp.length], t, s % 4 === 0 ? 0.11 : 0.07, 0.5);
+      if (s === 0 || s === 8) a.kick(t, 0.4);
+      if (s % 4 === 2) a.hat(t, 0.045);
+    },
+  },
+];
+
+class Ambient {
+  constructor() { this.ctx = null; this.mood = 0; this.vol = 0.6; this.playing = false; }
+
+  init() {
+    const ctx = (this.ctx = new (window.AudioContext || window.webkitAudioContext)());
+    this.master = ctx.createGain();
+    this.master.gain.value = 0;
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -18; comp.ratio.value = 3;
+    this.analyser = ctx.createAnalyser();
+    this.analyser.fftSize = 256;
+    this.analyser.smoothingTimeConstant = 0.82;
+    this.bus = ctx.createGain();
+    this.dry = ctx.createGain();
+    const verb = ctx.createConvolver();
+    verb.buffer = this.impulse(3.4, 2.4);
+    const wet = ctx.createGain();
+    wet.gain.value = 0.5;
+    this.bus.connect(this.dry);
+    this.bus.connect(verb);
+    verb.connect(wet);
+    this.dry.connect(comp);
+    wet.connect(comp);
+    comp.connect(this.master);
+    this.master.connect(this.analyser);
+    this.analyser.connect(ctx.destination);
+    // Echo for plucks.
+    this.echo = ctx.createDelay(1);
+    this.echo.delayTime.value = 0.36;
+    const fb = ctx.createGain();
+    fb.gain.value = 0.32;
+    const echoOut = ctx.createGain();
+    echoOut.gain.value = 0.35;
+    this.echo.connect(fb); fb.connect(this.echo);
+    this.echo.connect(echoOut); echoOut.connect(this.bus);
+    this.noise = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    const d = this.noise.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+
+  impulse(sec, decay) {
+    const r = this.ctx.sampleRate, len = Math.floor(r * sec), b = this.ctx.createBuffer(2, len, r);
+    for (let c = 0; c < 2; c++) {
+      const d = b.getChannelData(c);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** decay;
+    }
+    return b;
+  }
+
+  env(g, t, peak, attack, hold, release) {
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(peak, t + attack);
+    g.gain.setValueAtTime(peak, t + attack + hold);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + attack + hold + release);
+    return t + attack + hold + release + 0.05;
+  }
+
+  pad(notes, t, dur, level) {
+    const ctx = this.ctx, f = ctx.createBiquadFilter(), g = ctx.createGain();
+    f.type = 'lowpass'; f.Q.value = 0.6;
+    f.frequency.setValueAtTime(380, t);
+    f.frequency.linearRampToValueAtTime(1500, t + dur * 0.5);
+    f.frequency.linearRampToValueAtTime(600, t + dur + 2);
+    const end = this.env(g, t, level, 2.2, Math.max(0, dur - 2.2), 3);
+    f.connect(g); g.connect(this.bus);
+    for (const n of notes) for (const det of [-8, 8]) {
+      const o = ctx.createOscillator();
+      o.type = 'sawtooth'; o.frequency.value = hz(n); o.detune.value = det;
+      o.connect(f); o.start(t); o.stop(end);
+    }
+  }
+
+  pluck(n, t, level, decay) {
+    const ctx = this.ctx, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'triangle'; o.frequency.value = hz(n);
+    const end = this.env(g, t, level, 0.006, 0, decay);
+    o.connect(g); g.connect(this.bus); g.connect(this.echo);
+    o.start(t); o.stop(end);
+  }
+
+  keys(n, t, dur, level) {
+    // Soft electric piano: sine with a quiet octave partial and slow tremolo.
+    const ctx = this.ctx, g = ctx.createGain(), trem = ctx.createGain(), lfo = ctx.createOscillator(), lfoAmt = ctx.createGain();
+    lfo.frequency.value = 4.2; lfoAmt.gain.value = 0.25; trem.gain.value = 0.75;
+    lfo.connect(lfoAmt); lfoAmt.connect(trem.gain);
+    const end = this.env(g, t, level, 0.01, 0.2, Math.min(dur, 2.4));
+    g.connect(trem); trem.connect(this.bus);
+    for (const [mult, amp] of [[1, 1], [2, 0.18]]) {
+      const o = ctx.createOscillator(), a = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = hz(n) * mult; a.gain.value = amp;
+      o.connect(a); a.connect(g); o.start(t); o.stop(end);
+    }
+    lfo.start(t); lfo.stop(end);
+  }
+
+  bass(n, t, dur, level) {
+    const ctx = this.ctx, o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    o.type = 'triangle'; o.frequency.value = hz(n);
+    f.type = 'lowpass'; f.frequency.value = 420;
+    const end = this.env(g, t, level, 0.03, Math.max(0, dur - 0.4), 0.5);
+    o.connect(f); f.connect(g); g.connect(this.dry);
+    o.start(t); o.stop(end);
+  }
+
+  kick(t, level) {
+    const ctx = this.ctx, o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.setValueAtTime(130, t);
+    o.frequency.exponentialRampToValueAtTime(42, t + 0.14);
+    const end = this.env(g, t, level, 0.002, 0.02, 0.32);
+    o.connect(g); g.connect(this.dry);
+    o.start(t); o.stop(end);
+  }
+
+  noiseHit(t, level, type, freq, decay, toBus = false) {
+    const ctx = this.ctx, src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    src.buffer = this.noise;
+    src.playbackRate.value = 0.9 + Math.random() * 0.2;
+    f.type = type; f.frequency.value = freq;
+    const end = this.env(g, t, level, 0.001, 0, decay);
+    src.connect(f); f.connect(g); g.connect(toBus ? this.bus : this.dry);
+    src.start(t, Math.random()); src.stop(end);
+  }
+
+  snare(t, level) { this.noiseHit(t, level, 'bandpass', 1800, 0.18, true); }
+  hat(t, level) { this.noiseHit(t, level, 'highpass', 7500, 0.045); }
+  crackle(t) { this.noiseHit(t, 0.02 + Math.random() * 0.03, 'highpass', 3000, 0.008); }
+
+  start() {
+    if (!this.ctx) this.init();
+    this.ctx.resume();
+    const now = this.ctx.currentTime;
+    this.master.gain.cancelScheduledValues(now);
+    this.master.gain.setValueAtTime(this.master.gain.value, now);
+    this.master.gain.linearRampToValueAtTime(this.vol, now + 1.2);
+    if (this.playing) return;
+    this.playing = true;
+    this.step = 0;
+    this.next = now + 0.1;
+    clearInterval(this.timer);
+    this.timer = setInterval(() => this.schedule(), 25);
+  }
+
+  stop() {
+    if (!this.ctx || !this.playing) return;
+    this.playing = false;
+    const now = this.ctx.currentTime;
+    this.master.gain.cancelScheduledValues(now);
+    this.master.gain.setValueAtTime(this.master.gain.value, now);
+    this.master.gain.linearRampToValueAtTime(0, now + 0.6);
+    clearTimeout(this.stopTimer);
+    this.stopTimer = setTimeout(() => { if (!this.playing) { clearInterval(this.timer); this.ctx.suspend(); } }, 700);
+  }
+
+  setVolume(v) {
+    this.vol = v;
+    if (this.ctx && this.playing) this.master.gain.setTargetAtTime(v, this.ctx.currentTime, 0.05);
+  }
+
+  setMood(i) {
+    this.mood = (i + MOODS.length) % MOODS.length;
+    this.step = 0;
+    if (this.ctx) this.next = Math.max(this.next || 0, this.ctx.currentTime + 0.05);
+  }
+
+  schedule() {
+    const m = MOODS[this.mood], spb = 60 / m.bpm / 4;
+    while (this.next < this.ctx.currentTime + 0.15) {
+      m.play(this, this.step, this.next, spb);
+      const swing = m.swing ? (this.step % 2 === 0 ? 1 + m.swing : 1 - m.swing) : 1;
+      this.next += spb * swing;
+      this.step++;
+    }
+  }
+}
+
+const music = new Ambient();
+music.vol = Math.min(1, Math.max(0, Number(load('rgo.vol') ?? 0.6)));
+music.mood = Math.min(MOODS.length - 1, Math.max(0, Number(load('rgo.mood')) || 0));
+
+function renderPlayer() {
+  const m = MOODS[music.mood];
+  $('p-title').textContent = m.name;
+  $('p-sub').textContent = m.sub;
+  $('player').classList.toggle('playing', music.playing);
+  $('p-play').setAttribute('aria-label', music.playing ? 'Pause' : 'Play');
+  $('p-icon').innerHTML = music.playing
+    ? '<rect x="6" y="4.5" width="3.5" height="13" rx="1" fill="currentColor"/><rect x="12.5" y="4.5" width="3.5" height="13" rx="1" fill="currentColor"/>'
+    : '<path d="M7 4.5v13l11-6.5z" fill="currentColor"/>';
+  $('p-stations').innerHTML = MOODS.map((x, i) => `<button type="button" data-mood="${i}" aria-pressed="${i === music.mood}">${x.name}</button>`).join('');
+  $('p-vol').value = music.vol;
+  $('p-vol').style.setProperty('--v', `${music.vol * 100}%`);
+}
+
+function togglePlay() {
+  if (music.playing) music.stop(); else music.start();
+  renderPlayer();
+  if (music.playing) drawViz();
+}
+
+function changeMood(i) {
+  music.setMood(i);
+  store('rgo.mood', music.mood);
+  if (!music.playing) music.start();
+  renderPlayer();
+  drawViz();
+}
+
+$('p-orb').onclick = () => { $('player').classList.add('open'); store('rgo.player', 'open'); drawViz(); };
+$('p-min').onclick = () => { $('player').classList.remove('open'); store('rgo.player', 'min'); };
+$('p-play').onclick = togglePlay;
+$('p-prev').onclick = () => changeMood(music.mood - 1);
+$('p-next').onclick = () => changeMood(music.mood + 1);
+$('p-stations').onclick = (e) => { const b = e.target.closest('[data-mood]'); if (b) changeMood(Number(b.dataset.mood)); };
+$('p-vol').oninput = (e) => {
+  music.setVolume(Number(e.target.value));
+  store('rgo.vol', music.vol);
+  e.target.style.setProperty('--v', `${music.vol * 100}%`);
+};
+if (load('rgo.player') === 'open') $('player').classList.add('open');
+renderPlayer();
+
+// Visualizer bars, plus a --beat value the background glow pulses to.
+let vizRunning = false, beat = 0, idleT = 0;
+function drawViz() {
+  if (vizRunning) return;
+  vizRunning = true;
+  const canvas = $('p-viz'), g = canvas.getContext('2d');
+  const bins = new Uint8Array(128);
+  const frame = () => {
+    const open = $('player').classList.contains('open');
+    if (!music.playing && beat < 0.01 && !open) { vizRunning = false; document.documentElement.style.setProperty('--beat', 0); return; }
+    const dpr = devicePixelRatio || 1, w = canvas.clientWidth, h = canvas.clientHeight;
+    if (canvas.width !== Math.round(w * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, w, h);
+    if (music.analyser && music.playing) music.analyser.getByteFrequencyData(bins); else bins.fill(0);
+    const low = (bins[1] + bins[2] + bins[3] + bins[4]) / (4 * 255);
+    beat += ((music.playing ? low : 0) - beat) * 0.25;
+    document.documentElement.style.setProperty('--beat', beat.toFixed(3));
+    const n = 36, gap = 3, bw = (w - gap * (n - 1)) / n;
+    const grad = g.createLinearGradient(0, 0, w, 0);
+    grad.addColorStop(0, cssVar('--accent'));
+    grad.addColorStop(0.55, '#7c5cff');
+    grad.addColorStop(1, '#e87ba4');
+    g.fillStyle = grad;
+    g.shadowColor = cssVar('--accent');
+    g.shadowBlur = 12;
+    idleT += 0.03;
+    for (let i = 0; i < n; i++) {
+      // Log-spaced bins, with highs lifted so the whole bar row moves.
+      const idx = Math.floor((i / n) ** 1.35 * 72) + 2;
+      let v = Math.min(1, (bins[idx] / 255) * (0.75 + (i / n) * 1.4));
+      if (!music.playing) v = 0.04 + Math.sin(idleT + i * 0.45) * 0.025;
+      const bh = Math.max(3, v * (h - 4));
+      const x = i * (bw + gap), y = (h - bh) / 2;
+      g.beginPath();
+      g.roundRect ? g.roundRect(x, y, bw, bh, Math.min(bw / 2, 3)) : g.rect(x, y, bw, bh);
+      g.fill();
+    }
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+if ($('player').classList.contains('open')) drawViz();
+document.addEventListener('visibilitychange', () => { if (!document.hidden && (music.playing || $('player').classList.contains('open'))) drawViz(); });
 
 let resizeTimer;
 addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });

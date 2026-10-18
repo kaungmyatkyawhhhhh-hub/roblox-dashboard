@@ -7,6 +7,7 @@ A single-screen analytics dashboard for every Roblox experience owned by the acc
 - **When players are online:** a day-by-hour heatmap of average players in your local time.
 - **Highlights:** busiest hour and day, peak since tracking began, visits per day, and the most played experience this week.
 - **Visits per day** for the last 14 days, and **next milestones** for visits and favorites, with an estimate of when you'll reach each one at your current pace.
+- **Music player:** the floating disc in the corner plays relaxing music that is generated live in your browser (no audio files), in three moods: Midnight Drift, Neon Rain and Aurora. The background glow pulses to the beat.
 - **Experience cards:** click any card for a detail panel with its own player chart, daily visits, favorites over time, milestones, and details. Each panel has its own link (`#game-<id>`).
 
 ## Hosted automatically (GitHub Pages)
