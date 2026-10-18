@@ -6,11 +6,12 @@
 
 const fs = require('fs');
 const path = require('path');
-const { resolveUser, resolveGroup, fetchOwnerGames } = require('../lib/roblox');
+const { resolveUser, resolveGroup, fetchOwnerGames, fetchStore } = require('../lib/roblox');
 
 const HOUR = 60 * 60 * 1000;
 const HISTORY_MS = 30 * 24 * HOUR;
 const FULL_RES_MS = 48 * HOUR; // older samples are thinned to one per hour
+const STORE_MS = HOUR;          // store listings change rarely; refresh hourly
 
 // history[universeId] = [[time, playing, visits, favorites, upVotes, downVotes], ...]
 // Keeps every sample from the last 48 hours and the hourly peak before that,
@@ -39,6 +40,8 @@ async function main() {
   const config = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'config.json'), 'utf8'));
   let history = {};
   try { history = JSON.parse(fs.readFileSync(historyFile, 'utf8')); } catch {}
+  const stores = history._store || {};
+  delete history._store;
 
   const owners = [];
   if (config.user) owners.push({ type: 'user', ...(await resolveUser(String(config.user))) });
@@ -54,11 +57,17 @@ async function main() {
       seen.add(g.universeId);
       const h = thin([...(history[g.universeId] || []), [now, g.playing, g.visits, g.favorites, g.upVotes, g.downVotes]], now);
       history[g.universeId] = h;
-      games.push({ ...g, ownerType: owner.type, ownerName: owner.name, history: h });
+      let cached = stores[g.universeId];
+      if (!cached || now - cached.fetchedAt > STORE_MS) {
+        try { cached = stores[g.universeId] = await fetchStore(g.universeId); } catch (e) { console.warn(`store ${g.universeId}: ${e.message}`); }
+      }
+      games.push({ ...g, ownerType: owner.type, ownerName: owner.name, history: h, store: cached || null });
     }
   }
   // Drop experiences that are no longer listed.
   for (const id of Object.keys(history)) if (!seen.has(Number(id))) delete history[id];
+  for (const id of Object.keys(stores)) if (!seen.has(Number(id))) delete stores[id];
+  history._store = stores;
 
   fs.writeFileSync(historyFile, JSON.stringify(history));
   fs.mkdirSync(path.dirname(outFile), { recursive: true });

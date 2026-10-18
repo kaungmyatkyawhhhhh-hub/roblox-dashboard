@@ -14,7 +14,8 @@ const POLL_MS = 60 * 1000;
 const HISTORY_MS = 24 * 60 * 60 * 1000;
 const DATA_FILE = path.join(__dirname, 'data', 'history.json');
 const PUBLIC_DIR = path.join(__dirname, 'public');
-const { resolveUser, resolveGroup, fetchOwnerGames } = require('./lib/roblox');
+const { resolveUser, resolveGroup, fetchOwnerGames, fetchStore } = require('./lib/roblox');
+const storeCache = new Map(); // universeId -> store, refreshed hourly
 
 // history[universeId] = [[timestampMs, playing, visits], ...]
 let history = {};
@@ -73,7 +74,11 @@ async function overview(params) {
     for (const g of await snapshot(owner)) {
       if (seen.has(g.universeId)) continue;
       seen.add(g.universeId);
-      games.push({ ...g, ownerType: owner.type, ownerName: owner.name, history: history[g.universeId] || [] });
+      let store = storeCache.get(g.universeId);
+      if (!store || Date.now() - store.fetchedAt > 3600000) {
+        try { store = await fetchStore(g.universeId); storeCache.set(g.universeId, store); } catch {}
+      }
+      games.push({ ...g, ownerType: owner.type, ownerName: owner.name, history: history[g.universeId] || [], store: store || null });
     }
   }
   save();

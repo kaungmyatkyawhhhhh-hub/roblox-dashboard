@@ -1058,6 +1058,51 @@
   .section-title .meta { color: var(--ink-2); }
   :root[data-theme="light"] .section-title, :root[data-theme="light"] .section-title .meta, :root[data-theme="light"] .bar .who-bar span, :root[data-theme="light"] .bar .who-bar b { text-shadow: 0 0 12px rgb(255 255 255 / .8); }
   @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .section-title, :root:not([data-theme="dark"]) .section-title .meta, :root:not([data-theme="dark"]) .bar .who-bar span, :root:not([data-theme="dark"]) .bar .who-bar b { text-shadow: 0 0 12px rgb(255 255 255 / .8); } }
+
+  /* ================= views & monetization ================= */
+  .view { display: grid; gap: 12px; }
+  .view[hidden] { display: none; }
+  .tabs { display: inline-flex; padding: 3px; gap: 2px; margin-left: 18px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); }
+  .tabs button { height: 28px; padding: 0 14px; border: 0; border-radius: 999px; font-size: 12.5px; color: var(--ink-3); background: transparent; }
+  .tabs button:hover { color: var(--ink); }
+  .tabs button[aria-pressed="true"] { background: var(--ink); color: var(--bg); box-shadow: 0 0 18px -6px var(--glow); }
+  body:not(.mounted) .tabs { display: none; }
+  .row-m { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 12px; }
+  #m-tiers-legend { gap: 4px 14px; }
+  .estimator .est-controls { display: grid; gap: 14px; padding: 14px 16px 4px; }
+  .est-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 12px; font-size: 12.5px; color: var(--ink-2); }
+  .est-row input[type="range"] { grid-column: 1; -webkit-appearance: none; appearance: none; width: 100%; height: 4px; padding: 0; border: 0; border-radius: 99px; background: linear-gradient(90deg, var(--ink) 0 var(--v, 10%), var(--track) var(--v, 10%)); }
+  .est-row input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 0 10px var(--glow), 0 0 0 3px rgb(255 255 255 / .15); }
+  .est-row input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border: 0; border-radius: 50%; background: #fff; }
+  .est-row > span:first-child { grid-column: 1 / -1; }
+  .est-row output { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; min-width: 44px; text-align: right; }
+  .avg-in { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-3); grid-column: 1 / -1; }
+  .avg-in input { width: 90px; height: 30px; border-radius: 8px; }
+  .est-out { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin: 12px 16px 0; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .est-out > div { background: var(--panel); padding: 10px 12px; min-width: 0; }
+  .est-out .k { font-size: 11.5px; color: var(--ink-3); }
+  .est-out .v { font-size: 18px; font-weight: 650; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; white-space: nowrap; text-shadow: 0 0 20px var(--glow); }
+  .est-out .s { font-size: 11px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .est-note { margin: 10px 16px 14px; font-size: 11.5px; color: var(--ink-3); line-height: 1.45; }
+  .stores { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 12px; }
+  .store-list { list-style: none; margin: 0; padding: 8px 10px 12px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; max-height: 300px; overflow-y: auto; scrollbar-width: thin; }
+  .store-list li { display: flex; align-items: center; gap: 12px; padding: 6px 6px; border-radius: 10px; }
+  .store-list li:hover { background: color-mix(in srgb, var(--ink) 5%, transparent); }
+  .store-list li.off { opacity: .5; }
+  .store-list img, .store-list .ph { width: 34px; height: 34px; border-radius: 8px; flex: none; background: var(--track); object-fit: cover; }
+  .store-list .si { flex: 1; min-width: 0; }
+  .store-list .si b { display: block; font-size: 13px; font-weight: 550; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .store-list .si span { font-size: 11.5px; color: var(--ink-3); }
+  .store-list .price { font-weight: 600; font-size: 13px; white-space: nowrap; }
+  @media (max-width: 900px) { .row-m { grid-template-columns: 1fr; } .tabs { margin-left: 8px; } }
+  @media (max-width: 520px) { .tabs button { padding: 0 10px; } .est-out { grid-template-columns: 1fr; } }
+  @media (max-width: 720px) {
+    .bar { flex-wrap: wrap; row-gap: 8px; }
+    .tabs { order: 10; width: 100%; margin-left: 0; }
+    .tabs button { flex: 1; }
+    .bar .spacer { display: block; margin-left: auto; }
+  }
+  .panel.store { min-width: 0; }
 </style>
 </head>
 <body>
@@ -1071,6 +1116,7 @@
 <canvas class="eq-bottom" id="eq-bottom" aria-hidden="true"></canvas>
 <header class="bar">
   <div class="brand"><span class="mark"></span><span class="who-bar"><img id="avatar" alt="" hidden><b id="owner">Experience Overview</b><span id="owner-sub"></span></span></div>
+  <nav class="tabs" aria-label="Views"><button type="button" data-tab="overview" aria-pressed="true">Overview</button><button type="button" data-tab="money" aria-pressed="false">Monetization</button></nav>
   <span class="spacer"></span>
   <form id="form">
     <div class="field"><label for="user">Creator</label><input id="user" placeholder="Username or ID" autocomplete="off"></div>
@@ -1131,6 +1177,7 @@
 </div>
 
 <template id="dashboard">
+  <div class="view" data-view="overview">
   <section class="kpis reveal-group" id="kpis"></section>
 
   <div class="row-a">
@@ -1180,6 +1227,28 @@
     </div>
     <div class="table-scroll"><table id="table"></table></div>
   </section>
+  </div>
+
+  <div class="view" data-view="money" hidden>
+    <section class="kpis" id="m-kpis"></section>
+    <div class="row-m">
+      <section class="panel">
+        <div class="panel-head"><h2>Price tiers</h2><div class="legend" id="m-tiers-legend"></div></div>
+        <div class="chart-wrap" id="m-tiers"></div>
+      </section>
+      <section class="panel estimator">
+        <div class="panel-head"><h2>Earnings estimate</h2><span class="meta">After Roblox's 30% fee</span></div>
+        <div class="est-controls">
+          <label class="est-row"><span>Visitors who buy something</span><input type="range" id="m-rate" min="0.1" max="10" step="0.1"><output id="m-rate-out"></output></label>
+          <label class="est-row"><span>Average purchase</span><span class="avg-in">R$ <input type="number" id="m-avg" min="1" step="1"></span></label>
+        </div>
+        <div class="est-out" id="m-est"></div>
+        <p class="est-note">An estimate, not real sales: Roblox only shows actual revenue to you in Creator Hub. Set these to match your real numbers there.</p>
+      </section>
+    </div>
+    <div class="section-title"><h2>Store</h2><span class="meta">Every game pass and developer product, priciest first</span></div>
+    <div class="stores" id="m-stores"></div>
+  </div>
 </template>
 
 <script>
@@ -1244,6 +1313,8 @@ function mountDashboard() {
   $('main').replaceChildren($('dashboard').content.cloneNode(true));
   document.body.classList.add('mounted');
   observeReveals($('main'));
+  document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.tab === view));
+  document.querySelectorAll('[data-view]').forEach((el) => { el.hidden = el.dataset.view !== view; });
   animateChart = true;
   $('filter').oninput = (e) => { filter = e.target.value.trim().toLowerCase(); render(); };
   $('range').hidden = !staticMode;
@@ -1421,6 +1492,7 @@ function render() {
   barChart($('visits'), visitBars(games, colorOf, 14), { label: 'Visits per day', height: 158 });
   $('milestones').innerHTML = milestoneHtml(milestoneRows(games).slice(0, 3)) || '<li class="faint">Every milestone reached. Legendary.</li>';
   renderCards(ranked, colorOf);
+  if (view === 'money') renderMoney(games);
   renderDrawer();
   const ccu = games.reduce((s, g) => s + g.playing, 0);
   document.title = `${ccu ? `(${fmt.format(ccu)}) ` : ''}${data.owners.map((o) => o.name).join(', ')} · Experience Overview`;
@@ -1636,7 +1708,7 @@ function roundTop(x, y, w, h, r) {
 }
 
 // Stacked daily bars. bars: [{ t, partial, parts: [{ name, color, v }] }]
-function barChart(box, bars, { height = 200, label = '' } = {}) {
+function barChart(box, bars, { height = 200, label = '', xLabel = (b) => dayFmt.format(b.t), tipTitle = null, unit = 'Visits', sign = '+' } = {}) {
   const totals = bars.map((b) => b.parts.reduce((s, p) => s + p.v, 0));
   if (!bars.length || totals.every((v) => !v)) { box.innerHTML = `<div class="empty">No visits recorded yet. Daily bars appear as visits come in.</div>`; return; }
   const W = Math.max(260, box.clientWidth - 44), H = height;
@@ -1657,7 +1729,7 @@ function barChart(box, bars, { height = 200, label = '' } = {}) {
   bars.forEach((b, i) => {
     const cx = m.l + slot * (i + 0.5);
     const last = i === bars.length - 1 && i % every >= every / 2;
-    if (i % every === 0 || last) grid += `<text x="${cx}" y="${H - 8}" text-anchor="middle">${dayFmt.format(b.t)}</text>`;
+    if (i % every === 0 || last) grid += `<text x="${cx}" y="${H - 8}" text-anchor="middle">${esc(xLabel(b))}</text>`;
     const parts = b.parts.filter((p) => p.v);
     let acc = 0;
     parts.forEach((p, j) => {
@@ -1677,9 +1749,9 @@ function barChart(box, bars, { height = 200, label = '' } = {}) {
     r.onpointermove = (e) => {
       const b = bars[Number(r.dataset.i)];
       const parts = b.parts.filter((p) => p.v);
-      tip.innerHTML = `<div class="when">${dayLong.format(b.t)}${b.partial ? ' · so far' : ''}</div>` +
-        (parts.length > 1 ? parts.map((p) => `<div class="row"><span><i class="key" style="background:${p.color}"></i>${esc(p.name)}</span><b>+${fmt.format(p.v)}</b></div>`).join('') : '') +
-        `<div class="row"><span>Visits</span><b>+${fmt.format(parts.reduce((s, p) => s + p.v, 0))}</b></div>`;
+      tip.innerHTML = `<div class="when">${tipTitle ? esc(tipTitle(b)) : dayLong.format(b.t)}${b.partial ? ' · so far' : ''}</div>` +
+        (parts.length > 1 ? parts.map((p) => `<div class="row"><span><i class="key" style="background:${p.color}"></i>${esc(p.name)}</span><b>${sign}${fmt.format(p.v)}</b></div>`).join('') : '') +
+        `<div class="row"><span>${unit}</span><b>${sign}${fmt.format(parts.reduce((s, p) => s + p.v, 0))}</b></div>`;
       placeTip(box, tip, e);
     };
     r.onpointerleave = () => { tip.style.display = 'none'; };
@@ -2981,6 +3053,118 @@ function setAmbientArt(id) {
   pickArtColor(id);
   if (!reduceMotion) artTimer = setInterval(() => { artFrameIdx = (artFrameIdx + 1) % artFrames.length; showAmbientFrame(artFrames[artFrameIdx], artFallback); }, 9000);
 }
+
+// ---- monetization (public store data + an estimator) ----
+// Roblox keeps sales and revenue private to the owner, so this view shows what is
+// public (every game pass and developer product with its price) plus an estimate
+// that the viewer tunes themselves. Estimates are labelled as such everywhere.
+const ROBLOX_CUT = 0.3;          // Roblox keeps 30% of game pass and developer product sales
+const DEVEX_USD = 0.0038;        // Developer Exchange rate, USD per Robux (2025)
+const TIERS = [[1, 25], [26, 50], [51, 100], [101, 250], [251, 500], [501, Infinity]];
+const robux = (v) => `R$ ${fmt.format(Math.round(v))}`;
+let view = (location.hash === '#monetization' || load('rgo.view') === 'money') ? 'money' : 'overview';
+let est = { rate: Number(load('rgo.rate')) || 1, avg: Number(load('rgo.avg')) || 0 };
+
+function setView(v) {
+  view = v;
+  store('rgo.view', v);
+  if (!/^#game-/.test(location.hash)) history.replaceState(null, '', v === 'money' ? '#monetization' : location.pathname + location.search);
+  document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.tab === v));
+  document.querySelectorAll('[data-view]').forEach((el) => { el.hidden = el.dataset.view !== v; });
+  if (v === 'money' && data) renderMoney(data.games);
+  if (v === 'overview' && data) { animateChart = true; render(); }
+}
+
+const storeItems = (g) => {
+  const s = g.store || { passes: [], products: [] };
+  return [
+    ...s.passes.map((x) => ({ ...x, kind: 'pass', game: g })),
+    ...s.products.map((x) => ({ ...x, kind: 'product', game: g })),
+  ];
+};
+const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) => x - y); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+
+function visitsPerDay(games) {
+  const today = dayStart(Date.now());
+  const gains = games.map(dailyGains);
+  let sum = 0, days = 0;
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const vals = gains.map((m) => m.get(d.getTime())).filter((v) => v != null);
+    if (vals.length) { sum += vals.reduce((a, b) => a + b, 0); days++; }
+  }
+  return days ? sum / days : games.reduce((s, g) => s + visitsGained(g), 0);
+}
+
+function renderMoney(games) {
+  if (!$('m-kpis')) return;
+  const items = games.flatMap(storeItems);
+  const onSale = items.filter((x) => x.forSale && x.price > 0);
+  const passes = onSale.filter((x) => x.kind === 'pass');
+  const products = onSale.filter((x) => x.kind === 'product');
+  const prices = onSale.map((x) => x.price);
+  const loaded = games.some((g) => g.store);
+
+  const tiles = [
+    { label: 'Game passes', value: fmt.format(passes.length), sub: `${games.filter((g) => g.store && g.store.passes.length).length} of ${games.length} experiences sell them` },
+    { label: 'Developer products', value: fmt.format(products.length), sub: 'Repeatable purchases' },
+    { label: 'Average price', value: prices.length ? robux(prices.reduce((a, b) => a + b, 0) / prices.length) : '—', sub: prices.length ? `Median ${robux(median(prices))}` : 'Nothing on sale' },
+    { label: 'Price range', value: prices.length ? `${robux(Math.min(...prices))}–${fmt.format(Math.max(...prices))}` : '—', sub: 'Cheapest to most expensive' },
+    { label: 'Every pass, once', value: robux(passes.reduce((s, x) => s + x.price, 0)), sub: 'To own every pass' },
+  ];
+  $('m-kpis').innerHTML = tiles.map((t, i) => `
+    <div class="panel kpi" style="--i:${i}">
+      <div class="label">${t.label}</div>
+      <div><span class="value num">${t.value}</span></div>
+      <div class="sub num">${t.sub}</div>
+    </div>`).join('');
+
+  // Price tiers: how many items sit at each price point.
+  const bars = TIERS.map(([lo, hi]) => ({
+    label: hi === Infinity ? `${lo}+` : `${lo}–${hi}`,
+    parts: [
+      { name: 'Game passes', color: cssVar('--series-1'), v: passes.filter((x) => x.price >= lo && x.price <= hi).length },
+      { name: 'Developer products', color: cssVar('--series-2'), v: products.filter((x) => x.price >= lo && x.price <= hi).length },
+    ],
+  }));
+  $('m-tiers-legend').innerHTML = `<span><i class="key" style="background:${cssVar('--series-1')}"></i>Game passes</span><span><i class="key" style="background:${cssVar('--series-2')}"></i>Developer products</span>`;
+  barChart($('m-tiers'), bars, { height: 236, label: 'Items per price tier', xLabel: (b) => (innerWidth < 600 ? b.label : `R$ ${b.label}`), tipTitle: (b) => `R$ ${b.label}`, unit: 'Items', sign: '' });
+
+  // Estimator.
+  if (!est.avg) est.avg = Math.round(median(prices)) || 50;
+  const vpd = visitsPerDay(games);
+  const totalVisits = games.reduce((s, g) => s + g.visits, 0);
+  const net = (visits) => visits * (est.rate / 100) * est.avg * (1 - ROBLOX_CUT);
+  const perDay = net(vpd);
+  $('m-rate').value = est.rate;
+  $('m-rate-out').textContent = `${est.rate.toFixed(1)}%`;
+  if (document.activeElement !== $('m-avg')) $('m-avg').value = est.avg;
+  $('m-rate').style.setProperty('--v', `${((est.rate - 0.1) / (10 - 0.1)) * 100}%`);
+  $('m-est').innerHTML = `
+    <div><div class="k">Per day</div><div class="v">${robux(perDay)}</div><div class="s">${fmt.format(Math.round(vpd))} visits/day × ${est.rate.toFixed(1)}%</div></div>
+    <div><div class="k">Per month</div><div class="v">${robux(perDay * 30)}</div><div class="s">≈ $${(perDay * 30 * DEVEX_USD).toFixed(2)} via DevEx</div></div>
+    <div><div class="k">All visits so far</div><div class="v">${robux(net(totalVisits))}</div><div class="s">${fmt.format(totalVisits)} visits</div></div>`;
+
+  // Store lists per experience, priciest first.
+  $('m-stores').innerHTML = games.map((g) => {
+    const list = storeItems(g).filter((x) => x.price > 0).sort((a, b) => b.price - a.price);
+    const sum = list.filter((x) => x.forSale);
+    return `<section class="panel store">
+      <div class="panel-head"><h2>${esc(g.name)}</h2><span class="meta">${list.filter((x) => x.kind === 'pass').length} passes · ${list.filter((x) => x.kind === 'product').length} products</span></div>
+      <ul class="store-list">${list.length ? list.map((x) => `<li class="${x.forSale ? '' : 'off'}">
+          ${x.icon ? `<img src="${esc(x.icon)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'), { className: 'ph' }))">` : '<span class="ph"></span>'}
+          <span class="si"><b>${esc(x.name)}</b><span>${x.kind === 'pass' ? 'Game pass' : 'Developer product'}${x.forSale ? '' : ' · not on sale'}</span></span>
+          <span class="price num">${robux(x.price)}</span>
+        </li>`).join('') : `<li class="faint">${loaded ? 'Nothing for sale yet.' : 'Store data appears after the next update.'}</li>`}</ul>
+    </section>`;
+  }).join('');
+}
+
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'm-rate') { est.rate = Number(e.target.value); store('rgo.rate', est.rate); renderMoney(data.games); }
+  if (e.target.id === 'm-avg') { est.avg = Math.max(1, Number(e.target.value) || 1); store('rgo.avg', est.avg); renderMoney(data.games); }
+});
+document.addEventListener('click', (e) => { const t = e.target.closest('.tabs button'); if (t) setView(t.dataset.tab); });
 
 let resizeTimer;
 addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
