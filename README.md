@@ -7,7 +7,7 @@ A black-and-white, one-screen analytics dashboard for every Roblox experience ow
 - **When players are online:** a day-by-hour heatmap of average players in your local time.
 - **Highlights:** busiest hour and day, peak since tracking began, visits per day, and the most played experience this week.
 - **Visits per day** for the last 14 days, and **next milestones** for visits and favorites, with an estimate of when you'll reach each one at your current pace.
-- **Music player:** the vinyl disc in the corner opens a player. Paste YouTube video or playlist links to build a queue; they play through YouTube's official embedded player, and your queue is remembered in your browser. There are also three relaxing moods generated live in the browser (Midnight Drift, Neon Rain, Aurora). Videos whose owners block embedding are skipped automatically.
+- **Music player:** the vinyl disc in the corner opens a player. Paste YouTube video or playlist links to build a queue; they play through YouTube's official embedded player with a seek bar, and your queue is remembered in your browser. When the queue runs out (or you press next on the last song), it keeps going with YouTube's Mix of songs similar to the last one. There are also three relaxing moods generated live in the browser. Videos whose owners block embedding are skipped automatically.
 - **Experience cards:** click any card for a detail panel with its own player chart, daily visits, favorites over time, milestones, and details. Each panel has its own link (`#game-<id>`).
 
 ## Hosted automatically (GitHub Pages)

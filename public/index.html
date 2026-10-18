@@ -797,12 +797,168 @@
   main { gap: 12px; padding-bottom: 14px; }
   .row-a, .row-b { gap: 12px; }
   .cards { grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); }
+
+  /* ================= background textures ================= */
+  /* The page background lives on <html> so the fixed texture layers show through. */
+  html { background: radial-gradient(1200px 520px at 50% -220px, var(--glow), transparent 70%), var(--bg); }
+  body { background: transparent; }
+  :root { --dot: rgb(0 0 0 / .10); --gridline: rgb(0 0 0 / .045); --ray: rgb(0 0 0 / .035); --vig: rgb(0 0 0 / .07); --grain-o: .05; }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --aurora-o: .035; } }
+  :root[data-theme="light"] { --aurora-o: .035; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --dot: rgb(255 255 255 / .14); --gridline: rgb(255 255 255 / .055); --ray: rgb(255 255 255 / .06); --vig: rgb(0 0 0 / .7); --grain-o: .08; }
+  }
+  :root[data-theme="dark"] { --dot: rgb(255 255 255 / .14); --gridline: rgb(255 255 255 / .055); --ray: rgb(255 255 255 / .06); --vig: rgb(0 0 0 / .7); --grain-o: .08; }
+
+  .texture, .rays, .vignette { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+  /* dot grid over a faint large grid, fading out downwards */
+  .texture {
+    background-image:
+      radial-gradient(var(--dot) 1px, transparent 1.3px),
+      linear-gradient(var(--gridline) 1px, transparent 1px),
+      linear-gradient(90deg, var(--gridline) 1px, transparent 1px);
+    background-size: 22px 22px, 110px 110px, 110px 110px;
+    background-position: 0 0, -1px -1px, -1px -1px;
+    -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 0%, #000 0%, rgb(0 0 0 / .45) 55%, transparent 100%);
+    mask-image: radial-gradient(ellipse 85% 75% at 50% 0%, #000 0%, rgb(0 0 0 / .45) 55%, transparent 100%);
+  }
+  /* soft light rays fanning down from the top */
+  .rays {
+    inset: -20% -10% 30%;
+    background: repeating-conic-gradient(from 180deg at 50% 0%, transparent 0deg 7deg, var(--ray) 9deg 10deg, transparent 12deg 19deg);
+    -webkit-mask-image: radial-gradient(ellipse 60% 80% at 50% 0%, #000, transparent 75%);
+    mask-image: radial-gradient(ellipse 60% 80% at 50% 0%, #000, transparent 75%);
+    filter: blur(6px);
+    transform-origin: 50% 0%;
+    animation: sway 22s ease-in-out infinite alternate;
+  }
+  @keyframes sway { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
+  .vignette { background: radial-gradient(ellipse 120% 90% at 50% 40%, transparent 55%, var(--vig) 100%); }
+  /* film grain with a gentle flicker */
+  .grain { opacity: var(--grain-o); inset: -50%; animation: grain 1.2s steps(6) infinite; }
+  @keyframes grain {
+    0% { transform: translate(0, 0); } 20% { transform: translate(-4%, 3%); } 40% { transform: translate(3%, -5%); }
+    60% { transform: translate(-6%, -2%); } 80% { transform: translate(5%, 4%); } 100% { transform: translate(0, 0); }
+  }
+  @media (prefers-reduced-motion: reduce) { .rays, .grain { animation: none; } }
+
+  /* ================= player, refined ================= */
+  :root[data-theme="dark"], :root { --pl-ink: var(--ink); }
+  .p-card { width: 368px; padding: 18px; border-radius: 28px; isolation: isolate; overflow-x: hidden; }
+  .p-bg { position: absolute; inset: 0; z-index: -1; border-radius: inherit; overflow: hidden; pointer-events: none; }
+  .p-bg::before {
+    content: ""; position: absolute; inset: -30%; background: var(--art, none) center / cover no-repeat;
+    filter: blur(46px) grayscale(1) brightness(.55) contrast(1.2); opacity: 0; transform: scale(1.1); transition: opacity .8s ease;
+  }
+  .p-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent, var(--glass) 70%); }
+  .player.has-art .p-bg::before { opacity: .55; }
+  :root[data-theme="light"] .player.has-art .p-bg::before { opacity: .25; filter: blur(46px) grayscale(1) brightness(1.4); }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .player.has-art .p-bg::before { opacity: .25; filter: blur(46px) grayscale(1) brightness(1.4); } }
+
+  .p-top { gap: 16px; }
+  .p-art { width: 68px; height: 68px; }
+  .p-art .disc { width: 68px; height: 68px; }
+  .player.has-art .p-art .disc::after { background: var(--art) center / cover no-repeat; filter: grayscale(1) contrast(1.1); inset: 30%; box-shadow: 0 0 0 2px #0a0a0b, inset 0 0 0 1px rgb(255 255 255 / .2); }
+  .p-art .pin { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: #0a0a0b; box-shadow: 0 0 0 1px rgb(255 255 255 / .35); z-index: 2; }
+  .p-kicker { display: flex; align-items: center; gap: 6px; }
+  .p-kicker .live-eq { display: inline-flex; gap: 2px; align-items: flex-end; height: 9px; }
+  .p-kicker .live-eq i { width: 2px; height: 3px; background: var(--ink); border-radius: 1px; }
+  .player.playing .p-kicker .live-eq i { animation: eq .9s ease-in-out infinite; }
+  .player.playing .p-kicker .live-eq i:nth-child(2) { animation-delay: -.3s; }
+  .player.playing .p-kicker .live-eq i:nth-child(3) { animation-delay: -.6s; }
+  .p-title { overflow: hidden; text-overflow: clip; font-size: 17px; letter-spacing: -0.02em;
+    -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
+  .p-title:not(.marquee) { -webkit-mask-image: none; mask-image: none; text-overflow: ellipsis; }
+  .p-title span { display: inline-block; }
+  .p-title.marquee span { animation: marquee var(--mq-t, 10s) ease-in-out infinite alternate; }
+  @keyframes marquee { 0%, 18% { transform: translateX(0); } 82%, 100% { transform: translateX(var(--mq, 0)); } }
+
+  .p-video { position: relative; overflow: visible; background: none; box-shadow: none; height: auto; margin-top: 16px; }
+  .p-ambient { position: absolute; inset: 6% 4%; z-index: -1; border-radius: 24px; background: var(--art, none) center / cover no-repeat; filter: blur(30px) saturate(1.2); opacity: .55; transform: scale(1.06); transition: opacity .6s; }
+  .p-frame { position: relative; height: 200px; border-radius: 18px; overflow: hidden; background: #000; box-shadow: 0 0 0 1px rgb(255 255 255 / .08), 0 18px 40px -16px rgb(0 0 0 / .8); }
+  .p-frame iframe, .p-frame > div { width: 100%; height: 200px; display: block; border: 0; }
+  .p-frame::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .06); background: linear-gradient(180deg, transparent 70%, rgb(0 0 0 / .25)); }
+
+  .p-progress { display: grid; grid-template-columns: 40px 1fr 40px; align-items: center; gap: 10px; margin: 16px 0 4px; font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .p-progress span:last-child { text-align: right; }
+  .player:not(.yt) .p-progress { display: none; }
+  .p-seek { position: relative; height: 18px; cursor: pointer; touch-action: none; }
+  .p-seek::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 4px; margin-top: -2px; border-radius: 99px; background: var(--track); }
+  .p-seek i { position: absolute; left: 0; top: 50%; height: 4px; margin-top: -2px; width: var(--pos, 0%); border-radius: 99px; background: var(--ink); box-shadow: 0 0 10px var(--glow); }
+  .p-seek b { position: absolute; top: 50%; left: var(--pos, 0%); width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 4px rgb(255 255 255 / .12), 0 0 12px var(--glow); transform: scale(0); transition: transform .15s; }
+  .p-seek:hover b, .p-seek.drag b { transform: scale(1); }
+  .p-seek:hover::before, .p-seek.drag::before, .p-seek:hover i, .p-seek.drag i { height: 6px; margin-top: -3px; }
+
+  .p-controls { gap: 26px; margin-top: 6px; }
+  .p-controls .p-play { width: 60px; height: 60px; position: relative; }
+  .p-controls .p-play::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid var(--ink-3); opacity: 0; pointer-events: none; }
+  .player.playing .p-controls .p-play::after { animation: ring 2.4s ease-out infinite; }
+  @keyframes ring { 0% { transform: scale(.9); opacity: .6; } 100% { transform: scale(1.35); opacity: 0; } }
+
+  .p-vol { gap: 12px; margin-top: 14px; }
+  .p-vol .mute { width: 28px; height: 28px; padding: 0; border-radius: 50%; display: grid; place-items: center; background: transparent; border-color: transparent; color: var(--ink-3); }
+  .p-vol .mute:hover { color: var(--ink); border-color: var(--glass-line); }
+  .p-vol output { width: 30px; text-align: right; font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+  .p-add { position: relative; margin-top: 16px; }
+  .p-add svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--ink-3); pointer-events: none; }
+  .p-add input { padding-left: 34px; height: 40px; border-radius: 14px; transition: border-color .2s, box-shadow .2s; }
+  .p-add input:focus { border-color: var(--ink-3); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ink) 8%, transparent), 0 0 24px -8px var(--glow); }
+  .p-add button { height: 40px; width: 40px; padding: 0; border-radius: 14px; display: grid; place-items: center; font-size: 20px; line-height: 1; }
+
+  .p-list-head { margin: 18px 2px 8px; }
+  .p-queue { counter-reset: q; }
+  .p-queue li { padding: 7px; gap: 12px; }
+  .p-queue .qthumb { position: relative; width: 52px; height: 38px; flex: none; border-radius: 9px; overflow: hidden; background: var(--track); }
+  .p-queue .qthumb img, .p-queue .qthumb .ph { width: 100%; height: 100%; border-radius: 0; display: block; }
+  .p-queue .q-eq { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; gap: 2px; background: rgb(0 0 0 / .55); }
+  .p-queue .q-eq i { width: 3px; height: 4px; background: #fff; border-radius: 1px; box-shadow: 0 0 6px #fff; }
+  .p-queue li.on .q-eq { display: flex; }
+  .player.playing .p-queue li.on .q-eq i { animation: eq .9s ease-in-out infinite; }
+  .player.playing .p-queue li.on .q-eq i:nth-child(2) { animation-delay: -.3s; }
+  .player.playing .p-queue li.on .q-eq i:nth-child(3) { animation-delay: -.6s; }
+  .p-queue li.on .qt b { text-shadow: 0 0 16px var(--glow); }
+
+  .p-stations { gap: 0; padding: 3px; border-radius: 99px; background: color-mix(in srgb, var(--panel-2) 70%, transparent); border: 1px solid var(--glass-line); }
+  .p-stations button { border: 0; height: 30px; }
+  .p-stations button[aria-pressed="true"] { background: var(--ink); color: var(--bg); box-shadow: 0 0 18px -4px var(--glow); }
+  @media (prefers-reduced-motion: reduce) { .p-title.marquee span, .player.playing .p-controls .p-play::after { animation: none; } }
+
+  /* ---- queue width fix, radio row, smooth video transitions ---- */
+  .p-queue { grid-template-columns: minmax(0, 1fr); }
+  .p-queue li.radio .qthumb { display: grid; place-items: center; background: var(--art, none) center / cover, var(--track); }
+  .p-queue li.radio .qthumb::before { content: ""; position: absolute; inset: 0; background: rgb(0 0 0 / .45); }
+  .p-queue li.radio .qthumb svg { position: relative; z-index: 1; color: #fff; filter: drop-shadow(0 0 6px #fff); }
+  .p-queue li.radio.on .qthumb svg { display: none; }
+
+  /* video area slides open/closed instead of popping */
+  .p-video, .p-video[hidden] { display: block; }
+  .p-video { max-height: 240px; opacity: 1; transition: max-height .55s cubic-bezier(.16, 1, .3, 1), opacity .4s ease, margin-top .55s cubic-bezier(.16, 1, .3, 1); }
+  .player:not(.yt) .p-video { max-height: 0; opacity: 0; margin-top: 0; pointer-events: none; }
+  /* poster of the current track sits under the video; the video fades in over it once playing */
+  .p-poster { position: absolute; inset: 0; background: var(--art, none) center / cover no-repeat, #000; filter: grayscale(.35) blur(0); transform: scale(1.02); transition: filter .6s ease, transform 1.2s cubic-bezier(.16, 1, .3, 1); }
+  .p-poster::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgb(0 0 0 / .1), rgb(0 0 0 / .55)); }
+  .p-poster .spin { position: absolute; left: 50%; top: 50%; width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%; border: 2px solid rgb(255 255 255 / .25); border-top-color: #fff; animation: spin .9s linear infinite; z-index: 1; opacity: 0; transition: opacity .3s; }
+  .player:not(.vid-ready) .p-poster { filter: grayscale(.35) blur(6px); transform: scale(1.08); }
+  .player.yt:not(.vid-ready) .p-poster .spin { opacity: 1; }
+  .p-frame #yt-frame, .p-frame iframe { position: relative; z-index: 1; opacity: 0; transform: scale(1.015); transition: opacity .7s ease, transform .9s cubic-bezier(.16, 1, .3, 1), filter .7s ease; filter: blur(4px); }
+  .player.vid-ready .p-frame #yt-frame, .player.vid-ready .p-frame iframe { opacity: 1; transform: none; filter: none; }
+  .p-frame::after { z-index: 2; }
+  .p-ambient { transition: opacity .9s ease; }
+  .player.swapping .p-ambient { opacity: 0; }
+  @media (prefers-reduced-motion: reduce) {
+    .p-video, .p-poster, .p-frame #yt-frame, .p-frame iframe { transition: none; }
+  }
+  .p-queue .qt span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 </style>
 </head>
 <body>
 <div class="progress" aria-hidden="true"></div>
 <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="texture" aria-hidden="true"></div>
+<div class="rays" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
 <header class="bar">
   <div class="brand"><span class="mark"></span><span class="who-bar"><img id="avatar" alt="" hidden><b id="owner">Experience Overview</b><span id="owner-sub"></span></span></div>
   <span class="spacer"></span>
@@ -827,24 +983,26 @@
 <div class="player" id="player">
   <button class="orb" id="p-orb" type="button" aria-label="Open music player"><span class="disc"></span><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span></button>
   <div class="p-card" role="region" aria-label="Music player">
+    <div class="p-bg" aria-hidden="true"></div>
     <div class="p-top">
-      <div class="p-art"><span class="disc"></span></div>
+      <div class="p-art"><span class="disc"></span><span class="pin"></span></div>
       <div class="p-meta">
-        <div class="p-kicker" id="p-kicker">Now playing</div>
+        <div class="p-kicker"><span class="live-eq" aria-hidden="true"><i></i><i></i><i></i></span><span id="p-kicker">Now playing</span></div>
         <div class="p-title" id="p-title"></div>
         <div class="p-sub" id="p-sub"></div>
       </div>
       <button class="p-min" id="p-min" type="button" aria-label="Minimize player"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
-    <div class="p-video" id="p-video" hidden><div id="yt-frame"></div></div>
+    <div class="p-video" id="p-video"><div class="p-ambient" aria-hidden="true"></div><div class="p-frame"><div class="p-poster" aria-hidden="true"><span class="spin"></span></div><div id="yt-frame"></div></div></div>
     <canvas id="p-viz" aria-hidden="true"></canvas>
+    <div class="p-progress"><span id="p-cur">0:00</span><div class="p-seek" id="p-seek" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" tabindex="0"><i></i><b></b></div><span id="p-dur">0:00</span></div>
     <div class="p-controls">
       <button id="p-prev" type="button" aria-label="Previous"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 3v12M15 3.5v11L6.5 9z" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button>
       <button id="p-play" class="p-play" type="button" aria-label="Play"><svg id="p-icon" width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M7 4.5v13l11-6.5z" fill="currentColor"/></svg></button>
       <button id="p-next" type="button" aria-label="Next"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M14 3v12M3 3.5v11L11.5 9z" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button>
     </div>
-    <div class="p-vol"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6h3l4-3v10l-4-3H2z" fill="currentColor"/><path d="M11 5.5a3.5 3.5 0 0 1 0 5M12.8 3.5a6 6 0 0 1 0 9" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg><input type="range" id="p-vol" min="0" max="1" step="0.01" aria-label="Volume"></div>
-    <form class="p-add" id="p-add"><input id="p-url" placeholder="Paste a YouTube link" autocomplete="off" aria-label="YouTube link"><button type="submit">Add</button></form>
+    <div class="p-vol"><button class="mute" id="p-mute" type="button" aria-label="Mute"><svg id="p-vol-icon" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"></svg></button><input type="range" id="p-vol" min="0" max="1" step="0.01" aria-label="Volume"><output id="p-vol-out"></output></div>
+    <form class="p-add" id="p-add"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.2-1.2a2.8 2.8 0 0 1 4 4L11 8.5M9 11.5l-1.2 1.2a2.8 2.8 0 0 1-4-4L5 7.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input id="p-url" placeholder="Paste a YouTube link" autocomplete="off" aria-label="YouTube link"><button type="submit" aria-label="Add to queue">+</button></form>
     <div class="p-msg" id="p-msg" role="status"></div>
     <div class="p-list-head"><span>Your queue</span><button type="button" id="p-clear" hidden>Clear</button></div>
     <ul class="p-queue" id="p-queue"></ul>
@@ -2168,8 +2326,9 @@ async function playYT(i) {
   const item = queue[ytIndex];
   src = 'yt';
   music.stop();
+  radio = null;
   $('player').classList.add('yt');
-  $('p-video').hidden = false;
+  beginSwap();
   renderPlayer();
   try { await loadYouTubeApi(); } catch (e) { setMsg(`${e.message}. Check your connection and try again.`); return; }
   yt?.setVolume?.(Math.round(music.vol * 100));
@@ -2177,7 +2336,7 @@ async function playYT(i) {
     yt = new YT.Player('yt-frame', {
       width: '100%', height: '200',
       videoId: item.v || undefined,
-      playerVars: { autoplay: 1, playsinline: 1, rel: 0, start: item.start || 0, ...(item.list ? { listType: 'playlist', list: item.list } : {}) },
+      playerVars: { autoplay: 1, playsinline: 1, rel: 0, controls: 0, fs: 0, iv_load_policy: 3, disablekb: 1, start: item.start || 0, ...(item.list ? { listType: 'playlist', list: item.list } : {}) },
       events: {
         onReady: (e) => { e.target.setVolume(Math.round(music.vol * 100)); e.target.playVideo(); },
         onStateChange: onYTState,
@@ -2194,8 +2353,25 @@ async function playYT(i) {
 function onYTState(e) {
   const S = YT.PlayerState;
   ytPlaying = e.data === S.PLAYING || e.data === S.BUFFERING;
+  const cur = yt.getVideoData && yt.getVideoData();
+  if (cur && cur.video_id && cur.video_id !== lastVid) { lastVid = cur.video_id; beginSwap(); }
+  if (e.data === S.PLAYING) endSwap();
+  if (radio && e.data === S.PLAYING && cur) {
+    radio.now = { id: cur.video_id, title: cur.title || 'Recommended song', author: cur.author || '' };
+  }
+  if (radio) {
+    if (e.data === S.ENDED) {
+      const pl = yt.getPlaylist && yt.getPlaylist();
+      if (!pl || yt.getPlaylistIndex() >= pl.length - 1) startRadio();
+    }
+    renderPlayer();
+    if (ytPlaying) drawViz();
+    return;
+  }
   if (e.data === S.PLAYING) {
     ytErrors = 0;
+    const vd = yt.getVideoData && yt.getVideoData();
+    if (vd && vd.video_id && queue[ytIndex]) queue[ytIndex].nowId = vd.video_id;
     const d = yt.getVideoData && yt.getVideoData();
     const item = queue[ytIndex];
     if (d && item && d.title) {
@@ -2208,8 +2384,9 @@ function onYTState(e) {
     const item = queue[ytIndex];
     const pl = item && item.list && yt.getPlaylist && yt.getPlaylist();
     const atEnd = !pl || yt.getPlaylistIndex() >= pl.length - 1;
-    if (atEnd && queue.length > 1) playYT(ytIndex + 1);
-    else if (atEnd && item && item.v) { yt.seekTo(0); yt.pauseVideo(); }
+    // Keep going: next in the queue, or recommendations once the queue runs out.
+    if (atEnd && ytIndex < queue.length - 1) playYT(ytIndex + 1);
+    else if (atEnd) startRadio();
   }
   renderPlayer();
   if (ytPlaying) drawViz();
@@ -2221,7 +2398,45 @@ function onYTError(e) {
   setMsg(blocked ? "This video's owner doesn't allow playing it outside YouTube, so it was skipped." : "This video couldn't be played, so it was skipped.");
   ytPlaying = false;
   renderPlayer();
+  if (radio) { if (ytErrors < 5) setTimeout(() => yt.nextVideo(), 800); return; }
   if (queue.length > 1 && ytErrors < queue.length) setTimeout(() => playYT(ytIndex + 1), 1200);
+}
+
+// ---- recommendations: when the queue runs out, play YouTube's Mix for the last song ----
+let radio = null;      // { seed, seedTitle, now: { id, title, author } }
+let lastVid = null;
+
+function currentVideoId() {
+  const d = yt && yt.getVideoData && yt.getVideoData();
+  return (d && d.video_id) || (queue[ytIndex] && (queue[ytIndex].nowId || queue[ytIndex].v)) || null;
+}
+
+function startRadio() {
+  const seed = (radio && radio.now && radio.now.id) || currentVideoId();
+  if (!seed || !yt || !yt.loadPlaylist) { setMsg('Play a YouTube video first, then press next for recommendations.'); return; }
+  const seedTitle = (radio && radio.now && radio.now.title) || (queue[ytIndex] && (queue[ytIndex].now || queue[ytIndex].title)) || 'this song';
+  radio = { seed, seedTitle, now: null };
+  ytErrors = 0;
+  src = 'yt';
+  music.stop();
+  beginSwap();
+  setMsg(`Playing songs like “${seedTitle}”.`);
+  // Index 0 of a Mix is the seed itself, so start from the next song.
+  yt.loadPlaylist({ list: `RD${seed}`, listType: 'playlist', index: 1 });
+  renderPlayer();
+}
+
+// Fade the video out to the poster while the next track loads, then back in.
+function beginSwap() {
+  const el = $('player');
+  el.classList.remove('vid-ready');
+  el.classList.add('swapping');
+  clearTimeout(beginSwap.t);
+  beginSwap.t = setTimeout(() => el.classList.remove('swapping'), 450);
+}
+function endSwap() {
+  clearTimeout(endSwap.t);
+  endSwap.t = setTimeout(() => $('player').classList.add('vid-ready'), 120);
 }
 
 function removeItem(i) {
@@ -2231,7 +2446,7 @@ function removeItem(i) {
   if (i < ytIndex) ytIndex--;
   if (wasCurrent) {
     if (queue.length) playYT(Math.min(i, queue.length - 1));
-    else { yt?.stopVideo?.(); ytPlaying = false; ytIndex = -1; src = 'mood'; $('player').classList.remove('yt'); $('p-video').hidden = true; }
+    else { yt?.stopVideo?.(); ytPlaying = false; ytIndex = -1; src = 'mood'; radio = null; $('player').classList.remove('yt'); }
   }
   renderPlayer();
 }
@@ -2241,28 +2456,128 @@ const isPlaying = () => (src === 'yt' ? ytPlaying : music.playing);
 function renderPlayer() {
   const item = src === 'yt' ? queue[ytIndex] : null;
   const m = MOODS[music.mood];
-  $('p-kicker').textContent = item ? (ytPlaying ? 'Now playing · YouTube' : 'YouTube') : 'Generated live';
-  $('p-title').textContent = item ? (item.now || item.title) : m.name;
-  $('p-sub').textContent = item ? (item.nowAuthor || item.author || (item.list ? 'Playlist' : 'YouTube')) : m.sub;
+  const rn = src === 'yt' && radio ? (radio.now || { id: null, title: 'Finding recommendations…', author: `Based on ${radio.seedTitle}` }) : null;
+  $('p-kicker').textContent = rn ? 'Recommended · YouTube' : item ? (ytPlaying ? 'Now playing · YouTube' : 'YouTube') : 'Generated live';
+  setTitle(rn ? rn.title : item ? (item.now || item.title) : m.name);
+  setArt(rn ? (rn.id || radio.seed) : item ? (item.nowId || item.v) : null);
+  $('p-sub').textContent = rn ? (rn.author || `Based on ${radio.seedTitle}`) : item ? (item.nowAuthor || item.author || (item.list ? 'Playlist' : 'YouTube')) : m.sub;
   $('player').classList.toggle('playing', isPlaying());
   $('player').classList.toggle('yt', src === 'yt');
-  $('p-video').hidden = src !== 'yt';
   $('p-play').setAttribute('aria-label', isPlaying() ? 'Pause' : 'Play');
   $('p-icon').innerHTML = isPlaying()
     ? '<rect x="6" y="4.5" width="3.5" height="13" rx="1" fill="currentColor"/><rect x="12.5" y="4.5" width="3.5" height="13" rx="1" fill="currentColor"/>'
     : '<path d="M7 4.5v13l11-6.5z" fill="currentColor"/>';
   $('p-stations').innerHTML = MOODS.map((x, i) => `<button type="button" data-mood="${i}" aria-pressed="${src === 'mood' && i === music.mood}">${x.name}</button>`).join('');
   $('p-queue').innerHTML = queue.length
-    ? queue.map((q, i) => `<li class="${src === 'yt' && i === ytIndex ? 'on' : ''}" data-q="${i}">
-        ${q.v ? `<img src="https://i.ytimg.com/vi/${esc(q.v)}/mqdefault.jpg" alt="" loading="lazy">` : '<span class="ph"></span>'}
+    ? queue.map((q, i) => `<li class="${src === 'yt' && !radio && i === ytIndex ? 'on' : ''}" data-q="${i}">
+        <span class="qthumb">${q.v ? `<img src="https://i.ytimg.com/vi/${esc(q.v)}/mqdefault.jpg" alt="" loading="lazy">` : '<span class="ph"></span>'}<span class="q-eq" aria-hidden="true"><i></i><i></i><i></i></span></span>
         <span class="qt"><b>${esc(q.title)}</b><span>${esc(q.author || (q.list ? 'Playlist' : 'YouTube'))}</span></span>
         <button class="rm" type="button" data-rm="${i}" aria-label="Remove ${esc(q.title)}">✕</button>
       </li>`).join('')
     : '<li class="p-empty">Paste a YouTube video or playlist link above.</li>';
+  if (src === 'yt' && radio) {
+    $('p-queue').insertAdjacentHTML('beforeend', `<li class="radio on" data-radio>
+      <span class="qthumb"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 9a6 6 0 0 1 12 0M5.5 9a3.5 3.5 0 0 1 7 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="9" r="1.4" fill="currentColor"/></svg><span class="q-eq" aria-hidden="true"><i></i><i></i><i></i></span></span>
+      <span class="qt"><b>${esc(radio.now ? radio.now.title : 'Recommended songs')}</b><span>Recommended · based on ${esc(radio.seedTitle)}</span></span>
+    </li>`);
+  }
   $('p-clear').hidden = !queue.length;
+  showVolume();
+}
+
+function showVolume() {
   $('p-vol').value = music.vol;
   $('p-vol').style.setProperty('--v', `${music.vol * 100}%`);
+  $('p-vol-out').textContent = Math.round(music.vol * 100);
+  $('p-vol-icon').innerHTML = music.vol === 0
+    ? '<path d="M2 6h3l4-3v10l-4-3H2z" fill="currentColor"/><path d="M11.5 6l3 4M14.5 6l-3 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'
+    : `<path d="M2 6h3l4-3v10l-4-3H2z" fill="currentColor"/><path d="M11 5.5a3.5 3.5 0 0 1 0 5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>${music.vol > 0.5 ? '<path d="M12.8 3.5a6 6 0 0 1 0 9" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>' : ''}`;
+  $('p-mute').setAttribute('aria-label', music.vol === 0 ? 'Unmute' : 'Mute');
 }
+
+function setVolume(v) {
+  music.setVolume(v);
+  yt?.setVolume?.(Math.round(v * 100));
+  store('rgo.vol', v);
+  showVolume();
+}
+
+// Long titles glide back and forth instead of being cut off.
+function setTitle(text) {
+  const el = $('p-title');
+  if (el.dataset.t === text) return;
+  el.dataset.t = text;
+  el.innerHTML = `<span>${esc(text)}</span>`;
+  el.classList.remove('marquee');
+  requestAnimationFrame(() => {
+    const over = el.firstChild.scrollWidth - el.clientWidth;
+    if (over > 4) {
+      el.style.setProperty('--mq', `${-over - 16}px`);
+      el.style.setProperty('--mq-t', `${Math.max(6, over / 18)}s`);
+      el.classList.add('marquee');
+    }
+  });
+}
+
+// Current video's thumbnail tints the player backdrop, vinyl label and video glow.
+function setArt(id) {
+  const url = id ? `url("https://i.ytimg.com/vi/${id}/hqdefault.jpg")` : '';
+  const el = $('player');
+  if (el.dataset.art === url) return;
+  el.dataset.art = url;
+  if (url) el.style.setProperty('--art', url); else el.style.removeProperty('--art');
+  el.classList.toggle('has-art', !!url);
+}
+
+const fmtTime = (t) => {
+  t = Math.max(0, Math.floor(t || 0));
+  const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), sec = String(t % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
+};
+
+let seeking = false;
+function updateProgress() {
+  if (src !== 'yt' || !yt || !yt.getDuration || seeking) return;
+  const dur = yt.getDuration() || 0, cur = yt.getCurrentTime() || 0;
+  $('p-seek').style.setProperty('--pos', `${dur ? (cur / dur) * 100 : 0}%`);
+  $('p-seek').setAttribute('aria-valuenow', dur ? Math.round((cur / dur) * 100) : 0);
+  $('p-cur').textContent = fmtTime(cur);
+  $('p-dur').textContent = fmtTime(dur);
+}
+setInterval(updateProgress, 400);
+
+function seekFromEvent(e, commit) {
+  const r = $('p-seek').getBoundingClientRect();
+  const k = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+  const dur = (yt && yt.getDuration && yt.getDuration()) || 0;
+  $('p-seek').style.setProperty('--pos', `${k * 100}%`);
+  $('p-cur').textContent = fmtTime(k * dur);
+  if (commit && dur) yt.seekTo(k * dur, true);
+}
+$('p-seek').addEventListener('pointerdown', (e) => {
+  if (src !== 'yt' || !yt) return;
+  seeking = true;
+  $('p-seek').classList.add('drag');
+  $('p-seek').setPointerCapture(e.pointerId);
+  seekFromEvent(e, false);
+});
+$('p-seek').addEventListener('pointermove', (e) => { if (seeking) seekFromEvent(e, false); });
+$('p-seek').addEventListener('pointerup', (e) => {
+  if (!seeking) return;
+  seekFromEvent(e, true);
+  seeking = false;
+  $('p-seek').classList.remove('drag');
+});
+$('p-seek').addEventListener('keydown', (e) => {
+  if (src !== 'yt' || !yt || !yt.getCurrentTime) return;
+  if (e.key === 'ArrowRight') yt.seekTo(yt.getCurrentTime() + 5, true);
+  if (e.key === 'ArrowLeft') yt.seekTo(yt.getCurrentTime() - 5, true);
+});
+
+let lastVol = 0.6;
+$('p-mute').onclick = () => {
+  if (music.vol > 0) { lastVol = music.vol; setVolume(0); } else setVolume(lastVol || 0.6);
+};
 
 function togglePlay() {
   if (src === 'yt' && yt && yt.getPlayerState) {
@@ -2276,6 +2591,12 @@ function togglePlay() {
 }
 
 function step(dir) {
+  if (src === 'yt' && radio && yt) {
+    if (dir > 0) return yt.nextVideo();
+    const k = yt.getPlaylistIndex ? yt.getPlaylistIndex() : 0;
+    if (k > 1) return yt.previousVideo();
+    return playYT(ytIndex);   // back to the song the recommendations came from
+  }
   if (src === 'yt' && queue.length) {
     const item = queue[ytIndex];
     const pl = item && item.list && yt && yt.getPlaylist && yt.getPlaylist();
@@ -2284,13 +2605,14 @@ function step(dir) {
       if (dir > 0 && k < pl.length - 1) return yt.nextVideo();
       if (dir < 0 && k > 0) return yt.previousVideo();
     }
+    if (dir > 0 && ytIndex >= queue.length - 1) return startRadio();
     return playYT(ytIndex + dir);
   }
   changeMood(music.mood + dir);
 }
 
 function changeMood(i) {
-  if (src === 'yt') { yt?.pauseVideo?.(); ytPlaying = false; src = 'mood'; }
+  if (src === 'yt') { yt?.pauseVideo?.(); ytPlaying = false; src = 'mood'; radio = null; }
   music.setMood(i);
   store('rgo.mood', music.mood);
   if (!music.playing) music.start();
@@ -2317,15 +2639,10 @@ $('p-queue').onclick = (e) => {
 };
 $('p-clear').onclick = () => {
   queue = []; saveQueue();
-  if (src === 'yt') { yt?.stopVideo?.(); ytPlaying = false; ytIndex = -1; src = 'mood'; }
+  if (src === 'yt') { yt?.stopVideo?.(); ytPlaying = false; ytIndex = -1; src = 'mood'; radio = null; $('player').classList.remove('yt'); }
   renderPlayer();
 };
-$('p-vol').oninput = (e) => {
-  music.setVolume(Number(e.target.value));
-  yt?.setVolume?.(Math.round(music.vol * 100));
-  store('rgo.vol', music.vol);
-  e.target.style.setProperty('--v', `${music.vol * 100}%`);
-};
+$('p-vol').oninput = (e) => setVolume(Number(e.target.value));
 if (load('rgo.player') === 'open') $('player').classList.add('open');
 renderPlayer();
 
