@@ -1011,11 +1011,46 @@
     .np { padding-right: 8px; }
     .player { right: 14px; }
   }
+
+  /* ================= performance =================
+     Nothing large is blurred or re-blurred per frame: glows are plain gradients,
+     the song backdrop is a pre-softened tiny canvas the GPU just stretches, and
+     panels are translucent instead of backdrop-filtered. */
+  .aurora i { filter: none !important; background: radial-gradient(circle, var(--blob) 0%, transparent 62%) !important; will-change: transform; }
+  .aurora { transition: none; }
+  .rays { filter: none; will-change: transform;
+    background: repeating-conic-gradient(from 180deg at 50% 0%, transparent 0deg 6deg, var(--ray) 9deg 10deg, transparent 13deg 19deg); }
+  .grain { animation: none; inset: 0; }
+  .ambient-bg { will-change: transform, opacity; }
+  .ambient-bg canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 3s ease; transform: scale(calc(1.06 + var(--beat, 0) * .05)); will-change: transform, opacity; }
+  .ambient-bg canvas.on { opacity: 1; }
+  body.art-on .panel { backdrop-filter: none; -webkit-backdrop-filter: none; background-color: color-mix(in srgb, var(--panel) 74%, transparent); }
+  body.art-on .bar { backdrop-filter: none; -webkit-backdrop-filter: none; background-color: color-mix(in srgb, var(--bg) 82%, transparent); }
+  .progress { transform: scaleX(var(--sp, 0)); will-change: transform; }
+  .kpi svg.spark, .exp-trend svg { filter: none; }
+
+  /* the song backdrop: a recognisable, softly dimmed still of the video */
+  .ambient-bg { inset: -4%; animation-duration: 60s; }
+  .ambient-bg canvas { object-fit: cover; transform: scale(calc(1.02 + var(--beat, 0) * .03)); }
+  body.art-on .ambient-bg { opacity: .5; }
+  body.art-on.eq-on .ambient-bg { opacity: .78; }
+  @keyframes ambDrift { 0% { transform: translate(-1%, -.5%) scale(1); } 100% { transform: translate(1%, .5%) scale(1.04); } }
+
+  /* performance: keep decorative layers still; only the content that matters moves */
+  .rays, .aurora i, .ambient-bg { animation: none !important; }
+  .ambient-bg canvas { transform: none; }
+  .aurora { opacity: 1; }
+  .bar, body.art-on .bar { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background-color: color-mix(in srgb, var(--bg) 90%, transparent); }
+  .badge { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgb(10 10 12 / .72); }
+  .player:not(.open) .p-card { visibility: hidden; transition: transform .45s cubic-bezier(.2, .9, .2, 1.05), opacity .3s ease, visibility 0s linear .45s; }
+  .player.open .p-card { visibility: visible; transition: transform .45s cubic-bezier(.2, .9, .2, 1.05), opacity .3s ease, visibility 0s; }
+  .p-card { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: color-mix(in srgb, var(--panel) 94%, transparent); }
+  .drawer-scrim { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgb(0 0 0 / .6); }
 </style>
 </head>
 <body>
 <div class="progress" aria-hidden="true"></div>
-<div class="ambient-bg" aria-hidden="true"><i></i><i></i></div>
+<div class="ambient-bg" aria-hidden="true"><canvas width="64" height="36"></canvas><canvas width="64" height="36"></canvas></div>
 <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
 <div class="texture" aria-hidden="true"></div>
 <div class="rays" aria-hidden="true"></div>
@@ -1251,6 +1286,7 @@ async function loadStatic() {
 const LIVE_MS = 15 * 1000;
 const livePoints = new WeakSet();
 let liveTimer = null;
+let lastLiveSig = '', lastLiveRender = 0;
 
 async function pollLive() {
   clearTimeout(liveTimer);
@@ -1263,6 +1299,9 @@ async function pollLive() {
     const live = await res.json();
     const now = live.fetchedAt || Date.now();
     const byId = new Map(live.games.map((g) => [g.universeId, g]));
+    const sig = live.games.map((g) => [g.universeId, g.playing, g.visits, g.favorites, g.upVotes, g.downVotes].join(':')).join('|');
+    const changed = sig !== lastLiveSig || now - lastLiveRender > 120000;
+    lastLiveSig = sig;
     for (const g of data.games) {
       const l = byId.get(g.universeId);
       if (!l) continue;
@@ -1273,7 +1312,7 @@ async function pollLive() {
       else { const p = [now, l.playing, l.visits]; livePoints.add(p); g.history.push(p); }
     }
     data.fetchedAt = now;
-    render();
+    if (changed) { render(); lastLiveRender = now; }
     setSync(`<b>Live</b> · ${secFmt.format(now)}`, 'live');
   } catch {
     setSync(`Updated ${ago(data.fetchedAt)} · live paused`, 'ok');
@@ -1972,7 +2011,12 @@ function renderTable(games, colorOf, rankOf) {
 }
 
 // Cursor glow on panels and a gentle 3D tilt on experience cards.
+let pointerQueued = null;
 document.addEventListener('pointermove', (e) => {
+  if (!pointerQueued) requestAnimationFrame(() => { applyPointer(pointerQueued); pointerQueued = null; });
+  pointerQueued = e;
+}, { passive: true });
+function applyPointer(e) {
   const panel = e.target.closest && e.target.closest('.panel');
   if (panel) {
     const r = panel.getBoundingClientRect();
@@ -1985,7 +2029,7 @@ document.addEventListener('pointermove', (e) => {
     card.style.setProperty('--ry', `${((e.clientX - r.left) / r.width - 0.5) * 7}deg`);
     card.style.setProperty('--rx', `${(0.5 - (e.clientY - r.top) / r.height) * 7}deg`);
   }
-}, { passive: true });
+}
 
 // Experience cards open the detail drawer.
 document.addEventListener('click', (e) => {
@@ -2031,9 +2075,9 @@ const clamp01 = (v) => Math.max(0, Math.min(1, v));
 function updateScrollFx() {
   const root = document.documentElement, vh = innerHeight;
   const max = root.scrollHeight - vh;
-  root.style.setProperty('--sp', max > 0 ? (scrollY / max).toFixed(4) : 0);
+  const bar = document.querySelector('.progress');
+  if (bar) bar.style.setProperty('--sp', max > 0 ? (scrollY / max).toFixed(4) : 0);
   if (reduceMotion) return;
-  root.style.setProperty('--sy', Math.round(scrollY));
   const stage = $('stage');
   if (stage) {
     const r = stage.getBoundingClientRect();
@@ -2731,6 +2775,22 @@ renderPlayer();
 // Generated moods are analyzed for real. YouTube audio plays inside YouTube's own
 // frame and can't be read by the page, so YouTube tracks drive a simulated spectrum.
 let vizRunning = false, beat = 0, idleT = 0;
+
+// Theme colour lookups are cached; reading computed styles every frame is slow.
+let inkCache = null;
+const themeInk = () => inkCache || (inkCache = cssVar('--ink'));
+new MutationObserver(() => { inkCache = null; }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { inkCache = null; });
+
+// The beat value is written only to the few elements that pulse with it, so the
+// browser doesn't have to recheck styles across the whole page on every frame.
+let beatShown = -1;
+function setBeat(v) {
+  if (Math.abs(v - beatShown) < 0.01 && v !== 0) return;
+  beatShown = v;
+  const val = v.toFixed(3);
+  for (const el of document.querySelectorAll('.p-art')) el.style.setProperty('--beat', val);
+}
 const EQ_BARS = 64;
 const spectrum = new Float32Array(EQ_BARS);
 
@@ -2754,14 +2814,16 @@ function drawBars(canvas, values, { gap = 3, mirror = false, alpha = 1, minH = 3
   g.clearRect(0, 0, w, h);
   const vals = mirror ? [...[...values].reverse(), ...values] : values;
   const n = vals.length, bw = Math.max(1, (w - gap * (n - 1)) / n);
-  const tint = artColor || cssVar('--ink');
+  const ink = themeInk();
+  const tint = artColor || ink;
   const grad = g.createLinearGradient(0, h, 0, 0);
   grad.addColorStop(0, tint);
-  grad.addColorStop(1, cssVar('--ink'));
+  grad.addColorStop(1, ink);
   g.globalAlpha = alpha;
   g.fillStyle = grad;
+  // A small glow only on the larger visualizer; shadow blur is costly to draw.
   g.shadowColor = tint;
-  g.shadowBlur = 14;
+  g.shadowBlur = w > 120 ? 6 : 0;
   for (let i = 0; i < n; i++) {
     const bh = Math.max(minH, vals[i] * (h - 4));
     const x = i * (bw + gap), y = mirror ? h - bh : (h - bh) / 2;
@@ -2776,17 +2838,21 @@ function drawViz() {
   if (vizRunning) return;
   vizRunning = true;
   const bins = new Uint8Array(128);
+  let skip = false;
   const frame = () => {
+    // 30 fps is plenty for bars and halves the work.
+    skip = !skip;
+    if (skip) { requestAnimationFrame(frame); return; }
     const open = $('player').classList.contains('open');
     const playing = isPlaying();
     if (!playing && beat < 0.01 && !open) {
       vizRunning = false;
-      document.documentElement.style.setProperty('--beat', 0);
+      setBeat(0);
       document.body.classList.remove('eq-on');
       drawBars($('eq-mini'), new Array(9).fill(0.1), { gap: 2, minH: 2 });
       return;
     }
-    idleT += 1 / 60;
+    idleT += 1 / 30;
     const target = new Float32Array(EQ_BARS);
     if (src === 'yt' && ytPlaying) fakeSpectrum(performance.now() / 1000, target);
     else if (src !== 'yt' && music.playing && music.analyser) {
@@ -2807,8 +2873,8 @@ function drawViz() {
       if (i < 6) low += spectrum[i] / 6;
     }
     beat += ((playing ? low : 0) - beat) * 0.25;
-    document.documentElement.style.setProperty('--beat', beat.toFixed(3));
-    document.body.classList.toggle('eq-on', playing);
+    setBeat(beat);
+    if (document.body.classList.contains('eq-on') !== playing) document.body.classList.toggle('eq-on', playing);
     if (open) drawBars($('p-viz'), Array.from({ length: 36 }, (_, i) => spectrum[Math.floor((i / 36) * EQ_BARS)]));
     drawBars($('eq-mini'), Array.from({ length: 9 }, (_, i) => spectrum[Math.floor((i / 9) * EQ_BARS * 0.7)]), { gap: 2, minH: 2 });
     requestAnimationFrame(frame);
@@ -2821,19 +2887,43 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && (i
 // Page-wide artwork: YouTube's thumbnail plus three stills from the video, blurred,
 // crossfading slowly behind the whole dashboard while a song plays.
 var artColor = '';
-var artFrames = [], artFrameIdx = 0, artLayer = 0, artTimer = null, artVideo = null;
+var artFrames = [], artFrameIdx = 0, artLayer = 0, artTimer = null, artVideo = null, artFallback = '';
 
-function showAmbientFrame(url) {
+// Draw a still of the video into the backdrop: lightly softened and dimmed once,
+// so the video stays recognisable without any per-frame blur.
+let ambientImg = null;
+function paintAmbient(c, img) {
+  const g = c.getContext('2d');
+  c.width = 640; c.height = 360;
+  // hq stills are 4:3 with black bars around a 16:9 picture; crop to the picture.
+  let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
+  if (sw / sh < 1.5) { sh = sw * 9 / 16; sy = (img.naturalHeight - sh) / 2; }
+  g.filter = 'blur(2px)';
+  g.drawImage(img, sx, sy, sw, sh, -8, -8, c.width + 16, c.height + 16);
+  g.filter = 'none';
+  const light = !matchMedia('(prefers-color-scheme: dark)').matches && document.documentElement.dataset.theme !== 'dark' || document.documentElement.dataset.theme === 'light';
+  g.fillStyle = light ? 'rgb(255 255 255 / .45)' : 'rgb(0 0 0 / .42)';
+  g.fillRect(0, 0, c.width, c.height);
+}
+
+function showAmbientFrame(url, fallback) {
   const img = new Image();
   img.onload = () => {
-    const layers = document.querySelectorAll('.ambient-bg i');
+    // YouTube serves a small grey placeholder when a size doesn't exist.
+    if (img.naturalWidth < 200 && fallback) return showAmbientFrame(fallback);
+    const layers = document.querySelectorAll('.ambient-bg canvas');
     artLayer = 1 - artLayer;
-    layers[artLayer].style.backgroundImage = `url("${url}")`;
+    paintAmbient(layers[artLayer], img);
+    ambientImg = img;
     layers[artLayer].classList.add('on');
     layers[1 - artLayer].classList.remove('on');
   };
+  img.onerror = () => { if (fallback) showAmbientFrame(fallback); };
   img.src = url;
 }
+// Repaint with the right dimming when the theme changes.
+new MutationObserver(() => { if (ambientImg) paintAmbient(document.querySelectorAll('.ambient-bg canvas')[artLayer], ambientImg); })
+  .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
 function pickArtColor(id) {
   // Average colour of the thumbnail tints the equalizers. Needs CORS on the image;
@@ -2871,11 +2961,13 @@ function setAmbientArt(id) {
     return;
   }
   document.body.classList.add('art-on');
-  artFrames = ['hqdefault', '1', '2', '3'].map((f) => `https://i.ytimg.com/vi/${id}/${f}.jpg`);
+  // Full-size thumbnail first, then three stills from through the video.
+  artFrames = ['maxresdefault', 'hq1', 'hq2', 'hq3'].map((f) => `https://i.ytimg.com/vi/${id}/${f}.jpg`);
+  artFallback = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
   artFrameIdx = 0;
-  showAmbientFrame(artFrames[0]);
+  showAmbientFrame(artFrames[0], artFallback);
   pickArtColor(id);
-  if (!reduceMotion) artTimer = setInterval(() => { artFrameIdx = (artFrameIdx + 1) % artFrames.length; showAmbientFrame(artFrames[artFrameIdx]); }, 9000);
+  if (!reduceMotion) artTimer = setInterval(() => { artFrameIdx = (artFrameIdx + 1) % artFrames.length; showAmbientFrame(artFrames[artFrameIdx], artFallback); }, 9000);
 }
 
 let resizeTimer;
