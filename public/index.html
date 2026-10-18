@@ -700,6 +700,103 @@
     .scroll-cue { display: none; }
     .headline .w, .statement .w { opacity: 1; }
   }
+
+  /* ================= compact, one-screen layout ================= */
+  main { max-width: 1440px; padding: 14px 20px 28px; gap: 14px; }
+  .bar { padding: 10px max(20px, calc((100vw - 1440px) / 2 + 20px)); }
+  .who-bar { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .who-bar img { width: 30px; height: 30px; border-radius: 8px; object-fit: cover; filter: grayscale(1); box-shadow: 0 0 0 1px var(--line), 0 0 18px -4px var(--glow); }
+  .who-bar b { font-size: 15px; font-weight: 650; letter-spacing: -0.02em; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 0 20px var(--glow); }
+  .who-bar span { font-size: 12px; color: var(--ink-3); white-space: nowrap; font-weight: 400; }
+  .brand .mark { display: none; }
+  body:not(.mounted) .brand .mark { display: block; }
+
+  .kpis { gap: 12px; }
+  .kpi { padding: 12px 16px; }
+  .kpi .value { font-size: 26px; padding-top: 6px; margin-bottom: 2px; }
+  .kpi.hero-kpi .value { font-size: 30px; }
+  .kpi svg.spark { height: 40px; }
+
+  .row-a { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr); gap: 14px; }
+  .row-b { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+  .panel-head { padding: 12px 16px 0; }
+  .panel-head h2 { font-size: 13.5px; }
+  .chart-wrap { padding: 6px 16px 10px; }
+  .legend { font-size: 12px; }
+
+  .highlights { padding: 4px 16px 10px; }
+  .highlights li { padding: 7px 0; gap: 10px; align-items: center; }
+  .hi-icon { width: 28px; height: 28px; border-radius: 8px; font-size: 13px; }
+  .hi-value { font-size: 13.5px; }
+  .hi-label, .hi-sub { font-size: 11.5px; }
+
+  .heat { gap: 2px; margin-top: 6px; }
+  .heat .cell { aspect-ratio: auto; height: 15px; min-height: 0; border-radius: 3px; }
+  .heat .hl { height: 14px; font-size: 10px; }
+  .heat-legend { margin-top: 8px; }
+
+  .milestones { padding: 10px 16px 14px; gap: 11px; }
+  .ms-top { font-size: 12.5px; }
+  .ms-bar { height: 6px; margin: 6px 0 4px; }
+  .ms-sub { font-size: 11.5px; }
+
+  .section-title { margin: 2px 0 -4px; align-items: baseline; }
+  .section-title h2 { font-size: 13.5px; }
+  .cards { grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 12px; }
+  .exp { flex-direction: row; min-height: 118px; }
+  .exp .thumb { width: 190px; flex: none; aspect-ratio: auto; max-height: none; height: auto; }
+  .exp .thumb img.banner { position: absolute; inset: 0; }
+  .exp .badge.rank, .exp .badge.more { display: none; }
+  .exp .badge.ccu { left: 10px; bottom: 10px; }
+  .exp-body { padding: 12px 14px; gap: 8px; flex: 1; min-width: 0; }
+  .exp-title .t { font-size: 14px; }
+  .exp-title .genre { font-size: 11.5px; margin-top: 0; }
+  .exp-stats .v { font-size: 13.5px; }
+  .exp-stats .k { font-size: 11px; }
+  .exp-trend { padding-top: 6px; }
+  .exp-trend svg { height: 22px; }
+
+  /* quick, quiet entrance instead of long scroll animations */
+  .reveal { opacity: 0; transform: translateY(10px); filter: none; transition: opacity .5s ease, transform .6s cubic-bezier(.16, 1, .3, 1); }
+  .reveal.in { opacity: 1; transform: none; }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+  .reveal-group.in:not(.done) > * { animation: rise .55s cubic-bezier(.16, 1, .3, 1) both; animation-delay: calc(var(--i, 0) * 45ms); }
+  .aurora { transform: none; }
+
+  @media (max-width: 1180px) {
+    .row-b { grid-template-columns: 1fr 1fr; }
+    .row-b > :first-child { grid-column: span 2; }
+  }
+  @media (max-width: 900px) {
+    .row-a, .row-b { grid-template-columns: 1fr; }
+    .row-b > :first-child { grid-column: auto; }
+    .cards { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 520px) {
+    .exp { flex-direction: column; }
+    .exp .thumb { width: 100%; aspect-ratio: 16 / 9; max-height: 180px; }
+    .who-bar span { display: none; }
+  }
+
+  /* tighter still, so the whole dashboard fits one screen */
+  .kpi { padding: 10px 14px; }
+  .kpi .value { font-size: 24px; padding-top: 4px; }
+  .kpi.hero-kpi .value { font-size: 28px; }
+  .kpi svg.spark { height: 34px; }
+  .highlights li { padding: 6px 0; }
+  .hi-text { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; width: 100%; }
+  .hi-label, .hi-value { grid-column: 1; }
+  .hi-sub { grid-column: 2; grid-row: 1 / span 2; align-self: center; text-align: right; max-width: 170px; }
+  .highlights li > .hi-text { flex: 1; }
+  .heat .cell { height: 13px; }
+  .milestones { gap: 9px; padding-top: 8px; }
+  .section-title { margin: 0 0 -6px; }
+  .exp { min-height: 104px; }
+  .exp .thumb { width: 168px; }
+  .exp-body { padding: 10px 14px; gap: 6px; }
+  main { gap: 12px; padding-bottom: 14px; }
+  .row-a, .row-b { gap: 12px; }
+  .cards { grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); }
 </style>
 </head>
 <body>
@@ -707,7 +804,7 @@
 <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
 <div class="grain" aria-hidden="true"></div>
 <header class="bar">
-  <div class="brand"><span class="mark"></span><span class="brand-text">Experience Overview</span></div>
+  <div class="brand"><span class="mark"></span><span class="who-bar"><img id="avatar" alt="" hidden><b id="owner">Experience Overview</b><span id="owner-sub"></span></span></div>
   <span class="spacer"></span>
   <form id="form">
     <div class="field"><label for="user">Creator</label><input id="user" placeholder="Username or ID" autocomplete="off"></div>
@@ -765,64 +862,46 @@
 </div>
 
 <template id="dashboard">
-  <section class="stage" id="stage">
-    <div class="stage-inner">
-      <img class="avatar" id="avatar" alt="" hidden>
-      <div class="eyebrow" id="owner-sub"></div>
-      <h1 class="stage-title" id="owner"></h1>
-      <div class="stage-stat"><span class="num" id="stage-ccu">0</span><span class="stage-unit" id="stage-unit">playing right now</span></div>
-      <div class="scroll-cue" aria-hidden="true"><span>Scroll</span><i></i></div>
-    </div>
-  </section>
-
   <section class="kpis reveal-group" id="kpis"></section>
 
-  <p class="statement" id="statement" data-words></p>
-
-  <h2 class="headline" data-words>Every player, every minute.</h2>
-
-  <section class="panel reveal">
-    <div class="panel-head">
-      <h2>Concurrent users</h2>
-      <div class="head-right">
-        <span class="meta" id="chart-meta"></span>
-        <div class="seg" id="range" hidden>
-          <button type="button" data-range="12">12h</button>
-          <button type="button" data-range="24">24h</button>
-          <button type="button" data-range="168">7d</button>
-          <button type="button" data-range="720" title="Last 30 days">1M</button>
+  <div class="row-a">
+    <section class="panel reveal">
+      <div class="panel-head">
+        <h2>Concurrent users</h2>
+        <div class="head-right">
+          <span class="meta" id="chart-meta"></span>
+          <div class="seg" id="range" hidden>
+            <button type="button" data-range="12">12h</button>
+            <button type="button" data-range="24">24h</button>
+            <button type="button" data-range="168">7d</button>
+            <button type="button" data-range="720" title="Last 30 days">1M</button>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="chart-wrap" id="chart"></div>
-  </section>
-
-  <h2 class="headline" data-words>Know when they show up.</h2>
-  <div class="grid-2-1">
-    <section class="panel reveal">
-      <div class="panel-head"><h2>When players are online</h2><span class="meta" id="heat-meta"></span></div>
-      <div class="chart-wrap" id="heatmap"></div>
+      <div class="chart-wrap" id="chart"></div>
     </section>
-    <section class="panel reveal" style="transition-delay:.12s">
+    <section class="panel reveal">
       <div class="panel-head"><h2>Highlights</h2></div>
       <ul class="highlights" id="highlights"></ul>
     </section>
   </div>
 
-  <h2 class="headline" data-words>Watch your games grow.</h2>
-  <div class="grid-1-1">
+  <div class="row-b">
     <section class="panel reveal">
-      <div class="panel-head"><h2>Visits per day</h2><span class="meta">Last 14 days · today so far</span></div>
+      <div class="panel-head"><h2>When players are online</h2><span class="meta" id="heat-meta"></span></div>
+      <div class="chart-wrap" id="heatmap"></div>
+    </section>
+    <section class="panel reveal">
+      <div class="panel-head"><h2>Visits per day</h2><span class="meta">Last 14 days</span></div>
       <div class="chart-wrap" id="visits"></div>
     </section>
-    <section class="panel reveal" style="transition-delay:.12s">
-      <div class="panel-head"><h2>Next milestones</h2><span class="meta">Closest first</span></div>
+    <section class="panel reveal">
+      <div class="panel-head"><h2>Next milestones</h2></div>
       <ul class="milestones" id="milestones"></ul>
     </section>
   </div>
 
-  <h2 class="headline" data-words>Your experiences.</h2>
-  <div class="section-title reveal"><span class="meta" id="cards-meta"></span></div>
+  <div class="section-title"><h2>Experiences</h2><span class="meta" id="cards-meta"></span></div>
   <section class="cards reveal-group" id="cards"></section>
 
   <section class="panel reveal" id="table-panel" hidden>
@@ -895,7 +974,6 @@ function mountDashboard() {
   if ($('kpis')) return;
   $('main').replaceChildren($('dashboard').content.cloneNode(true));
   document.body.classList.add('mounted');
-  $('main').querySelectorAll('[data-words]').forEach(splitWords);
   observeReveals($('main'));
   animateChart = true;
   $('filter').oninput = (e) => { filter = e.target.value.trim().toLowerCase(); render(); };
@@ -1067,12 +1145,11 @@ function render() {
   renderChart(games, top, colorOf);
   renderHeatmap(games);
   renderHighlights(games);
-  barChart($('visits'), visitBars(games, colorOf, 14), { label: 'Visits per day', height: 260 });
-  $('milestones').innerHTML = milestoneHtml(milestoneRows(games).slice(0, 5)) || '<li class="faint">Every milestone reached. Legendary.</li>';
+  barChart($('visits'), visitBars(games, colorOf, 14), { label: 'Visits per day', height: 158 });
+  $('milestones').innerHTML = milestoneHtml(milestoneRows(games).slice(0, 3)) || '<li class="faint">Every milestone reached. Legendary.</li>';
   renderCards(ranked, colorOf);
   renderDrawer();
   const ccu = games.reduce((s, g) => s + g.playing, 0);
-  renderStage(games, ccu);
   document.title = `${ccu ? `(${fmt.format(ccu)}) ` : ''}${data.owners.map((o) => o.name).join(', ')} · Experience Overview`;
   $('table-panel').hidden = games.length <= CARD_LIMIT;
   if (games.length > CARD_LIMIT) renderTable(games, colorOf, rankOf);
@@ -1138,7 +1215,7 @@ function renderChart(games, top, colorOf) {
     const pts = totalSeries(others, rangeHours);
     if (pts.length) series.push({ name: `All others (${others.length})`, color: cssVar('--series-other'), dash: '1 5', points: pts });
   }
-  lineChart($('chart'), series, { animate: animateChart, label: `Concurrent users, ${RANGE_NAMES[rangeHours].toLowerCase()}` });
+  lineChart($('chart'), series, { animate: animateChart, height: innerWidth < 600 ? 190 : 200, label: `Concurrent users, ${RANGE_NAMES[rangeHours].toLowerCase()}` });
   animateChart = false;
 }
 
@@ -1302,7 +1379,8 @@ function barChart(box, bars, { height = 200, label = '' } = {}) {
   let rects = '';
   bars.forEach((b, i) => {
     const cx = m.l + slot * (i + 0.5);
-    if (i % every === 0 || i === bars.length - 1) grid += `<text x="${cx}" y="${H - 8}" text-anchor="middle">${dayFmt.format(b.t)}</text>`;
+    const last = i === bars.length - 1 && i % every >= every / 2;
+    if (i % every === 0 || last) grid += `<text x="${cx}" y="${H - 8}" text-anchor="middle">${dayFmt.format(b.t)}</text>`;
     const parts = b.parts.filter((p) => p.v);
     let acc = 0;
     parts.forEach((p, j) => {

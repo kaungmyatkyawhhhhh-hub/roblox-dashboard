@@ -1,6 +1,6 @@
 # Roblox Experience Overview
 
-A black-and-white, Apple-style analytics dashboard for every Roblox experience owned by the accounts in [`config.json`](config.json). It's currently set to the **Myanmar Builders Club** group.
+A black-and-white, one-screen analytics dashboard for every Roblox experience owned by the accounts in [`config.json`](config.json). It's currently set to the **Myanmar Builders Club** group.
 
 - **Totals:** players right now (with a 24h trend), visits and visits gained, favorites, like ratio, and how many experiences are live. The browser tab shows the live player count.
 - **Concurrent users:** your top 5 experiences plus all others, over the last 12 hours, 24 hours, 7 days or month.
