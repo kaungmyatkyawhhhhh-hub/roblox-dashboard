@@ -6,241 +6,280 @@
 <title>Experience Overview</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     color-scheme: light;
-    --bg: #f6f6f5;
+    --bg: #f5f5f7;
+    --glow: rgb(42 120 214 / .10);
     --panel: #ffffff;
-    --line: #e6e6e3;
-    --line-soft: #efefec;
-    --row-hover: #fafaf9;
-    --ink: #111110;
-    --ink-2: #4f4e4b;
-    --ink-3: #85847f;
+    --panel-2: #fafafb;
+    --line: #e7e7ea;
+    --line-soft: #f0f0f2;
+    --ink: #0f0f12;
+    --ink-2: #55555c;
+    --ink-3: #8b8b93;
     --accent: #2a78d6;
     --series-1: #2a78d6;
     --series-2: #eb6834;
     --series-3: #1baf7a;
     --series-4: #eda100;
     --series-5: #e87ba4;
-    --series-other: #b4b3ad;
-    --pos: #0f7a2e;
-    --neg: #c23a3a;
+    --series-other: #a9a9b0;
+    --pos: #12803a;
     --live: #1f9d45;
-    --track: #ececea;
+    --track: #ececef;
+    --shadow: 0 1px 2px rgb(16 16 24 / .04), 0 4px 16px rgb(16 16 24 / .04);
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       color-scheme: dark;
-      --bg: #0e0e0d;
-      --panel: #171716;
-      --line: #2a2a28;
-      --line-soft: #222220;
-      --row-hover: #1c1c1b;
-      --ink: #efeeea;
-      --ink-2: #b9b8b1;
-      --ink-3: #807f79;
+      --bg: #0a0a0c;
+      --glow: rgb(57 135 229 / .16);
+      --panel: #131316;
+      --panel-2: #18181c;
+      --line: #24242a;
+      --line-soft: #1d1d22;
+      --ink: #f2f2f4;
+      --ink-2: #b4b4bc;
+      --ink-3: #7c7c86;
       --accent: #3987e5;
       --series-1: #3987e5;
       --series-2: #d95926;
       --series-3: #199e70;
       --series-4: #c98500;
       --series-5: #d55181;
-      --series-other: #5f5e5a;
+      --series-other: #5c5c66;
       --pos: #4cc06a;
-      --neg: #e66767;
-      --live: #3fbf62;
-      --track: #2a2a28;
+      --live: #3fcf6a;
+      --track: #26262c;
+      --shadow: 0 1px 0 rgb(255 255 255 / .03) inset, 0 8px 24px rgb(0 0 0 / .25);
     }
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --bg: #0e0e0d;
-    --panel: #171716;
-    --line: #2a2a28;
-    --line-soft: #222220;
-    --row-hover: #1c1c1b;
-    --ink: #efeeea;
-    --ink-2: #b9b8b1;
-    --ink-3: #807f79;
+    --bg: #0a0a0c;
+    --glow: rgb(57 135 229 / .16);
+    --panel: #131316;
+    --panel-2: #18181c;
+    --line: #24242a;
+    --line-soft: #1d1d22;
+    --ink: #f2f2f4;
+    --ink-2: #b4b4bc;
+    --ink-3: #7c7c86;
     --accent: #3987e5;
     --series-1: #3987e5;
     --series-2: #d95926;
     --series-3: #199e70;
     --series-4: #c98500;
     --series-5: #d55181;
-    --series-other: #5f5e5a;
+    --series-other: #5c5c66;
     --pos: #4cc06a;
-    --neg: #e66767;
-    --live: #3fbf62;
-    --track: #2a2a28;
+    --live: #3fcf6a;
+    --track: #26262c;
+    --shadow: 0 1px 0 rgb(255 255 255 / .03) inset, 0 8px 24px rgb(0 0 0 / .25);
   }
 
   * { box-sizing: border-box; }
+  html { background: var(--bg); }
   body {
     margin: 0;
-    background: var(--bg);
+    min-height: 100vh;
+    background: radial-gradient(1100px 420px at 18% -120px, var(--glow), transparent 70%), var(--bg);
     color: var(--ink);
-    font: 13px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-    font-feature-settings: "cv11", "ss01";
+    font: 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-feature-settings: "cv11", "ss01", "ss03";
     -webkit-font-smoothing: antialiased;
   }
   .num { font-variant-numeric: tabular-nums; }
+  a { color: inherit; }
 
   /* top bar */
-  .topbar {
-    height: 52px; display: flex; align-items: center; gap: 16px; padding: 0 20px;
-    background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5;
-  }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; white-space: nowrap; }
-  .brand .mark { width: 18px; height: 18px; border-radius: 4px; background: var(--ink); transform: rotate(-12deg); position: relative; }
-  .brand .mark::after { content: ""; position: absolute; inset: 6px; background: var(--panel); border-radius: 1px; }
-  .brand .divider { width: 1px; height: 18px; background: var(--line); }
-  .brand .section { color: var(--ink-2); font-weight: 500; }
-  .topbar form { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+  .bar { display: flex; align-items: center; gap: 16px; max-width: 1280px; margin: 0 auto; padding: 18px 24px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+  .brand .mark { width: 16px; height: 16px; border-radius: 4px; background: var(--ink); transform: rotate(-12deg); position: relative; flex: none; }
+  .brand .mark::after { content: ""; position: absolute; inset: 5px; background: var(--bg); border-radius: 1px; }
+  .bar form { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .bar .spacer { margin-left: auto; }
   .field { position: relative; }
-  .field label {
-    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
-    color: var(--ink-3); font-size: 12px; pointer-events: none;
-  }
+  .field label { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--ink-3); font-size: 12px; pointer-events: none; }
   input {
-    font: inherit; height: 32px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--line);
-    background: var(--bg); color: var(--ink); width: 180px; outline: none;
+    font: inherit; font-size: 13px; height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--ink); width: 190px; outline: none; transition: border-color .15s;
   }
-  .field input { padding-left: 62px; }
-  input:focus { border-color: var(--accent); background: var(--panel); }
+  .field input { padding-left: 66px; }
+  input:focus { border-color: var(--accent); }
   button {
-    font: inherit; font-weight: 500; height: 32px; padding: 0 12px; border-radius: 6px; cursor: pointer;
-    border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+    font: inherit; font-size: 13px; font-weight: 500; height: 36px; padding: 0 14px; border-radius: 10px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink); transition: background .15s, border-color .15s;
   }
-  button:hover { background: var(--row-hover); }
-  button.primary { background: var(--ink); color: var(--panel); border-color: var(--ink); }
-  button.icon { width: 32px; padding: 0; display: grid; place-items: center; color: var(--ink-2); }
+  button:hover { border-color: var(--ink-3); }
+  button.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  button.icon { width: 36px; padding: 0; display: grid; place-items: center; color: var(--ink-2); }
+  body.static .bar form { display: none; }
+  body:not(.static) .bar .spacer { display: none; }
 
-  main { max-width: 1400px; margin: 0 auto; padding: 24px 20px 40px; display: grid; gap: 20px; }
+  main { max-width: 1280px; margin: 0 auto; padding: 28px 24px 56px; display: grid; gap: 24px; }
 
-  .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-  .page-head h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.015em; margin: 0 0 2px; }
-  .page-head .owner { color: var(--ink-2); }
-  .sync { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-3); font-size: 12px; }
-  .sync .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--live); box-shadow: 0 0 0 3px color-mix(in srgb, var(--live) 18%, transparent); }
-  .sync.live .dot { animation: pulse 2s ease-in-out infinite; }
-  @keyframes pulse { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--live) 0%, transparent); } }
-  @media (prefers-reduced-motion: reduce) { .sync.live .dot { animation: none; } }
-  .sync.err { color: var(--neg); }
-  .sync.err .dot { background: var(--neg); box-shadow: none; }
+  /* hero */
+  .hero { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  .who { display: flex; align-items: center; gap: 16px; min-width: 0; }
+  .avatar { width: 56px; height: 56px; border-radius: 14px; background: var(--panel-2); border: 1px solid var(--line); object-fit: cover; flex: none; }
+  .who h1 { font-size: 26px; font-weight: 650; letter-spacing: -0.025em; margin: 0; line-height: 1.15; }
+  .who .sub { color: var(--ink-3); font-size: 13px; margin-top: 3px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border-radius: 999px;
+    background: var(--panel); border: 1px solid var(--line); color: var(--ink-2); font-size: 12.5px; box-shadow: var(--shadow);
+  }
+  .pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-3); flex: none; }
+  .pill.ok .dot, .pill.live .dot { background: var(--live); }
+  .pill.live .dot { animation: pulse 2s ease-out infinite; }
+  .pill.live b { color: var(--ink); font-weight: 600; }
+  .pill.err { color: var(--ink-2); }
+  .pill.err .dot { background: #d03b3b; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--live) 55%, transparent); } 100% { box-shadow: 0 0 0 8px transparent; } }
+  @media (prefers-reduced-motion: reduce) { .pill.live .dot { animation: none; } }
 
-  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
-  .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px 0; flex-wrap: wrap; }
-  .panel-head h2 { font-size: 13px; font-weight: 600; margin: 0; }
-  .panel-head .meta { color: var(--ink-3); font-size: 12px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); min-width: 0; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 22px 0; flex-wrap: wrap; }
+  .panel-head h2 { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+  .panel-head .meta { color: var(--ink-3); font-size: 12.5px; }
+  .section-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 8px 0 -8px; }
+  .section-title h2 { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+  .section-title .meta { color: var(--ink-3); font-size: 12.5px; }
 
-  /* KPI strip */
-  .kpis { display: grid; grid-template-columns: repeat(5, 1fr); }
-  .kpi { padding: 16px; border-left: 1px solid var(--line); min-width: 0; }
-  .kpi:first-child { border-left: 0; }
-  .kpi .label { color: var(--ink-2); font-size: 12px; font-weight: 500; }
-  .kpi .value { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; margin: 6px 0 2px; }
-  .kpi .sub { color: var(--ink-3); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .kpi svg { display: block; width: 100%; margin-top: 10px; }
+  /* KPIs */
+  .kpis { display: grid; grid-template-columns: 1.5fr repeat(4, 1fr); gap: 16px; }
+  .kpi { padding: 20px 22px; display: flex; flex-direction: column; min-width: 0; position: relative; overflow: hidden; }
+  .kpi .label { color: var(--ink-3); font-size: 12.5px; font-weight: 500; }
+  .kpi .value { font-size: 32px; font-weight: 650; letter-spacing: -0.03em; line-height: 1.1; margin: auto 0 6px; padding-top: 18px; }
+  .kpi .sub { color: var(--ink-3); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kpi .sub b { font-weight: 500; color: var(--ink-2); }
+  .kpi.hero-kpi .value { font-size: 40px; }
+  .kpi svg.spark { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 52px; pointer-events: none; }
+  .kpi.hero-kpi > :not(svg) { position: relative; z-index: 1; }
   .pos { color: var(--pos); }
 
+  /* segmented control */
+  .seg { display: inline-flex; padding: 3px; gap: 2px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; }
+  .seg[hidden] { display: none; }
+  .seg button { height: 26px; border: 0; border-radius: 7px; padding: 0 11px; font-size: 12px; color: var(--ink-3); background: transparent; }
+  .seg button:hover { color: var(--ink); }
+  .seg button[aria-pressed="true"] { background: var(--panel); color: var(--ink); box-shadow: 0 1px 3px rgb(0 0 0 / .12); }
+  .head-right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
   /* chart */
-  .chart-wrap { position: relative; padding: 8px 16px 12px; }
-  .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12px; color: var(--ink-2); }
-  .legend span { display: inline-flex; align-items: center; gap: 6px; max-width: 220px; }
-  .legend span em { font-style: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .key { width: 12px; height: 3px; border-radius: 2px; flex: none; }
+  .chart-wrap { position: relative; padding: 14px 22px 18px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--ink-2); }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; max-width: 260px; }
+  .legend em { font-style: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .key { width: 8px; height: 8px; border-radius: 50%; flex: none; }
   .axis text { fill: var(--ink-3); font-size: 11px; font-family: inherit; }
   .tooltip {
     position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--line);
-    border-radius: 6px; padding: 8px 10px; font-size: 12px; display: none; min-width: 180px; z-index: 2;
-    box-shadow: 0 6px 20px rgb(0 0 0 / .10);
+    border-radius: 12px; padding: 10px 12px; font-size: 12.5px; display: none; min-width: 200px; z-index: 2;
+    box-shadow: 0 12px 32px rgb(0 0 0 / .18);
   }
-  .tooltip .when { color: var(--ink-3); margin-bottom: 6px; }
-  .tooltip .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 1px 0; }
-  .tooltip .row span { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); }
+  .tooltip .when { color: var(--ink-3); margin-bottom: 6px; font-size: 12px; }
+  .tooltip .row { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 2px 0; }
+  .tooltip .row span { display: inline-flex; align-items: center; gap: 7px; color: var(--ink-2); min-width: 0; }
   .tooltip .row b { font-weight: 600; font-variant-numeric: tabular-nums; }
-  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
-  .seg[hidden] { display: none; }
-  .seg button { height: 26px; border: 0; border-radius: 0; padding: 0 10px; font-size: 12px; color: var(--ink-3); background: transparent; }
-  .seg button + button { border-left: 1px solid var(--line); }
-  .seg button[aria-pressed="true"] { background: var(--bg); color: var(--ink); }
-  .head-right { display: flex; align-items: center; gap: 12px; }
-  body.static .topbar form .field, body.static .topbar form .primary { display: none; }
-  .empty { color: var(--ink-3); padding: 48px 16px; text-align: center; }
+  .empty { color: var(--ink-3); padding: 56px 16px; text-align: center; }
 
-  /* table */
-  .table-tools { display: flex; align-items: center; gap: 8px; }
-  .table-tools input { width: 220px; height: 30px; }
-  .table-scroll { overflow-x: auto; margin-top: 12px; }
-  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-  th, td { padding: 0 16px; height: 48px; text-align: right; white-space: nowrap; border-top: 1px solid var(--line-soft); }
-  th:nth-child(-n+2), td:nth-child(-n+2) { text-align: left; }
-  th {
-    height: 34px; font-size: 12px; font-weight: 500; color: var(--ink-3); cursor: pointer; user-select: none;
-    background: var(--bg); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  /* experience cards */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .exp { overflow: hidden; display: flex; flex-direction: column; transition: transform .2s ease, border-color .2s; }
+  .exp:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--ink-3) 50%, var(--line)); }
+  .thumb { position: relative; display: block; aspect-ratio: 16 / 9; max-height: 250px; width: 100%; background: linear-gradient(135deg, var(--panel-2), var(--track)); overflow: hidden; }
+  .thumb img.banner { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
+  .exp:hover .thumb img.banner { transform: scale(1.03); }
+  .thumb img.icon-fallback { position: absolute; inset: 0; margin: auto; width: 72px; height: 72px; border-radius: 16px; }
+  .thumb::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(0 0 0 / .55), transparent 45%); pointer-events: none; }
+  .badge {
+    position: absolute; z-index: 1; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px;
+    border-radius: 999px; font-size: 12px; font-weight: 600; color: #fff; background: rgb(10 10 12 / .55);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgb(255 255 255 / .14);
   }
-  th:hover { color: var(--ink); }
-  th[aria-sort] { color: var(--ink); }
+  .badge.rank { top: 12px; left: 12px; font-variant-numeric: tabular-nums; }
+  .badge.ccu { bottom: 12px; left: 12px; }
+  .badge.ccu .dot { width: 6px; height: 6px; border-radius: 50%; background: #9a9aa2; }
+  .badge.ccu.on .dot { background: #4ade80; box-shadow: 0 0 0 3px rgb(74 222 128 / .25); }
+  .exp-body { padding: 16px 18px 18px; display: grid; gap: 14px; }
+  .exp-title a { text-decoration: none; font-weight: 600; font-size: 15px; letter-spacing: -0.01em; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .exp-title a:hover { color: var(--accent); }
+  .exp-title .genre { color: var(--ink-3); font-size: 12.5px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .exp-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .exp-stats div { min-width: 0; }
+  .exp-stats .k { color: var(--ink-3); font-size: 11.5px; white-space: nowrap; }
+  .exp-stats .v { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .exp-trend { display: flex; align-items: center; gap: 10px; color: var(--ink-3); font-size: 11.5px; border-top: 1px solid var(--line-soft); padding-top: 12px; }
+  .exp-trend svg { flex: 1; height: 32px; }
+
+  /* table (shown when there are many experiences) */
+  .table-tools input { width: 220px; height: 32px; }
+  .table-scroll { overflow-x: auto; margin-top: 14px; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 13px; }
+  th, td { padding: 0 18px; height: 52px; text-align: right; white-space: nowrap; border-top: 1px solid var(--line-soft); }
+  th:nth-child(-n+2), td:nth-child(-n+2) { text-align: left; }
+  th { height: 36px; font-size: 12px; font-weight: 500; color: var(--ink-3); cursor: pointer; user-select: none; background: var(--panel-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  th:hover, th[aria-sort] { color: var(--ink); }
   th[aria-sort="descending"]::after { content: "↓"; margin-left: 4px; }
   th[aria-sort="ascending"]::after { content: "↑"; margin-left: 4px; }
   thead + tbody tr:first-child td { border-top: 0; }
-  tbody tr:hover td { background: var(--row-hover); }
+  tbody tr:hover td { background: var(--panel-2); }
   td.rank { color: var(--ink-3); width: 1%; padding-right: 0; }
   .game { display: flex; align-items: center; gap: 12px; }
-  .game img, .game .noimg { width: 32px; height: 32px; border-radius: 6px; flex: none; background: var(--track); object-fit: cover; }
-  .game a { color: var(--ink); text-decoration: none; font-weight: 500; display: block; max-width: 300px; overflow: hidden; text-overflow: ellipsis; }
+  .game img, .game .noimg { width: 34px; height: 34px; border-radius: 9px; flex: none; background: var(--track); object-fit: cover; }
+  .game a { text-decoration: none; font-weight: 500; display: block; max-width: 300px; overflow: hidden; text-overflow: ellipsis; }
   .game a:hover { color: var(--accent); }
   .game .genre { color: var(--ink-3); font-size: 12px; }
-  .ccu { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; }
+  .ccu { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
   .ccu .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--live); }
   .ccu.idle { color: var(--ink-3); font-weight: 400; }
   .ccu.idle .dot { background: var(--track); }
   .faint { color: var(--ink-3); }
   .ratio { display: inline-flex; align-items: center; gap: 10px; }
-  .bar { width: 56px; height: 4px; border-radius: 2px; background: var(--track); overflow: hidden; }
-  .bar i { display: block; height: 100%; background: var(--ink-2); }
-  .series-tag { display: inline-block; width: 3px; height: 16px; border-radius: 2px; vertical-align: middle; }
+  .bar-meter { width: 56px; height: 4px; border-radius: 2px; background: var(--track); overflow: hidden; }
+  .bar-meter i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
 
-  .onboard { padding: 56px 24px; text-align: center; }
-  .onboard h2 { font-size: 16px; margin: 0 0 6px; }
+  .onboard { padding: 72px 24px; text-align: center; }
+  .onboard h2 { font-size: 18px; margin: 0 0 6px; letter-spacing: -0.01em; }
   .onboard p { color: var(--ink-2); margin: 0 auto; max-width: 440px; }
 
-  @media (max-width: 1000px) {
-    .kpis { grid-template-columns: repeat(3, 1fr); }
-    .kpi:nth-child(4) { border-left: 0; }
-    .kpi:nth-child(n+4) { border-top: 1px solid var(--line); }
+  @media (max-width: 1080px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .kpi.hero-kpi { grid-column: span 2; }
   }
   @media (max-width: 720px) {
-    .topbar { height: auto; flex-wrap: wrap; padding: 10px 16px; }
-    .topbar form { margin-left: 0; width: 100%; flex-wrap: wrap; }
+    .bar { flex-wrap: wrap; padding: 14px 16px 0; }
+    .bar form { margin-left: 0; width: 100%; flex-wrap: wrap; }
     .field { flex: 1 1 100%; }
-    .topbar form button.primary { flex: 1; }
     .field input { width: 100%; }
-    main { padding: 16px; }
-    .kpis { grid-template-columns: repeat(2, 1fr); }
-    .kpi { border-left: 0; border-top: 1px solid var(--line); }
-    .kpi:nth-child(even) { border-left: 1px solid var(--line); }
-    .kpi:nth-child(-n+2) { border-top: 0; }
-    .kpi:last-child { grid-column: span 2; border-left: 0; }
-    .kpi .value { font-size: 22px; }
+    .bar form button.primary { flex: 1; }
+    main { padding: 20px 16px 40px; gap: 18px; }
+    .who h1 { font-size: 21px; }
+    .avatar { width: 46px; height: 46px; border-radius: 12px; }
+    .kpi { padding: 16px; }
+    .kpi .value { font-size: 26px; }
+    .kpi.hero-kpi .value { font-size: 32px; }
+    .chart-wrap, .panel-head { padding-left: 16px; padding-right: 16px; }
+    .cards { grid-template-columns: 1fr; }
     .table-tools input { width: 150px; }
   }
 </style>
 </head>
 <body>
-<header class="topbar">
-  <div class="brand"><span class="mark"></span>Experience Overview<span class="divider"></span><span class="section">Analytics</span></div>
+<header class="bar">
+  <div class="brand"><span class="mark"></span>Experience Overview</div>
+  <span class="spacer"></span>
   <form id="form">
     <div class="field"><label for="user">Creator</label><input id="user" placeholder="Username or ID" autocomplete="off"></div>
     <div class="field"><label for="groups">Groups</label><input id="groups" placeholder="IDs, comma-separated" autocomplete="off"></div>
     <button class="primary" type="submit">Load</button>
-    <button class="icon" type="button" id="theme" title="Switch theme" aria-label="Switch theme">
-      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 2a6 6 0 0 0 0 12z" fill="currentColor"/></svg>
-    </button>
   </form>
+  <button class="icon" type="button" id="theme" title="Switch theme" aria-label="Switch theme">
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 2a6 6 0 0 0 0 12z" fill="currentColor"/></svg>
+  </button>
 </header>
 
 <main id="main">
@@ -251,30 +290,41 @@
 </main>
 
 <template id="dashboard">
-  <div class="page-head">
-    <div>
-      <h1>Overview</h1>
-      <div class="owner" id="owner"></div>
+  <div class="hero">
+    <div class="who">
+      <img class="avatar" id="avatar" alt="" hidden>
+      <div>
+        <h1 id="owner"></h1>
+        <div class="sub" id="owner-sub"></div>
+      </div>
     </div>
-    <div class="sync" id="sync"><span class="dot"></span><span id="sync-text"></span></div>
+    <div class="pill" id="sync"><span class="dot"></span><span id="sync-text"></span></div>
   </div>
 
-  <section class="panel kpis" id="kpis"></section>
+  <section class="kpis" id="kpis"></section>
 
   <section class="panel">
     <div class="panel-head">
       <h2>Concurrent users</h2>
       <div class="head-right">
         <span class="meta" id="chart-meta"></span>
-        <div class="seg" id="range" hidden><button type="button" data-range="12">12h</button><button type="button" data-range="24">24h</button><button type="button" data-range="168">7d</button><button type="button" data-range="720" title="Last 30 days">1M</button></div>
+        <div class="seg" id="range" hidden>
+          <button type="button" data-range="12">12h</button>
+          <button type="button" data-range="24">24h</button>
+          <button type="button" data-range="168">7d</button>
+          <button type="button" data-range="720" title="Last 30 days">1M</button>
+        </div>
       </div>
     </div>
     <div class="chart-wrap" id="chart"></div>
   </section>
 
-  <section class="panel">
+  <div class="section-title"><h2>Experiences</h2><span class="meta" id="cards-meta"></span></div>
+  <section class="cards" id="cards"></section>
+
+  <section class="panel" id="table-panel" hidden>
     <div class="panel-head">
-      <h2>Experiences <span class="faint num" id="count"></span></h2>
+      <h2>All experiences <span class="faint num" id="count"></span></h2>
       <div class="table-tools"><input id="filter" placeholder="Filter by name" autocomplete="off"></div>
     </div>
     <div class="table-scroll"><table id="table"></table></div>
@@ -283,13 +333,14 @@
 
 <script>
 const SERIES = ['--series-1', '--series-2', '--series-3', '--series-4', '--series-5'];
+const CARD_LIMIT = 6; // experiences shown as cards; the table appears when there are more
 const REFRESH_MS = 60 * 1000;
 const $ = (id) => document.getElementById(id);
 const fmt = new Intl.NumberFormat();
 const compact = new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 });
 const timeFmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
 const secFmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit' });
-const dayFmt = new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric' });
+const dayFmt = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
@@ -309,6 +360,7 @@ $('user').value = qs.get('user') ?? load('rgo.user') ?? '';
 $('groups').value = qs.get('groups') ?? load('rgo.groups') ?? '';
 const savedTheme = load('rgo.theme');
 if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+rangeHours = Number(load('rgo.range')) || 24;
 
 $('theme').onclick = () => {
   const dark = document.documentElement.dataset.theme
@@ -335,19 +387,31 @@ function mountDashboard() {
   $('main').replaceChildren($('dashboard').content.cloneNode(true));
   $('filter').oninput = (e) => { filter = e.target.value.trim().toLowerCase(); render(); };
   $('range').hidden = !staticMode;
+  if (!staticMode) rangeHours = 24;
   $('range').querySelectorAll('button').forEach((b) => {
-    b.onclick = () => { rangeHours = Number(b.dataset.range); render(); };
+    b.onclick = () => { rangeHours = Number(b.dataset.range); store('rgo.range', rangeHours); render(); };
   });
 }
 
-function setSync(text, isError, isLive) {
+function showOwners(owners, count) {
+  const main = owners[0];
+  $('owner').textContent = owners.map((o) => (o.type === 'group' ? o.name : o.displayName || o.name)).join(' · ');
+  const kind = owners.length > 1 ? 'Roblox creators' : main.type === 'group' ? 'Roblox group' : `@${main.name}`;
+  $('owner-sub').textContent = `${kind} · ${count} experience${count === 1 ? '' : 's'}`;
+  if (main.avatar) {
+    $('avatar').src = main.avatar;
+    $('avatar').hidden = false;
+    $('avatar').onerror = () => { $('avatar').hidden = true; };
+  }
+}
+
+function setSync(html, state) {
   if (!$('sync')) {
-    $('onboard').querySelector('p').textContent = text;
+    $('onboard').querySelector('p').innerHTML = html;
     return;
   }
-  $('sync-text').textContent = text;
-  $('sync').classList.toggle('err', !!isError);
-  $('sync').classList.toggle('live', !!isLive);
+  $('sync-text').innerHTML = html;
+  $('sync').className = `pill ${state || ''}`;
 }
 
 function ago(t) {
@@ -364,8 +428,8 @@ async function loadStatic() {
   staticMode = true;
   document.body.classList.add('static');
   mountDashboard();
-  $('owner').innerHTML = data.owners.map((o) => esc(o.type === 'group' ? o.name : o.displayName || o.name)).join(' · ');
-  setSync(`Updated ${ago(data.fetchedAt)} · refreshes every ${data.intervalMinutes || 15} min`);
+  showOwners(data.owners, data.games.length);
+  setSync(`Updated ${ago(data.fetchedAt)}`, 'ok');
   render();
   timer = setTimeout(loadStatic, 5 * 60 * 1000);
   if (data.liveProxy) pollLive();
@@ -400,9 +464,9 @@ async function pollLive() {
     }
     data.fetchedAt = now;
     render();
-    setSync(`Live · updated ${secFmt.format(now)} · every 15s`, false, true);
+    setSync(`<b>Live</b> · ${secFmt.format(now)}`, 'live');
   } catch {
-    setSync(`Updated ${ago(data.fetchedAt)} · live updates unavailable`);
+    setSync(`Updated ${ago(data.fetchedAt)} · live paused`, 'ok');
   }
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && staticMode) pollLive(); });
@@ -419,12 +483,11 @@ async function refresh(showLoading) {
     if (!res.ok) throw new Error(body.error || res.statusText);
     data = body;
     mountDashboard();
-    const names = body.owners.map((o) => (o.type === 'group' ? `${esc(o.name)} <span class="faint">(group)</span>` : esc(o.displayName || o.name)));
-    $('owner').innerHTML = names.join(' · ');
-    setSync(`Synced ${timeFmt.format(body.fetchedAt)}`);
+    showOwners(body.owners, body.games.length);
+    setSync(`Synced ${timeFmt.format(body.fetchedAt)}`, 'ok');
     render();
   } catch (e) {
-    setSync(`Sync failed: ${e.message}`, true);
+    setSync(`Sync failed: ${esc(e.message)}`, 'err');
   }
   timer = setTimeout(refresh, REFRESH_MS);
 }
@@ -435,6 +498,7 @@ const within = (g, hours) => g.history.filter((h) => h[0] >= data.fetchedAt - ho
 const last24 = (g) => within(g, 24);
 const peak = (g) => Math.max(g.playing, ...last24(g).map((h) => h[1]));
 const visitsGained = (g) => { const h = last24(g); return h.length ? g.visits - h[0][2] : 0; };
+const genreLine = (g) => [g.genre && g.genre !== 'All' ? g.genre : '', g.ownerType === 'group' && data.owners.length > 1 ? g.ownerName : ''].filter(Boolean).join(' · ') || 'Roblox experience';
 
 // Sum player counts across games, bucketed to the minute.
 function totalSeries(games, hours = 24) {
@@ -447,8 +511,42 @@ function totalSeries(games, hours = 24) {
   return [...buckets].sort((a, b) => a[0] - b[0]);
 }
 
+// Smooth path through points without overshooting (monotone cubic interpolation).
+function smoothPath(pts) {
+  const n = pts.length;
+  if (n < 2) return '';
+  if (n === 2) return `M${pts[0][0]},${pts[0][1]}L${pts[1][0]},${pts[1][1]}`;
+  const dx = [], m = [], t = [];
+  for (let i = 0; i < n - 1; i++) { dx[i] = pts[i + 1][0] - pts[i][0]; m[i] = dx[i] ? (pts[i + 1][1] - pts[i][1]) / dx[i] : 0; }
+  t[0] = m[0]; t[n - 1] = m[n - 2];
+  for (let i = 1; i < n - 1; i++) t[i] = m[i - 1] * m[i] <= 0 ? 0 : (3 * (dx[i - 1] + dx[i])) / ((2 * dx[i] + dx[i - 1]) / m[i - 1] + (dx[i] + 2 * dx[i - 1]) / m[i]);
+  let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  for (let i = 0; i < n - 1; i++) {
+    const h = dx[i] / 3;
+    d += `C${(pts[i][0] + h).toFixed(1)},${(pts[i][1] + t[i] * h).toFixed(1)} ${(pts[i + 1][0] - h).toFixed(1)},${(pts[i + 1][1] - t[i + 1] * h).toFixed(1)} ${pts[i + 1][0].toFixed(1)},${pts[i + 1][1].toFixed(1)}`;
+  }
+  return d;
+}
+
+let gradId = 0;
+// Small area chart. Lines are scaled so a quiet game doesn't look like a spike.
+function sparkline(points, w, h, color, cls = '') {
+  const id = `sg${gradId++}`;
+  if (points.length < 2) return `<svg class="${cls}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="${w}" y1="${h - 1.5}" y2="${h - 1.5}" stroke="var(--line)" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`;
+  const t0 = points[0][0], t1 = points[points.length - 1][0];
+  const max = Math.max(4, ...points.map((p) => p[1]));
+  const xy = points.map((p) => [((p[0] - t0) / (t1 - t0 || 1)) * w, h - 2 - (p[1] / max) * (h - 6)]);
+  const d = smoothPath(xy);
+  return `<svg class="${cls}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".28"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    <path d="${d}L${w},${h}L0,${h}Z" fill="url(#${id})"/>
+    <path d="${d}" fill="none" stroke="${color}" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+  </svg>`;
+}
+
 function render() {
   if (!data || !$('kpis')) return;
+  gradId = 0;
   const games = data.games;
   const ranked = [...games].sort((a, b) => b.playing - a.playing || b.visits - a.visits);
   const top = ranked.slice(0, 5);
@@ -456,18 +554,9 @@ function render() {
   const rankOf = new Map(ranked.map((g, i) => [g.universeId, i + 1]));
   renderKpis(games);
   renderChart(games, top, colorOf);
-  renderTable(games, colorOf, rankOf);
-}
-
-function sparkline(points, w, h, color, fluid) {
-  const size = fluid ? `viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" height="${h}"` : `width="${w}" height="${h}"`;
-  if (points.length < 2) return `<svg ${size} aria-hidden="true"><line x1="0" x2="${w}" y1="${h - 1}" y2="${h - 1}" stroke="var(--line)" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`;
-  const t0 = points[0][0], t1 = points[points.length - 1][0];
-  const max = Math.max(1, ...points.map((p) => p[1]));
-  const xy = points.map((p) => [((p[0] - t0) / (t1 - t0 || 1)) * (w - 2) + 1, h - 2 - (p[1] / max) * (h - 4)]);
-  const d = xy.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join('');
-  const area = fluid ? `<path d="${d}L${xy[xy.length - 1][0]},${h}L${xy[0][0]},${h}Z" fill="${color}" opacity=".08"/>` : '';
-  return `<svg ${size} aria-hidden="true">${area}<path d="${d}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`;
+  renderCards(ranked, colorOf);
+  $('table-panel').hidden = games.length <= CARD_LIMIT;
+  if (games.length > CARD_LIMIT) renderTable(games, colorOf, rankOf);
 }
 
 function renderKpis(games) {
@@ -481,18 +570,18 @@ function renderKpis(games) {
   const total = totalSeries(games);
   const peakTotal = Math.max(playing, ...total.map((p) => p[1]));
   const tiles = [
-    { label: 'Concurrent users', value: fmt.format(playing), sub: `24h peak ${fmt.format(peakTotal)}`, spark: sparkline(total, 200, 32, cssVar('--accent'), true) },
-    { label: 'Visits', value: compact.format(visits), sub: gained > 0 ? `<span class="pos">+${fmt.format(gained)}</span> past 24h` : fmt.format(visits) },
-    { label: 'Favorites', value: compact.format(favs), sub: fmt.format(favs) },
-    { label: 'Like ratio', value: up + down ? `${(up / (up + down) * 100).toFixed(1)}%` : '—', sub: `${compact.format(up)} up · ${compact.format(down)} down` },
-    { label: 'Experiences', value: fmt.format(games.length), sub: `${live} live now` },
+    { cls: 'hero-kpi', label: 'Playing right now', value: fmt.format(playing), sub: `24h peak <b>${fmt.format(peakTotal)}</b> · ${live} of ${games.length} live`, extra: sparkline(total, 400, 52, cssVar('--accent'), 'spark') },
+    { label: 'Total visits', value: compact.format(visits), sub: gained > 0 ? `<span class="pos">+${fmt.format(gained)}</span> in 24h` : fmt.format(visits) },
+    { label: 'Favorites', value: compact.format(favs), sub: `${fmt.format(favs)} total` },
+    { label: 'Like ratio', value: up + down ? `${Math.round((up / (up + down)) * 100)}%` : '—', sub: `${compact.format(up)} likes · ${compact.format(down)} dislikes` },
+    { label: 'Experiences', value: fmt.format(games.length), sub: `${live} with players` },
   ];
   $('kpis').innerHTML = tiles.map((t) => `
-    <div class="kpi">
+    <div class="panel kpi ${t.cls || ''}">
       <div class="label">${t.label}</div>
       <div class="value num">${t.value}</div>
       <div class="sub num">${t.sub}</div>
-      ${t.spark || ''}
+      ${t.extra || ''}
     </div>`).join('');
 }
 
@@ -501,9 +590,9 @@ function renderChart(games, top, colorOf) {
   const topIds = new Set(top.map((g) => g.universeId));
   const others = games.filter((g) => !topIds.has(g.universeId));
   $('range').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', Number(b.dataset.range) === rangeHours));
-  const step = staticMode ? `${data.intervalMinutes || 15}-minute` : '1-minute';
+  const step = staticMode ? `${data.intervalMinutes || 15}-min samples` : '1-min samples';
   const rangeName = { 12: 'Last 12 hours', 24: 'Last 24 hours', 168: 'Last 7 days', 720: 'Last 30 days' }[rangeHours];
-  $('chart-meta').textContent = `${rangeName} · ${step} samples`;
+  $('chart-meta').textContent = `${rangeName} · ${step}`;
   const series = top.filter((g) => within(g, rangeHours).length).map((g) => ({
     name: g.name, color: cssVar(colorOf.get(g.universeId)), points: within(g, rangeHours).map((h) => [h[0], h[1]]),
   }));
@@ -520,40 +609,48 @@ function renderChart(games, top, colorOf) {
     return;
   }
 
-  const W = Math.max(300, box.clientWidth - 32), H = 240;
-  const m = { l: 40, r: 4, t: 12, b: 26 };
+  const W = Math.max(300, box.clientWidth - 44), H = W < 520 ? 220 : 280;
+  const m = { l: 34, r: 8, t: 16, b: 30 };
   const iw = W - m.l - m.r, ih = H - m.t - m.b;
-  const rawMax = Math.max(1, ...all.map((p) => p[1]));
-  const yStep = niceStep(rawMax / 4);
+  // A floor on the scale keeps one or two players from filling the whole chart.
+  const rawMax = Math.max(4, ...all.map((p) => p[1]));
+  const yStep = Math.max(1, niceStep(rawMax / 4));
   const yMax = Math.ceil(rawMax / yStep) * yStep;
   const x = (t) => m.l + ((t - t0) / (t1 - t0)) * iw;
   const y = (v) => m.t + ih - (v / yMax) * ih;
 
   let grid = '';
   for (let v = 0; v <= yMax; v += yStep) {
-    grid += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line-soft)"${v === 0 ? ' style="stroke:var(--line)"' : ''}/>`;
-    grid += `<text x="${m.l - 10}" y="${y(v) + 4}" text-anchor="end">${compact.format(v)}</text>`;
+    grid += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" ${v ? 'stroke-dasharray="2 4"' : ''}/>`;
+    grid += `<text x="${m.l - 12}" y="${y(v) + 4}" text-anchor="end">${compact.format(v)}</text>`;
   }
-  const ticks = Math.min(6, Math.floor(iw / 100));
+  const multiDay = t1 - t0 > 1.5 * DAY;
+  const ticks = Math.min(6, Math.floor(iw / 110));
   let lastLabel = '';
   for (let i = 0; i <= ticks; i++) {
     const t = t0 + ((t1 - t0) * i) / ticks;
-    const label = t1 - t0 > 1.5 * DAY ? dayFmt.format(t) : timeFmt.format(t);
+    const label = multiDay ? dayFmt.format(t) : timeFmt.format(t);
     if (label === lastLabel) continue;
     lastLabel = label;
-    grid += `<text x="${x(t)}" y="${H - 6}" text-anchor="${i === 0 ? 'start' : i === ticks ? 'end' : 'middle'}">${lastLabel}</text>`;
+    grid += `<text x="${x(t)}" y="${H - 8}" text-anchor="${i === 0 ? 'start' : i === ticks ? 'end' : 'middle'}">${label}</text>`;
   }
-  const lines = series.map((s) => {
-    const d = s.points.map((p, i) => `${i ? 'L' : 'M'}${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join('');
-    return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const defs = series.map((s, i) => `<linearGradient id="cg${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity=".22"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient>`).join('');
+  const shapes = series.map((s, i) => {
+    const pts = s.points.map((p) => [x(p[0]), y(p[1])]);
+    const d = smoothPath(pts);
+    const last = pts[pts.length - 1];
+    return `<path d="${d}L${last[0]},${y(0)}L${pts[0][0]},${y(0)}Z" fill="url(#cg${i})"/>
+      <path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${s.color}" stroke="var(--panel)" stroke-width="2"/>`;
   }).join('');
 
   box.innerHTML = `
     <div class="legend">${series.map((s) => `<span><i class="key" style="background:${s.color}"></i><em>${esc(s.name)}</em></span>`).join('')}</div>
-    <svg width="${W}" height="${H}" role="img" aria-label="Concurrent users over the last 24 hours" style="display:block;margin-top:8px">
+    <svg width="${W}" height="${H}" role="img" aria-label="Concurrent users, ${rangeName.toLowerCase()}" style="display:block;margin-top:10px;overflow:visible">
+      <defs>${defs}</defs>
       <g class="axis">${grid}</g>
-      ${lines}
-      <line id="xhair" y1="${m.t}" y2="${m.t + ih}" stroke="var(--ink-3)" stroke-width="1" visibility="hidden"/>
+      ${shapes}
+      <line id="xhair" y1="${m.t}" y2="${m.t + ih}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="3 3" visibility="hidden"/>
       <g id="dots"></g>
       <rect x="${m.l}" y="${m.t}" width="${iw}" height="${ih}" fill="transparent" id="hit"/>
     </svg>
@@ -568,16 +665,16 @@ function renderChart(games, top, colorOf) {
     const rows = series.map((s) => ({ s, p: nearest(s.points, t) })).sort((a, b) => b.p[1] - a.p[1]);
     const px = x(rows[0].p[0]);
     xh.setAttribute('x1', px); xh.setAttribute('x2', px); xh.setAttribute('visibility', 'visible');
-    dots.innerHTML = rows.map(({ s, p }) => `<circle cx="${x(p[0])}" cy="${y(p[1])}" r="4" fill="${s.color}" stroke="var(--panel)" stroke-width="2"/>`).join('');
+    dots.innerHTML = rows.map(({ s, p }) => `<circle cx="${x(p[0])}" cy="${y(p[1])}" r="4.5" fill="${s.color}" stroke="var(--panel)" stroke-width="2"/>`).join('');
     const when = new Date(rows[0].p[0]);
-    tip.innerHTML = `<div class="when">${t1 - t0 > 1.5 * DAY ? `${dayFmt.format(when)}, ` : ''}${timeFmt.format(when)}</div>` +
+    tip.innerHTML = `<div class="when">${multiDay ? `${dayFmt.format(when)}, ` : ''}${timeFmt.format(when)}</div>` +
       rows.map(({ s, p }) => `<div class="row"><span><i class="key" style="background:${s.color}"></i>${esc(s.name)}</span><b>${fmt.format(p[1])}</b></div>`).join('');
     tip.style.display = 'block';
     const bx = box.getBoundingClientRect();
-    let left = e.clientX - bx.left + 16;
-    if (left + tip.offsetWidth > bx.width) left = e.clientX - bx.left - tip.offsetWidth - 16;
+    let left = e.clientX - bx.left + 18;
+    if (left + tip.offsetWidth > bx.width) left = e.clientX - bx.left - tip.offsetWidth - 18;
     tip.style.left = `${Math.max(0, left)}px`;
-    tip.style.top = `${e.clientY - bx.top - 12}px`;
+    tip.style.top = `${e.clientY - bx.top - 14}px`;
   };
   hit.onpointerleave = () => { tip.style.display = 'none'; xh.setAttribute('visibility', 'hidden'); dots.innerHTML = ''; };
 }
@@ -588,10 +685,42 @@ function niceStep(raw) {
   return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p;
 }
 
+function renderCards(ranked, colorOf) {
+  const shown = ranked.slice(0, CARD_LIMIT);
+  $('cards-meta').textContent = ranked.length > CARD_LIMIT ? `Top ${CARD_LIMIT} by players right now` : 'Sorted by players right now';
+  $('cards').innerHTML = shown.map((g, i) => {
+    const r = rating(g);
+    const color = colorOf.has(g.universeId) ? cssVar(colorOf.get(g.universeId)) : cssVar('--accent');
+    const media = g.thumbnail
+      ? `<img class="banner" src="${esc(g.thumbnail)}" alt="" loading="lazy" onerror="this.remove()">`
+      : g.icon ? `<img class="icon-fallback" src="${esc(g.icon)}" alt="" loading="lazy" onerror="this.remove()">` : '';
+    return `<article class="panel exp">
+      <a class="thumb" href="https://www.roblox.com/games/${g.placeId}" target="_blank" rel="noopener" aria-label="Open ${esc(g.name)} on Roblox">
+        ${media}
+        <span class="badge rank">#${i + 1}</span>
+        <span class="badge ccu ${g.playing ? 'on' : ''}"><span class="dot"></span>${fmt.format(g.playing)} playing</span>
+      </a>
+      <div class="exp-body">
+        <div class="exp-title">
+          <a href="https://www.roblox.com/games/${g.placeId}" target="_blank" rel="noopener" title="${esc(g.name)}">${esc(g.name)}</a>
+          <div class="genre">${esc(genreLine(g))}</div>
+        </div>
+        <div class="exp-stats">
+          <div><div class="k">Visits</div><div class="v">${compact.format(g.visits)}</div></div>
+          <div><div class="k">Favorites</div><div class="v">${compact.format(g.favorites)}</div></div>
+          <div><div class="k">Likes</div><div class="v">${r == null ? '—' : `${Math.round(r * 100)}%`}</div></div>
+          <div><div class="k">24h peak</div><div class="v">${fmt.format(peak(g))}</div></div>
+        </div>
+        <div class="exp-trend"><span>24h</span>${sparkline(last24(g), 240, 32, color)}${visitsGained(g) > 0 ? `<span class="pos">+${compact.format(visitsGained(g))} visits</span>` : ''}</div>
+      </div>
+    </article>`;
+  }).join('');
+}
+
 const COLUMNS = [
   { key: 'rank', label: '#', get: (g) => g.playing },
   { key: 'name', label: 'Experience', get: (g) => g.name.toLowerCase() },
-  { key: 'playing', label: 'CCU', get: (g) => g.playing },
+  { key: 'playing', label: 'Playing', get: (g) => g.playing },
   { key: 'peak', label: '24h peak', get: peak },
   { key: 'trend', label: '24h trend', get: (g) => g.playing },
   { key: 'visits', label: 'Visits', get: (g) => g.visits },
@@ -630,16 +759,16 @@ function renderTable(games, colorOf, rankOf) {
         ${g.icon ? `<img src="${esc(g.icon)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'noimg' }))">` : '<div class="noimg"></div>'}
         <div>
           <a href="https://www.roblox.com/games/${g.placeId}" target="_blank" rel="noopener" title="${esc(g.name)}">${esc(g.name)}</a>
-          <div class="genre">${esc([g.genre && g.genre !== 'All' ? g.genre : '', g.ownerType === 'group' ? g.ownerName : ''].filter(Boolean).join(' · ') || 'No genre')}</div>
+          <div class="genre">${esc(genreLine(g))}</div>
         </div>
       </div></td>
       <td><span class="ccu${g.playing ? '' : ' idle'}"><span class="dot"></span>${fmt.format(g.playing)}</span></td>
       <td>${fmt.format(peak(g))}</td>
-      <td>${sparkline(last24(g), 88, 22, color)}</td>
+      <td>${sparkline(last24(g), 88, 24, color).replace('<svg', '<svg width="88" height="24"')}</td>
       <td>${fmt.format(g.visits)}</td>
       <td>${gained > 0 ? `<span class="pos">+${fmt.format(gained)}</span>` : gained < 0 ? fmt.format(gained) : '<span class="faint">—</span>'}</td>
       <td>${fmt.format(g.favorites)}</td>
-      <td>${r == null ? '<span class="faint">—</span>' : `<span class="ratio">${(r * 100).toFixed(1)}%<span class="bar"><i style="width:${(r * 100).toFixed(1)}%"></i></span></span>`}</td>
+      <td>${r == null ? '<span class="faint">—</span>' : `<span class="ratio">${(r * 100).toFixed(1)}%<span class="bar-meter"><i style="width:${(r * 100).toFixed(1)}%"></i></span></span>`}</td>
       <td class="faint">${agoIso(g.updated)}</td>
     </tr>`;
   }).join('');
