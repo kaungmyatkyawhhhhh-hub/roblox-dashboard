@@ -6,7 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { resolveUser, resolveGroup, fetchOwnerGames, fetchStore } = require('../lib/roblox');
+const { resolveUser, resolveGroup, fetchOwnerGames, fetchStore, fetchRevenueSummary, fetchGroupSales } = require('../lib/roblox');
 
 const HOUR = 60 * 60 * 1000;
 const HISTORY_MS = 30 * 24 * HOUR;
@@ -42,6 +42,8 @@ async function main() {
   try { history = JSON.parse(fs.readFileSync(historyFile, 'utf8')); } catch {}
   const stores = history._store || {};
   delete history._store;
+  let ledger = history._sales || [];
+  delete history._sales;
 
   const owners = [];
   if (config.user) owners.push({ type: 'user', ...(await resolveUser(String(config.user))) });
@@ -69,9 +71,38 @@ async function main() {
   for (const id of Object.keys(stores)) if (!seen.has(Number(id))) delete stores[id];
   history._store = stores;
 
+  // Real revenue, when a cookie for an account that can view group revenue is set
+  // as the ROBLOX_COOKIE secret. Published as-is (the owner chose a public page).
+  let revenue = { connected: false };
+  const cookie = process.env.ROBLOX_COOKIE;
+  const groups = owners.filter((o) => o.type === 'group');
+  if (cookie && groups.length) {
+    try {
+      const known = new Set(ledger.map((x) => x.id));
+      const summaries = {};
+      for (const g of groups) {
+        summaries[g.id] = await fetchRevenueSummary(g.id, cookie);
+        const fresh = await fetchGroupSales(g.id, cookie, known);
+        for (const x of fresh) { x.groupId = g.id; ledger.push(x); }
+        // Pending sales settle a few days later; update the ones Roblox now shows as settled.
+        for (const x of ledger) if (x.pending && fresh.settled.has(x.id)) x.pending = false;
+      }
+      ledger.sort((a, b) => b.t - a.t);
+      ledger = ledger.slice(0, 20000);
+      revenue = { connected: true, updatedAt: now, summaries, sales: ledger };
+    } catch (e) {
+      const expired = /401|403/.test(e.message);
+      console.warn(`revenue: ${e.message}`);
+      revenue = { connected: false, error: expired ? 'The Roblox login in ROBLOX_COOKIE was rejected or has expired.' : `Couldn't read revenue: ${e.message}`, sales: ledger };
+    }
+  } else if (ledger.length) {
+    revenue = { connected: false, sales: ledger };
+  }
+  history._sales = ledger;
+
   fs.writeFileSync(historyFile, JSON.stringify(history));
   fs.mkdirSync(path.dirname(outFile), { recursive: true });
-  fs.writeFileSync(outFile, JSON.stringify({ fetchedAt: now, intervalMinutes: 5, liveProxy: config.liveProxy || '', owners, games }));
+  fs.writeFileSync(outFile, JSON.stringify({ fetchedAt: now, intervalMinutes: 5, liveProxy: config.liveProxy || '', owners, games, revenue }));
   const ccu = games.reduce((s, g) => s + g.playing, 0);
   console.log(`${games.length} experiences, ${ccu} playing, ${owners.map((o) => o.name).join(', ')}`);
 }

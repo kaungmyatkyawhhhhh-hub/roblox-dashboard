@@ -36,6 +36,9 @@ jobs:
 
       - name: Collect stats
         run: node scripts/collect.js history.json site/data.json
+        env:
+          # Optional: login cookie of an account that can view the group's revenue.
+          ROBLOX_COOKIE: ${{ secrets.ROBLOX_COOKIE }}
 
       - name: Save history
         run: |

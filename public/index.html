@@ -1103,6 +1103,29 @@
     .bar .spacer { display: block; margin-left: auto; }
   }
   .panel.store { min-width: 0; }
+
+  /* ================= real revenue ================= */
+  .rev { display: grid; gap: 12px; }
+  .rev[hidden], .rev-setup[hidden], #estimator[hidden] { display: none; }
+  .rev-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .rev-game { max-width: 100%; overflow-x: auto; }
+  .rev-game button { max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 28px; padding: 0 12px; }
+  .row-rev { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+  .row-rev .store-list { max-height: 252px; }
+  .rank-bar { display: block; height: 3px; margin-top: 5px; border-radius: 2px; background: var(--track); overflow: hidden; }
+  .rank-bar i { display: block; height: 100%; background: var(--ink); border-radius: 2px; box-shadow: 0 0 8px var(--glow); }
+  .store-list .price small { display: block; font-size: 11px; font-weight: 400; color: var(--ink-3); text-align: right; }
+  .tag { font-style: normal; font-size: 10.5px; font-weight: 500; padding: 2px 6px; margin-right: 6px; border-radius: 99px; border: 1px solid var(--line); color: var(--ink-3); vertical-align: 1px; }
+  .rev-setup ol { margin: 10px 16px 6px; padding-left: 20px; display: grid; gap: 8px; font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+  .rev-setup p { margin: 6px 16px 14px; font-size: 12px; }
+  .rev-error { color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, transparent); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+  .row-m:has(#estimator[hidden]) { grid-template-columns: 1fr; }
+  @media (max-width: 1080px) { .row-rev { grid-template-columns: 1fr 1fr; } .row-rev > :first-child { grid-column: span 2; } }
+  @media (max-width: 720px) { .row-rev { grid-template-columns: 1fr; } .row-rev > :first-child { grid-column: auto; } }
+  .rev-head { min-width: 0; }
+  .rev-head .meta { font-size: 12.5px; color: var(--ink-3); }
+  .rev-game { display: flex; max-width: 100%; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+  .rev-game button { flex: none; }
 </style>
 </head>
 <body>
@@ -1230,13 +1253,33 @@
   </div>
 
   <div class="view" data-view="money" hidden>
+    <section class="panel rev-setup" id="rev-setup" hidden>
+      <div class="panel-head"><h2>Connect your Robux and sales</h2></div>
+      <p class="rev-error" id="rev-error" hidden></p>
+      <ol>
+        <li>Make a separate Roblox account and add it to your group with a role that can <b>view the group's revenue</b> (and nothing else).</li>
+        <li>Sign in to that account on roblox.com in your browser, open developer tools, and copy the value of the <b>.ROBLOSECURITY</b> cookie.</li>
+        <li>In your GitHub repository go to <b>Settings → Secrets and variables → Actions → New repository secret</b>, name it <b>ROBLOX_COOKIE</b> and paste the value.</li>
+      </ol>
+      <p class="faint">Your Robux, sales and per-game breakdown appear here after the next update (within 5 minutes). Never paste that cookie anywhere else.</p>
+    </section>
+    <section class="rev" id="rev" hidden>
+      <div class="rev-head"><div class="seg rev-game" id="rev-game"></div><span class="meta" id="rev-meta"></span></div>
+      <section class="kpis" id="rev-kpis"></section>
+      <div class="row-rev">
+        <section class="panel"><div class="panel-head"><h2>Robux per day</h2><span class="meta">Last 30 days</span></div><div class="chart-wrap" id="rev-chart"></div></section>
+        <section class="panel"><div class="panel-head"><h2>Top items</h2><span class="meta">Last 30 days</span></div><ul class="store-list rank-list" id="rev-top"></ul></section>
+        <section class="panel"><div class="panel-head"><h2>Recent sales</h2></div><ul class="store-list" id="rev-recent"></ul></section>
+      </div>
+      <div class="section-title"><h2>Store</h2><span class="meta">What you sell</span></div>
+    </section>
     <section class="kpis" id="m-kpis"></section>
     <div class="row-m">
       <section class="panel">
         <div class="panel-head"><h2>Price tiers</h2><div class="legend" id="m-tiers-legend"></div></div>
         <div class="chart-wrap" id="m-tiers"></div>
       </section>
-      <section class="panel estimator">
+      <section class="panel estimator" id="estimator">
         <div class="panel-head"><h2>Earnings estimate</h2><span class="meta">After Roblox's 30% fee</span></div>
         <div class="est-controls">
           <label class="est-row"><span>Visitors who buy something</span><input type="range" id="m-rate" min="0.1" max="10" step="0.1"><output id="m-rate-out"></output></label>
@@ -3098,6 +3141,7 @@ function visitsPerDay(games) {
 
 function renderMoney(games) {
   if (!$('m-kpis')) return;
+  renderRevenue(games);
   const items = games.flatMap(storeItems);
   const onSale = items.filter((x) => x.forSale && x.price > 0);
   const passes = onSale.filter((x) => x.kind === 'pass');
@@ -3165,6 +3209,115 @@ document.addEventListener('input', (e) => {
   if (e.target.id === 'm-avg') { est.avg = Math.max(1, Number(e.target.value) || 1); store('rgo.avg', est.avg); renderMoney(data.games); }
 });
 document.addEventListener('click', (e) => { const t = e.target.closest('.tabs button'); if (t) setView(t.dataset.tab); });
+
+// ---- real revenue (when connected with ROBLOX_COOKIE) ----
+let revGame = load('rgo.revgame') || 'all';
+const REV_KEYS = { itemSaleRobux: 'Sales', premiumPayouts: 'Premium Payouts', groupPremiumPayouts: 'Premium Payouts', immersiveAdRevenue: 'Ads', subscriptionsRevenue: 'Subscriptions' };
+
+function renderRevenue(games) {
+  const rev = data.revenue || {};
+  const sales = rev.sales || [];
+  const has = rev.connected || sales.length;
+  $('rev').hidden = !has;
+  $('rev-setup').hidden = !!rev.connected;
+  $('rev-error').textContent = rev.error || '';
+  $('rev-error').hidden = !rev.error;
+  $('estimator').hidden = !!rev.connected;
+  if (!has) return;
+
+  const gameName = new Map(games.map((g) => [String(g.universeId), g.name]));
+  const known = new Set(games.map((g) => String(g.universeId)));
+  if (revGame !== 'all' && !known.has(revGame)) revGame = 'all';
+  $('rev-game').innerHTML = [['all', 'All games'], ...games.map((g) => [String(g.universeId), g.name])]
+    .map(([id, name]) => `<button type="button" data-rev="${id}" aria-pressed="${id === revGame}" title="${esc(name)}">${esc(name)}</button>`).join('');
+
+  const mine = revGame === 'all' ? sales : sales.filter((x) => String(x.universeId) === revGame);
+  const now = Date.now(), today = dayStart(now);
+  const since = (ms) => mine.filter((x) => x.t >= ms);
+  const sum = (list) => list.reduce((s, x) => s + x.robux, 0);
+  const d7 = since(now - 7 * DAY), d30 = since(now - 30 * DAY);
+  const first = mine.length ? mine[mine.length - 1].t : null;
+  const pending = sum(mine.filter((x) => x.pending));
+
+  // Roblox's own monthly summary (whole group) for Premium Payouts and a cross-check.
+  let premium = 0, monthTotal = 0;
+  for (const s of Object.values(rev.summaries || {})) {
+    const m = s.month || {};
+    premium += (m.premiumPayouts || 0) + (m.groupPremiumPayouts || 0);
+    for (const k of Object.keys(REV_KEYS)) monthTotal += m[k] || 0;
+  }
+  const tiles = [
+    { label: 'Robux today', value: robux(sum(since(today))), sub: `${since(today).length} sale${since(today).length === 1 ? '' : 's'}` },
+    { label: 'Last 7 days', value: robux(sum(d7)), sub: `${d7.length} sales` },
+    { label: 'Last 30 days', value: robux(sum(d30)), sub: revGame === 'all' && monthTotal ? `Roblox: ${robux(monthTotal)} this month` : `${d30.length} sales · avg ${robux(d30.length ? sum(d30) / d30.length : 0)}` },
+    { label: 'All tracked', value: robux(sum(mine)), sub: first ? `${fmt.format(mine.length)} sales since ${new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).format(first)}` : 'No sales yet' },
+    revGame === 'all'
+      ? { label: 'Premium Payouts', value: robux(premium), sub: pending ? `This month · ${robux(pending)} pending sales` : 'This month' }
+      : { label: 'Pending', value: robux(pending), sub: 'Settles in a few days' },
+  ];
+  $('rev-kpis').innerHTML = tiles.map((t, i) => `
+    <div class="panel kpi" style="--i:${i}">
+      <div class="label">${t.label}</div>
+      <div><span class="value num">${t.value}</span></div>
+      <div class="sub num">${t.sub}</div>
+    </div>`).join('');
+  $('rev-meta').textContent = rev.connected ? `Updated ${ago(rev.updatedAt)} · after Roblox's fee` : 'Last saved data · not connected';
+
+  // Robux per day, stacked by game.
+  const ids = revGame === 'all' ? [...new Set(sales.map((x) => String(x.universeId)))] : [revGame];
+  const colorFor = (id) => {
+    const i = games.findIndex((g) => String(g.universeId) === id);
+    return cssVar(i >= 0 ? SERIES[i % SERIES.length] : '--series-other');
+  };
+  const bars = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const t0 = d.getTime(), t1 = t0 + DAY;
+    const day = mine.filter((x) => x.t >= t0 && x.t < t1);
+    bars.push({ t: t0, partial: i === 0, parts: ids.map((id) => ({ name: gameName.get(id) || 'Other', color: colorFor(id), v: sum(day.filter((x) => String(x.universeId) === id)) })) });
+  }
+  if (!rev.connected && !mine.length) $('rev-chart').innerHTML = '<div class="empty">No sales recorded yet.</div>';
+  else barChart($('rev-chart'), bars, { height: 214, label: 'Robux per day', unit: 'Robux', sign: '' });
+
+  // Top items over 30 days.
+  const items = new Map();
+  for (const x of d30) {
+    const k = `${x.type}|${x.item}|${x.universeId}`;
+    const e = items.get(k) || { ...x, robux: 0, count: 0 };
+    e.robux += x.robux; e.count++;
+    items.set(k, e);
+  }
+  const top = [...items.values()].sort((a, b) => b.robux - a.robux).slice(0, 6);
+  const maxR = top[0] ? top[0].robux : 1;
+  const iconOf = (x) => {
+    const g = games.find((gg) => String(gg.universeId) === String(x.universeId));
+    const all = g && g.store ? [...g.store.passes, ...g.store.products] : [];
+    const hit = all.find((it) => it.id === x.itemId) || all.find((it) => it.name === x.item);
+    return hit && hit.icon;
+  };
+  const icon = (x) => { const u = iconOf(x); return u ? `<img src="${esc(u)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'), { className: 'ph' }))">` : '<span class="ph"></span>'; };
+  const typeName = (t) => ({ GamePass: 'Game pass', DeveloperProduct: 'Developer product', PrivateServer: 'Private server' }[t] || t || 'Item');
+  $('rev-top').innerHTML = top.length ? top.map((x) => `<li>
+      ${icon(x)}
+      <span class="si"><b>${esc(x.item)}</b><span>${typeName(x.type)}${revGame === 'all' && gameName.get(String(x.universeId)) ? ` · ${esc(gameName.get(String(x.universeId)))}` : ''}</span>
+        <i class="rank-bar"><i style="width:${((x.robux / maxR) * 100).toFixed(1)}%"></i></i></span>
+      <span class="price num">${robux(x.robux)}<small>${x.count} sale${x.count === 1 ? '' : 's'}</small></span>
+    </li>`).join('') : '<li class="faint">No sales in the last 30 days.</li>';
+
+  $('rev-recent').innerHTML = mine.length ? mine.slice(0, 12).map((x) => `<li>
+      ${icon(x)}
+      <span class="si"><b>${esc(x.item)}</b><span>${revGame === 'all' ? esc(gameName.get(String(x.universeId)) || x.place || '') + ' · ' : ''}${agoIso(new Date(x.t).toISOString())}</span></span>
+      <span class="price num">${x.pending ? '<em class="tag">Pending</em>' : ''}+${robux(x.robux)}</span>
+    </li>`).join('') : '<li class="faint">No sales yet.</li>';
+}
+
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-rev]');
+  if (!b) return;
+  revGame = b.dataset.rev;
+  store('rgo.revgame', revGame);
+  renderRevenue(data.games);
+});
 
 let resizeTimer;
 addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });

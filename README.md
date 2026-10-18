@@ -8,7 +8,17 @@ A black-and-white, one-screen analytics dashboard for every Roblox experience ow
 - **Highlights:** busiest hour and day, peak since tracking began, visits per day, and the most played experience this week.
 - **Visits per day** for the last 14 days, and **next milestones** for visits and favorites, with an estimate of when you'll reach each one at your current pace.
 - **Music player:** the music button in the top bar (with a live mini equalizer) opens a player. Paste YouTube video or playlist links to build a queue; they play through YouTube's official embedded player with a seek bar, and your queue is remembered in your browser. When the queue runs out (or you press next on the last song), it keeps going with YouTube's Mix of songs similar to the last one. There are also three relaxing moods generated live in the browser. Videos whose owners block embedding are skipped automatically.
-- **Monetization tab:** every game pass and developer product with icons and prices, store stats (counts, average and median price, price range, cost of every pass), a price-tier chart, and an earnings estimator. Roblox keeps real sales and revenue private to the owner (Creator Hub), so the estimator uses your real visits per day with a purchase rate and average spend you set, after Roblox's 30% fee and at the DevEx rate. Store data refreshes hourly.
+- **Monetization tab:** your real Robux and sales (when connected, see below): Robux today, 7 days, 30 days and all tracked, Premium Payouts, pending Robux, Robux per day, top items and recent sales, for all games or one selected game. Below that: every game pass and developer product with prices, store stats and a price-tier chart. Without a connection it shows an earnings estimator instead.
+
+### Connecting Robux and sales
+
+Roblox only shows revenue to signed-in group members with permission, so the updater signs in with a cookie you provide:
+
+1. Create a separate Roblox account and add it to your group with a role that can only view the group's revenue.
+2. Sign in to that account in a browser and copy the value of the `.ROBLOSECURITY` cookie (developer tools → Application → Cookies → roblox.com).
+3. In this repository: **Settings → Secrets and variables → Actions → New repository secret**, name `ROBLOX_COOKIE`, paste the value.
+
+The next run reads the group's revenue summary and sales. Sales are published on the public page (item, game, Robux, time), without buyer names. If the cookie expires, the Monetization tab says so; paste a fresh one into the same secret.
 - **Experience cards:** click any card for a detail panel with its own player chart, daily visits, favorites over time, milestones, and details. Each panel has its own link (`#game-<id>`).
 
 ## Hosted automatically (GitHub Pages)
