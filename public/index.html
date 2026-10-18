@@ -983,6 +983,34 @@
   .player.yt #p-viz { display: block; height: 44px; margin: 14px 0 0; }
   .p-video { margin-bottom: 0; }
   @media (prefers-reduced-motion: reduce) { .ambient-bg { animation: none; } .ambient-bg i { transform: scale(1.1); } }
+
+  /* ================= polish pass ================= */
+  /* sparkline sits beside the number, not under the text */
+  .kpi.hero-kpi svg.spark { left: auto; right: 0; width: 56%; height: 70%; -webkit-mask-image: linear-gradient(90deg, transparent, #000 30%); mask-image: linear-gradient(90deg, transparent, #000 30%); }
+  /* empty heatmap cells read as "not yet", not as broken */
+  .heat .cell.none { background: transparent; box-shadow: inset 0 0 0 1px var(--line-soft); }
+
+  /* now-playing button in the top bar; the player drops down from it */
+  .np {
+    display: inline-flex; align-items: center; gap: 9px; height: 32px; padding: 0 12px 0 5px; border-radius: 999px; max-width: 280px;
+    background: var(--panel); border: 1px solid var(--line); color: var(--ink-2); box-shadow: var(--shadow);
+  }
+  .np:hover { border-color: var(--ink-3); color: var(--ink); }
+  .np .np-disc { width: 22px; height: 22px; flex: none; }
+  .np-eq { width: 34px; height: 16px; flex: none; display: block; }
+  .np-text { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .player.playing ~ .bar .np, body.eq-on .np { color: var(--ink); border-color: var(--glass-line); box-shadow: var(--shadow), 0 0 22px -6px var(--art-color, var(--glow)); }
+  body.eq-on .np .np-disc { animation-play-state: running; }
+  .orb { display: none !important; }
+  .player { top: 60px; bottom: auto; right: max(20px, calc((100vw - 1440px) / 2 + 20px)); }
+  .p-card { top: 0; bottom: auto; transform-origin: top right; transform: scale(.94) translateY(-10px); max-height: calc(100vh - 76px); max-height: calc(100svh - 76px); }
+  .player.open .p-card { transform: none; }
+  .eq-bottom { display: none; }
+  @media (max-width: 720px) {
+    .np-text { display: none; }
+    .np { padding-right: 8px; }
+    .player { right: 14px; }
+  }
 </style>
 </head>
 <body>
@@ -1002,6 +1030,7 @@
     <div class="field"><label for="groups">Groups</label><input id="groups" placeholder="IDs, comma-separated" autocomplete="off"></div>
     <button class="primary" type="submit">Load</button>
   </form>
+  <button class="np" id="np" type="button" aria-label="Open music player" aria-expanded="false"><span class="np-disc disc"></span><canvas class="np-eq" id="eq-mini" aria-hidden="true"></canvas><span class="np-text" id="np-text">Music</span></button>
   <div class="pill" id="sync"><span class="dot"></span><span id="sync-text"></span></div>
   <button class="icon" type="button" id="theme" title="Switch theme" aria-label="Switch theme">
     <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 2a6 6 0 0 0 0 12z" fill="currentColor"/></svg>
@@ -1400,7 +1429,11 @@ function renderChart(games, top, colorOf) {
   const others = games.filter((g) => !topIds.has(g.universeId));
   $('range').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', Number(b.dataset.range) === rangeHours));
   const step = staticMode ? `${data.intervalMinutes || 5}-min samples` : '1-min samples';
-  $('chart-meta').textContent = `${RANGE_NAMES[rangeHours]} · ${step}`;
+  // Until tracking covers the chosen range, say where the data actually starts.
+  const firstT = Math.min(...games.flatMap((g) => (g.history[0] ? [g.history[0][0]] : [])));
+  const since = isFinite(firstT) && data.fetchedAt - firstT < rangeHours * 3600000 * 0.9
+    ? `Since ${data.fetchedAt - firstT > DAY ? dayFmt.format(firstT) + ', ' : ''}${timeFmt.format(firstT)}` : RANGE_NAMES[rangeHours];
+  $('chart-meta').textContent = `${since} · ${step}`;
   const series = top.filter((g) => within(g, rangeHours).length).map((g) => ({
     name: g.name, color: cssVar(colorOf.get(g.universeId)), dash: DASHES[SERIES.indexOf(colorOf.get(g.universeId))], points: within(g, rangeHours).map((h) => [h[0], h[1]]),
   }));
@@ -1472,7 +1505,7 @@ function lineChart(box, series, { animate = false, label = '', height, floor = 4
     grid += `<text x="${x(t)}" y="${H - 8}" text-anchor="${i === 0 ? 'start' : i === ticks ? 'end' : 'middle'}">${lbl}</text>`;
   }
   const liveNow = $('sync') && $('sync').classList.contains('live');
-  const glow = `<filter id="${id}glow" x="-10%" y="-40%" width="120%" height="180%"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+  const glow = `<filter id="${id}glow" x="-10%" y="-40%" width="120%" height="180%"><feGaussianBlur stdDeviation="2.2" result="b"/><feComponentTransfer in="b" result="g"><feFuncA type="linear" slope=".55"/></feComponentTransfer><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
   const defs = glow + series.map((s, i) => `<linearGradient id="${id}g${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity=".24"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient>`).join('');
   const shapes = series.map((s, i) => {
     const pts = s.points.map((p) => [x(p[0]), y(p[1])]);
@@ -2497,6 +2530,8 @@ function renderPlayer() {
   setArt(rn ? (rn.id || radio.seed) : item ? (item.nowId || item.v) : null);
   $('p-sub').textContent = rn ? (rn.author || `Based on ${radio.seedTitle}`) : item ? (item.nowAuthor || item.author || (item.list ? 'Playlist' : 'YouTube')) : m.sub;
   $('player').classList.toggle('playing', isPlaying());
+  $('np-text').textContent = isPlaying() ? (rn ? rn.title : item ? (item.now || item.title) : m.name) : (src === 'yt' && item ? 'Paused' : 'Music');
+  document.querySelector('.np .np-disc').style.animationPlayState = isPlaying() ? 'running' : 'paused';
   $('player').classList.toggle('yt', src === 'yt');
   $('p-play').setAttribute('aria-label', isPlaying() ? 'Pause' : 'Play');
   $('p-icon').innerHTML = isPlaying()
@@ -2656,8 +2691,19 @@ function changeMood(i) {
   drawViz();
 }
 
-$('p-orb').onclick = () => { $('player').classList.add('open'); store('rgo.player', 'open'); drawViz(); };
-$('p-min').onclick = () => { $('player').classList.remove('open'); store('rgo.player', 'min'); };
+function setPlayerOpen(open) {
+  $('player').classList.toggle('open', open);
+  $('np').setAttribute('aria-expanded', open);
+  store('rgo.player', open ? 'open' : 'min');
+  if (open) drawViz();
+}
+$('p-orb').onclick = () => setPlayerOpen(true);
+$('np').onclick = (e) => { e.stopPropagation(); setPlayerOpen(!$('player').classList.contains('open')); };
+// Clicking anywhere outside the player closes it.
+document.addEventListener('pointerdown', (e) => {
+  if ($('player').classList.contains('open') && !e.target.closest('#player, #np')) setPlayerOpen(false);
+});
+$('p-min').onclick = () => setPlayerOpen(false);
 $('p-play').onclick = togglePlay;
 $('p-prev').onclick = () => step(-1);
 $('p-next').onclick = () => step(1);
@@ -2679,7 +2725,6 @@ $('p-clear').onclick = () => {
   renderPlayer();
 };
 $('p-vol').oninput = (e) => setVolume(Number(e.target.value));
-if (load('rgo.player') === 'open') $('player').classList.add('open');
 renderPlayer();
 
 // ---- music-reactive visuals: equalizers, beat pulse, page-wide artwork glow ----
@@ -2738,6 +2783,7 @@ function drawViz() {
       vizRunning = false;
       document.documentElement.style.setProperty('--beat', 0);
       document.body.classList.remove('eq-on');
+      drawBars($('eq-mini'), new Array(9).fill(0.1), { gap: 2, minH: 2 });
       return;
     }
     idleT += 1 / 60;
@@ -2764,12 +2810,12 @@ function drawViz() {
     document.documentElement.style.setProperty('--beat', beat.toFixed(3));
     document.body.classList.toggle('eq-on', playing);
     if (open) drawBars($('p-viz'), Array.from({ length: 36 }, (_, i) => spectrum[Math.floor((i / 36) * EQ_BARS)]));
-    if (playing || beat > 0.01) drawBars($('eq-bottom'), spectrum, { gap: 4, mirror: true, alpha: 0.9, minH: 2 });
+    drawBars($('eq-mini'), Array.from({ length: 9 }, (_, i) => spectrum[Math.floor((i / 9) * EQ_BARS * 0.7)]), { gap: 2, minH: 2 });
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);
 }
-if ($('player').classList.contains('open')) drawViz();
+requestAnimationFrame(() => drawBars($('eq-mini'), new Array(9).fill(0.1), { gap: 2, minH: 2 }));
 document.addEventListener('visibilitychange', () => { if (!document.hidden && (isPlaying() || $('player').classList.contains('open'))) drawViz(); });
 
 // Page-wide artwork: YouTube's thumbnail plus three stills from the video, blurred,
