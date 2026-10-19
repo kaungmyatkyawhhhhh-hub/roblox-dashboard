@@ -1251,6 +1251,12 @@
   .p-controls .p-side.on { color: var(--ink); }
   .p-controls .p-side.on::after { content: ""; position: absolute; left: 50%; bottom: 2px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 8px var(--glow); }
   .p-controls span.p-side { display: block; }
+  .p-queue .r-add { width: 30px; height: 30px; padding: 0; border-radius: 50%; display: grid; place-items: center; flex: none; margin-left: auto; background: transparent; border: 1px solid var(--glass-line); color: var(--ink-2); cursor: pointer; }
+  .p-queue .r-add:hover, .p-queue .r-add.done { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .p-queue .r-add.done { font-size: 13px; }
+  .p-queue li.rec-head { cursor: default; padding: 10px 6px 2px; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); background: none; box-shadow: none; }
+  .p-queue li.rec img { filter: none; }
+  .p-queue li.rec .qt b { font-weight: 500; }
 </style>
 </head>
 <body class="intro-hold">
@@ -2961,6 +2967,49 @@ function removeItem(i) {
 
 const isPlaying = () => (src === 'yt' ? ytPlaying : music.playing);
 
+// Recommendations: the YouTube mix only gives video ids, so titles come from oEmbed (once per id).
+const recTitles = new Map();
+function recInfo(id) {
+  if (!recTitles.has(id)) {
+    recTitles.set(id, { title: 'Recommended song', author: '' });
+    fetch(`https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(`https://www.youtube.com/watch?v=${id}`)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => { if (j) { recTitles.set(id, { title: j.title || 'Recommended song', author: j.author_name || '' }); renderPlayer(); } })
+      .catch(() => {});
+  }
+  return recTitles.get(id);
+}
+function recUpNext() {
+  const pl = yt && yt.getPlaylist && yt.getPlaylist();
+  if (!pl || !pl.length) return [];
+  const k = yt.getPlaylistIndex ? yt.getPlaylistIndex() : 0;
+  return pl.slice(k + 1, k + 6).map((id, j) => ({ id, at: k + 1 + j })).filter((r) => r.id);
+}
+const recAddButton = (id, title) => {
+  const added = queue.some((q) => q.v === id);
+  return `<button type="button" class="r-add${added ? ' done' : ''}" data-rec-add="${esc(id)}" title="${added ? 'In your queue' : 'Add to queue'}" aria-label="${added ? 'In your queue' : `Add ${esc(title)} to queue`}">${added ? '✓' : '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 3.5h7M2 7h7M2 10.5h4M11 8v5M8.5 10.5h5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'}</button>`;
+};
+function addRecToQueue(id) {
+  if (queue.some((q) => q.v === id)) return setMsg('Already in your queue.');
+  const isNow = radio && radio.now && radio.now.id === id;
+  const info = isNow ? radio.now : recInfo(id);
+  const item = { v: id, title: info.title || 'Recommended song', author: info.author || '', start: 0 };
+  if (isNow) {
+    // The song that's playing becomes the current queue item, placed before anything
+    // already queued, so it isn't played twice and the queued songs still come next.
+    const at = ytIndex + 1;
+    queue.splice(at, 0, item);
+    played = played.map((i) => (i >= at ? i + 1 : i)).concat(at);
+    ytIndex = at;
+    setMsg(`Saved “${info.title}” to your queue.`);
+  } else {
+    queue.push(item);
+    setMsg(`Queued “${info.title}”. It plays after the current song.`);
+  }
+  saveQueue();
+  renderPlayer();
+}
+
 function renderPlayer() {
   const item = src === 'yt' ? queue[ytIndex] : null;
   const m = MOODS[music.mood];
@@ -2986,10 +3035,24 @@ function renderPlayer() {
       </li>`).join('')
     : '<li class="p-empty">Search YouTube or paste a video or playlist link above.</li>';
   if (src === 'yt' && radio) {
+    const nowId = radio.now && radio.now.id;
     $('p-queue').insertAdjacentHTML('beforeend', `<li class="radio on" data-radio>
-      <span class="qthumb"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 9a6 6 0 0 1 12 0M5.5 9a3.5 3.5 0 0 1 7 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="9" r="1.4" fill="currentColor"/></svg><span class="q-eq" aria-hidden="true"><i></i><i></i><i></i></span></span>
+      <span class="qthumb">${nowId ? `<img src="https://i.ytimg.com/vi/${esc(nowId)}/mqdefault.jpg" alt="" loading="lazy">` : '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 9a6 6 0 0 1 12 0M5.5 9a3.5 3.5 0 0 1 7 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="9" r="1.4" fill="currentColor"/></svg>'}<span class="q-eq" aria-hidden="true"><i></i><i></i><i></i></span></span>
       <span class="qt"><b>${esc(radio.now ? radio.now.title : 'Recommended songs')}</b><span>Recommended · based on ${esc(radio.seedTitle)}</span></span>
+      ${nowId ? recAddButton(nowId, radio.now.title) : ''}
     </li>`);
+    // The next few songs in the recommendation mix, each with its own add-to-queue button.
+    const upNext = recUpNext();
+    if (upNext.length) {
+      $('p-queue').insertAdjacentHTML('beforeend', `<li class="rec-head" aria-hidden="true">Up next · recommended</li>` + upNext.map(({ id, at }) => {
+        const info = recInfo(id);
+        return `<li class="rec" data-rec-at="${at}">
+          <span class="qthumb"><img src="https://i.ytimg.com/vi/${esc(id)}/mqdefault.jpg" alt="" loading="lazy"></span>
+          <span class="qt"><b>${esc(info.title)}</b><span>${esc(info.author || 'Recommended')}</span></span>
+          ${recAddButton(id, info.title)}
+        </li>`;
+      }).join(''));
+    }
   }
   $('p-clear').hidden = !queue.length;
   showVolume();
@@ -3217,6 +3280,10 @@ $('p-url').addEventListener('paste', (e) => {
   if (parseYouTube(text)) { e.preventDefault(); $('p-url').value = ''; addLink(text); }
 });
 $('p-queue').onclick = (e) => {
+  const add = e.target.closest('[data-rec-add]');
+  if (add) { e.stopPropagation(); addRecToQueue(add.dataset.recAdd); return; }
+  const rec = e.target.closest('[data-rec-at]');
+  if (rec) { yt?.playVideoAt?.(Number(rec.dataset.recAt)); return; }
   const rm = e.target.closest('[data-rm]');
   if (rm) { e.stopPropagation(); removeItem(Number(rm.dataset.rm)); return; }
   const li = e.target.closest('[data-q]');
