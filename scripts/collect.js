@@ -6,7 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { resolveUser, resolveGroup, fetchOwnerGames, fetchStore, fetchRevenueSummary, fetchGroupSales } = require('../lib/roblox');
+const { saleKey, resolveUser, resolveGroup, fetchOwnerGames, fetchStore, fetchRevenueSummary, fetchGroupSales } = require('../lib/roblox');
 
 const HOUR = 60 * 60 * 1000;
 const HISTORY_MS = 30 * 24 * HOUR;
@@ -44,6 +44,14 @@ async function main() {
   delete history._store;
   let ledger = history._sales || [];
   delete history._sales;
+  // Re-key saved sales (older versions used Roblox's non-unique ids) and drop duplicates.
+  const seenKeys = new Set();
+  ledger = ledger.filter((x) => {
+    x.id = saleKey(x.t, x.itemId, x.robux);
+    if (seenKeys.has(x.id)) return false;
+    seenKeys.add(x.id);
+    return true;
+  });
 
   const owners = [];
   if (config.user) owners.push({ type: 'user', ...(await resolveUser(String(config.user))) });
@@ -90,6 +98,7 @@ async function main() {
       ledger.sort((a, b) => b.t - a.t);
       ledger = ledger.slice(0, 20000);
       revenue = { connected: true, updatedAt: now, summaries, sales: ledger };
+      console.log(`revenue: ${ledger.length} sales saved; summary fields: ${Object.keys(Object.values(summaries)[0]?.month || {}).join(', ')}`);
     } catch (e) {
       const expired = /401|403/.test(e.message);
       console.warn(`revenue: ${e.message}`);

@@ -3226,6 +3226,7 @@ function renderRevenue(games) {
   if (!has) return;
 
   const gameName = new Map(games.map((g) => [String(g.universeId), g.name]));
+  gameName.set('null', 'Group store items');
   const known = new Set(games.map((g) => String(g.universeId)));
   if (revGame !== 'all' && !known.has(revGame)) revGame = 'all';
   $('rev-game').innerHTML = [['all', 'All games'], ...games.map((g) => [String(g.universeId), g.name])]
@@ -3296,7 +3297,7 @@ function renderRevenue(games) {
     return hit && hit.icon;
   };
   const icon = (x) => { const u = iconOf(x); return u ? `<img src="${esc(u)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'), { className: 'ph' }))">` : '<span class="ph"></span>'; };
-  const typeName = (t) => ({ GamePass: 'Game pass', DeveloperProduct: 'Developer product', PrivateServer: 'Private server' }[t] || t || 'Item');
+  const typeName = (t) => ({ GamePass: 'Game pass', DeveloperProduct: 'Developer product', PrivateServer: 'Private server', Asset: 'Avatar item' }[t] || t || 'Item');
   $('rev-top').innerHTML = top.length ? top.map((x) => `<li>
       ${icon(x)}
       <span class="si"><b>${esc(x.item)}</b><span>${typeName(x.type)}${revGame === 'all' && gameName.get(String(x.universeId)) ? ` · ${esc(gameName.get(String(x.universeId)))}` : ''}</span>
