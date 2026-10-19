@@ -3171,6 +3171,8 @@ async function searchYouTube(q) {
   try {
     const res = await fetch(`${data.liveProxy.replace(/\/$/, '')}/search?q=${encodeURIComponent(q)}`);
     const body = await res.json();
+    // The worker answers 404 until it's redeployed with the version that has /search.
+    if (res.status === 404) throw new Error('Search needs the updated Cloudflare worker. Paste the new worker/worker.js into Cloudflare and click Deploy.');
     if (!res.ok) throw new Error(body.error || 'Search failed.');
     lastResults = body.results || [];
     $('p-results').innerHTML = lastResults.length ? lastResults.map((r, i) => `<li data-res="${i}" tabindex="0">
