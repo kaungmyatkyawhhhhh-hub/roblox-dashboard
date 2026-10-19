@@ -6,7 +6,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const { saleKey, resolveUser, resolveGroup, fetchOwnerGames, fetchStore, fetchRevenueSummary, fetchGroupSales } = require('../lib/roblox');
+const { saleKey, resolveUser, resolveGroup, fetchGames, fetchOwnerGames, fetchStore, fetchRevenueSummary, fetchGroupSales } = require('../lib/roblox');
+const { runAlerts } = require('./alerts');
 
 const HOUR = 60 * 60 * 1000;
 const HISTORY_MS = 30 * 24 * HOUR;
@@ -44,6 +45,10 @@ async function main() {
   delete history._store;
   let ledger = history._sales || [];
   delete history._sales;
+  const compHistory = history._comp || {};
+  const updates = history._updates || {};
+  const alertState = history._alerts || {};
+  for (const k of ['_comp', '_updates', '_alerts']) delete history[k];
   // Re-key saved sales (older versions used Roblox's non-unique ids) and drop duplicates.
   const seenKeys = new Set();
   ledger = ledger.filter((x) => {
@@ -71,7 +76,11 @@ async function main() {
       if (!cached || now - cached.fetchedAt > STORE_MS) {
         try { cached = stores[g.universeId] = await fetchStore(g.universeId); } catch (e) { console.warn(`store ${g.universeId}: ${e.message}`); }
       }
-      games.push({ ...g, ownerType: owner.type, ownerName: owner.name, history: h, store: cached || null });
+      // Every publish changes the "updated" time; keep a list of them for update-impact charts.
+      const ups = (updates[g.universeId] ||= []);
+      const ut = Date.parse(g.updated);
+      if (ut && !ups.includes(ut)) { ups.push(ut); ups.sort((a, b) => a - b); }
+      games.push({ ...g, ownerType: owner.type, ownerName: owner.name, history: h, store: cached || null, updates: ups });
     }
   }
   // Drop experiences that are no longer listed.
@@ -82,6 +91,7 @@ async function main() {
   // Real revenue, when a cookie for an account that can view group revenue is set
   // as the ROBLOX_COOKIE secret. Published as-is (the owner chose a public page).
   let revenue = { connected: false };
+  const newSales = [];
   const cookie = process.env.ROBLOX_COOKIE;
   const groups = owners.filter((o) => o.type === 'group');
   if (cookie && groups.length) {
@@ -91,7 +101,7 @@ async function main() {
       for (const g of groups) {
         summaries[g.id] = await fetchRevenueSummary(g.id, cookie);
         const fresh = await fetchGroupSales(g.id, cookie, known);
-        for (const x of fresh) { x.groupId = g.id; ledger.push(x); }
+        for (const x of fresh) { x.groupId = g.id; ledger.push(x); newSales.push(x); }
         // Pending sales settle a few days later; update the ones Roblox now shows as settled.
         for (const x of ledger) if (x.pending && fresh.settled.has(x.id)) x.pending = false;
       }
@@ -109,9 +119,40 @@ async function main() {
   }
   history._sales = ledger;
 
+  // Similar public games to compare against (config.json "competitors": place or universe ids / game links).
+  const competitors = [];
+  try {
+    const ids = [];
+    for (const c of config.competitors || []) {
+      const m = String(c).match(/games\/(\d+)/) || String(c).match(/^place:(\d+)$/);
+      if (m) {
+        const r = await fetch(`https://apis.roblox.com/universes/v1/places/${m[1]}/universe`).then((x) => x.json()).catch(() => ({}));
+        if (r.universeId) ids.push(r.universeId);
+      } else if (/^\d+$/.test(String(c))) ids.push(Number(c));
+    }
+    const mine = new Set(games.map((g) => g.universeId));
+    const list = ids.length ? await fetchGames([...new Set(ids)].filter((id) => !mine.has(id))) : [];
+    for (const g of list) {
+      const h = thin([...(compHistory[g.universeId] || []), [now, g.playing, g.visits, g.favorites, g.upVotes, g.downVotes]], now);
+      compHistory[g.universeId] = h;
+      competitors.push({ ...g, history: h });
+    }
+    for (const id of Object.keys(compHistory)) if (!list.some((g) => String(g.universeId) === id)) delete compHistory[id];
+  } catch (e) { console.warn(`competitors: ${e.message}`); }
+  history._comp = compHistory;
+  for (const id of Object.keys(updates)) if (!seen.has(Number(id))) delete updates[id];
+  history._updates = updates;
+
+  const repo = process.env.GITHUB_REPOSITORY;
+  const siteUrl = repo ? `https://${repo.split('/')[0]}.github.io/${repo.split('/')[1]}/` : undefined;
+  try {
+    history._alerts = await runAlerts({ state: alertState, games, newSales, sales: ledger, now, siteUrl, revenueConnected: revenue.connected });
+  } catch (e) { console.warn(`alerts: ${e.message}`); history._alerts = alertState; }
+  const alerts = { discord: !!process.env.DISCORD_WEBHOOK, ntfy: !!process.env.NTFY_TOPIC };
+
   fs.writeFileSync(historyFile, JSON.stringify(history));
   fs.mkdirSync(path.dirname(outFile), { recursive: true });
-  fs.writeFileSync(outFile, JSON.stringify({ fetchedAt: now, intervalMinutes: 5, liveProxy: config.liveProxy || '', owners, games, revenue }));
+  fs.writeFileSync(outFile, JSON.stringify({ fetchedAt: now, intervalMinutes: 5, liveProxy: config.liveProxy || '', owners, games, revenue, competitors, alerts, goals: config.goals || [] }));
   const ccu = games.reduce((s, g) => s + g.playing, 0);
   console.log(`${games.length} experiences, ${ccu} playing, ${owners.map((o) => o.name).join(', ')}`);
 }

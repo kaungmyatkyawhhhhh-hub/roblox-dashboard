@@ -1187,6 +1187,48 @@
   body.intro-hold .bar, body.intro-hold main { opacity: 0; transform: scale(.965); filter: blur(10px); }
   body.intro-reveal .bar, body.intro-reveal main { transition: opacity .9s ease .15s, transform 1.2s cubic-bezier(.16, 1, .3, 1) .1s, filter .9s ease .15s; }
   @media (prefers-reduced-motion: reduce) { .intro { display: none !important; } body.intro-hold .bar, body.intro-hold main { opacity: 1; transform: none; filter: none; } }
+
+  /* ================= compare & reports ================= */
+  .tabs { flex: none; }
+  .cmp-kpis { grid-template-columns: repeat(3, 1fr) !important; }
+  table.cmp tr.mine td { background: color-mix(in srgb, var(--ink) 5%, transparent); }
+  table.cmp tr.mine td:first-child { box-shadow: inset 3px 0 0 var(--ink); }
+  table.cmp th, table.cmp td { text-align: right; }
+  table.cmp th:first-child, table.cmp td:first-child, table.cmp th:nth-child(2), table.cmp td:nth-child(2) { text-align: left; }
+  .ccu-cell { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; }
+  .cellbar { display: inline-block; width: 56px; height: 5px; border-radius: 3px; background: var(--track); overflow: hidden; vertical-align: middle; margin-right: 8px; }
+  .cellbar.wide { width: 110px; margin-right: 0; }
+  .cellbar i { display: block; height: 100%; background: var(--ink); border-radius: 3px; box-shadow: 0 0 8px var(--glow); }
+  table.mini { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  table.mini th, table.mini td { padding: 8px 10px; height: auto; text-align: right; border-top: 1px solid var(--line-soft); white-space: nowrap; }
+  table.mini th { font-weight: 500; color: var(--ink-3); background: none; border-top: 0; border-bottom: 0; cursor: default; font-size: 11.5px; }
+  table.mini th:first-child, table.mini td:first-child { text-align: left; white-space: normal; }
+  .pervisit, .updates { padding: 6px 8px 4px; overflow-x: auto; }
+  .delta { font-weight: 600; font-size: 11.5px; }
+  .delta.up { color: var(--ink); }
+  .delta.down { color: var(--ink-3); }
+  .report { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important; }
+  .report .v.small { font-size: 14px; white-space: normal; }
+  .report .s { white-space: normal; }
+  .goals { list-style: none; margin: 0; padding: 8px 16px; display: grid; gap: 4px; }
+  .goals li { display: flex; gap: 14px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line-soft); }
+  .goals li:first-child { border-top: 0; }
+  .ring { position: relative; width: 64px; height: 64px; flex: none; }
+  .ring b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .gtxt { flex: 1; min-width: 0; font-size: 12.5px; }
+  .gtitle { font-weight: 600; font-size: 14px; }
+  .gnum { margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .gtag { font-size: 11px; }
+  .goal-form { display: flex; flex-wrap: wrap; gap: 8px; padding: 6px 16px 0; }
+  .goal-form select, .goal-form input { height: 34px; width: auto; flex: 1 1 120px; font: inherit; font-size: 12.5px; padding: 0 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); }
+  .goal-form button { height: 34px; }
+  .setup { margin: 10px 16px 14px; padding-left: 20px; display: grid; gap: 8px; font-size: 12.5px; color: var(--ink-2); line-height: 1.5; }
+  .exports { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 16px 16px; }
+  .exports button { height: 38px; }
+  .marker text { fill: var(--ink-2); font-size: 10px; font-family: inherit; }
+  #alerts-setup[hidden] { display: none; }
+  .reports-row:has(#alerts-setup[hidden]) { grid-template-columns: 1fr; }
+  @media (max-width: 720px) { .cmp-kpis { grid-template-columns: 1fr !important; } .tabs { overflow-x: auto; } .tabs button { flex: 1 0 auto; } }
 </style>
 </head>
 <body class="intro-hold">
@@ -1212,7 +1254,7 @@
 <canvas class="eq-bottom" id="eq-bottom" aria-hidden="true"></canvas>
 <header class="bar">
   <div class="brand"><span class="mark"></span><span class="who-bar"><img id="avatar" alt="" hidden><b id="owner">Experience Overview</b><span id="owner-sub"></span></span></div>
-  <nav class="tabs" aria-label="Views"><button type="button" data-tab="overview" aria-pressed="true">Overview</button><button type="button" data-tab="money" aria-pressed="false">Monetization</button></nav>
+  <nav class="tabs" aria-label="Views"><button type="button" data-tab="overview" aria-pressed="true">Overview</button><button type="button" data-tab="money" aria-pressed="false">Monetization</button><button type="button" data-tab="compare" aria-pressed="false">Compare</button><button type="button" data-tab="reports" aria-pressed="false">Reports</button></nav>
   <span class="spacer"></span>
   <form id="form">
     <div class="field"><label for="user">Creator</label><input id="user" placeholder="Username or ID" autocomplete="off"></div>
@@ -1344,7 +1386,10 @@
         <section class="panel"><div class="panel-head"><h2>Top items</h2><span class="meta">Last 30 days</span></div><ul class="store-list rank-list" id="rev-top"></ul></section>
         <section class="panel"><div class="panel-head"><h2>Recent sales</h2></div><ul class="store-list" id="rev-recent"></ul></section>
       </div>
-      <div class="section-title"><h2>Store</h2><span class="meta">What you sell</span></div>
+      <div class="row-m">
+        <section class="panel"><div class="panel-head"><h2>When people buy</h2><span class="meta" id="rev-heat-meta"></span></div><div class="chart-wrap" id="rev-heat"></div></section>
+        <section class="panel"><div class="panel-head"><h2>Earnings per visit</h2><span class="meta">Which game monetizes better</span></div><div class="pervisit" id="rev-pervisit"></div></section>
+      </div>
     </section>
     <section class="kpis" id="m-kpis"></section>
     <div class="row-m">
@@ -1364,6 +1409,57 @@
     </div>
     <div class="section-title"><h2>Store</h2><span class="meta">Every game pass and developer product, priciest first</span></div>
     <div class="stores" id="m-stores"></div>
+  </div>
+  <div class="view" data-view="compare" hidden>
+    <section class="kpis cmp-kpis" id="cmp-share"></section>
+    <section class="panel">
+      <div class="panel-head"><h2>You vs. similar games</h2><span class="meta" id="cmp-meta"></span></div>
+      <div class="table-scroll"><table id="cmp-table" class="cmp"></table></div>
+    </section>
+  </div>
+
+  <div class="view" data-view="reports" hidden>
+    <section class="panel">
+      <div class="panel-head"><h2>This week</h2><span class="meta">Last 7 days vs. the 7 before</span></div>
+      <div class="est-out report" id="report"></div>
+      <p class="est-note" id="alerts-status"></p>
+    </section>
+    <div class="row-m reports-row">
+      <section class="panel">
+        <div class="panel-head"><h2>Goals</h2><span class="meta">Projected from your current pace</span></div>
+        <ul class="goals" id="goals"></ul>
+        <form class="goal-form" id="goal-form">
+          <select name="metric" aria-label="Goal type"><option value="visits">Visits</option><option value="robux_month">Robux this month</option><option value="robux_total">Robux total</option><option value="favorites">Favorites</option><option value="peak">Players at once</option></select>
+          <input name="amount" type="number" min="1" placeholder="Target" aria-label="Target" required>
+          <input name="by" type="date" aria-label="By date">
+          <select name="game" id="goal-game" aria-label="Game"></select>
+          <button class="primary" type="submit">Add goal</button>
+        </form>
+        <p class="est-note">Goals you add here are saved in this browser. Goals in config.json show for everyone.</p>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><h2>Update impact</h2><span class="meta">Before vs. after each publish</span></div>
+        <div class="updates" id="updates"></div>
+      </section>
+    </div>
+    <div class="row-m reports-row">
+      <section class="panel" id="alerts-setup">
+        <div class="panel-head"><h2>Get alerts on your phone</h2></div>
+        <ol class="setup">
+          <li><b>Discord:</b> in a server you own, open a channel's settings → Integrations → Webhooks → New Webhook → Copy Webhook URL.</li>
+          <li><b>Or the ntfy app</b> (iPhone/Android, free): subscribe to a long random topic name only you know.</li>
+          <li>In GitHub: Settings → Secrets and variables → Actions → New repository secret, named <b>DISCORD_WEBHOOK</b> (the URL) or <b>NTFY_TOPIC</b> (the topic name).</li>
+        </ol>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><h2>Export</h2><span class="meta">Spreadsheet-ready files</span></div>
+        <div class="exports">
+          <button type="button" id="exp-sales">Sales (CSV)</button>
+          <button type="button" id="exp-daily">Daily stats per game (CSV)</button>
+          <button type="button" id="exp-json">Everything (JSON)</button>
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -1650,6 +1746,8 @@ function render() {
   $('milestones').innerHTML = milestoneHtml(milestoneRows(games).slice(0, 3)) || '<li class="faint">Every milestone reached. Legendary.</li>';
   renderCards(ranked, colorOf);
   if (view === 'money') renderMoney(games);
+  if (view === 'compare') renderCompare(games);
+  if (view === 'reports') renderReports(games);
   renderDrawer();
   const ccu = games.reduce((s, g) => s + g.playing, 0);
   document.title = `${ccu ? `(${fmt.format(ccu)}) ` : ''}${data.owners.map((o) => o.name).join(', ')} · Experience Overview`;
@@ -1721,7 +1819,8 @@ function renderChart(games, top, colorOf) {
     const pts = totalSeries(others, rangeHours);
     if (pts.length) series.push({ name: `All others (${others.length})`, color: cssVar('--series-other'), dash: '1 5', points: pts });
   }
-  lineChart($('chart'), series, { animate: animateChart, height: innerWidth < 600 ? 190 : 200, label: `Concurrent users, ${RANGE_NAMES[rangeHours].toLowerCase()}` });
+  const markers = games.flatMap((g) => (g.updates || []).map((t) => ({ t, label: 'Update', title: `${g.name} updated ${new Date(t).toLocaleString()}` })));
+  lineChart($('chart'), series, { markers, animate: animateChart, height: innerWidth < 600 ? 190 : 200, label: `Concurrent users, ${RANGE_NAMES[rangeHours].toLowerCase()}` });
   animateChart = false;
 }
 
@@ -1750,7 +1849,7 @@ const numText = (v) => (Number.isInteger(v) ? fmt.format(v) : v.toFixed(1));
 
 // Multi-series line chart with gradient fills, crosshair and tooltip.
 // series: [{ name, color, points: [[time, value], ...] }]
-function lineChart(box, series, { animate = false, label = '', height, floor = 4, legend = true } = {}) {
+function lineChart(box, series, { animate = false, label = '', height, floor = 4, legend = true, markers = [] } = {}) {
   const all = series.flatMap((s) => s.points);
   const t0 = Math.min(...all.map((p) => p[0])), t1 = Math.max(...all.map((p) => p[0]));
   if (!series.length || t1 - t0 < 60000) { box.innerHTML = `<div class="empty">${EMPTY_LINE}</div>`; return; }
@@ -1804,6 +1903,7 @@ function lineChart(box, series, { animate = false, label = '', height, floor = 4
       <defs>${defs}</defs>
       <g class="axis">${grid}</g>
       ${shapes}
+      ${markers.filter((k) => k.t >= t0 && k.t <= t1).map((k) => `<g class="marker"><line x1="${x(k.t)}" x2="${x(k.t)}" y1="${m.t}" y2="${m.t + ih}" stroke="var(--ink-2)" stroke-width="1" stroke-dasharray="2 3"/><text x="${x(k.t) + 4}" y="${m.t + 10}">${esc(k.label)}</text><title>${esc(k.title || k.label)}</title></g>`).join('')}
       <line class="xhair" y1="${m.t}" y2="${m.t + ih}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="3 3" visibility="hidden"/>
       <g class="dots"></g>
       <rect class="hit" x="${m.l}" y="${m.t}" width="${iw}" height="${ih}" fill="transparent"/>
@@ -3219,16 +3319,19 @@ const ROBLOX_CUT = 0.3;          // Roblox keeps 30% of game pass and developer 
 const DEVEX_USD = 0.0038;        // Developer Exchange rate, USD per Robux (2025)
 const TIERS = [[1, 25], [26, 50], [51, 100], [101, 250], [251, 500], [501, Infinity]];
 const robux = (v) => `R$ ${fmt.format(Math.round(v))}`;
-let view = (location.hash === '#monetization' || load('rgo.view') === 'money') ? 'money' : 'overview';
+const VIEW_HASH = { money: '#monetization', compare: '#compare', reports: '#reports' };
+let view = Object.keys(VIEW_HASH).find((k) => VIEW_HASH[k] === location.hash) || (['money', 'compare', 'reports'].includes(load('rgo.view')) && !location.hash ? load('rgo.view') : 'overview');
 let est = { rate: Number(load('rgo.rate')) || 1, avg: Number(load('rgo.avg')) || 0 };
 
 function setView(v) {
   view = v;
   store('rgo.view', v);
-  if (!/^#game-/.test(location.hash)) history.replaceState(null, '', v === 'money' ? '#monetization' : location.pathname + location.search);
+  if (!/^#game-/.test(location.hash)) history.replaceState(null, '', VIEW_HASH[v] || location.pathname + location.search);
   document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.tab === v));
   document.querySelectorAll('[data-view]').forEach((el) => { el.hidden = el.dataset.view !== v; });
   if (v === 'money' && data) renderMoney(data.games);
+  if (v === 'compare' && data) renderCompare(data.games);
+  if (v === 'reports' && data) renderReports(data.games);
   if (v === 'overview' && data) { animateChart = true; render(); }
 }
 
@@ -3424,6 +3527,8 @@ function renderRevenue(games) {
       <span class="si"><b>${esc(x.item)}</b><span>${revGame === 'all' ? esc(gameName.get(String(x.universeId)) || x.place || '') + ' · ' : ''}${agoIso(new Date(x.t).toISOString())}</span></span>
       <span class="price num">${x.pending ? '<em class="tag">Pending</em>' : ''}+${robux(x.robux)}</span>
     </li>`).join('') : '<li class="faint">No sales yet.</li>';
+  renderSalesHeat(mine);
+  renderPerVisit(revGame === 'all' ? games : games.filter((g) => String(g.universeId) === revGame), sales);
 }
 
 document.addEventListener('click', (e) => {
@@ -3432,6 +3537,265 @@ document.addEventListener('click', (e) => {
   revGame = b.dataset.rev;
   store('rgo.revgame', revGame);
   renderRevenue(data.games);
+});
+
+// ================= more analytics: sales heatmap, earnings per visit, compare, reports =================
+const sumR = (list) => list.reduce((s, x) => s + x.robux, 0);
+const cleanName = (n) => n.replace(/\[[^\]]*\]\s*/g, '').trim() || n;
+
+// Visits gained between two times, from the stored history.
+function visitsBetween(g, from, to = Infinity) {
+  const h = g.history.filter((p) => p[0] >= from && p[0] <= to && p[2] != null);
+  return h.length > 1 ? h[h.length - 1][2] - h[0][2] : 0;
+}
+function avgPlayers(g, from, to) {
+  const h = g.history.filter((p) => p[0] >= from && p[0] < to);
+  return h.length ? h.reduce((s, p) => s + p[1], 0) / h.length : null;
+}
+
+// ---- sales heatmap (Monetization) ----
+function renderSalesHeat(sales) {
+  const box = $('rev-heat');
+  if (!box) return;
+  const sums = Array.from({ length: 7 }, () => new Array(24).fill(0));
+  const counts = Array.from({ length: 7 }, () => new Array(24).fill(0));
+  for (const x of sales) {
+    const d = new Date(x.t), dow = (d.getDay() + 6) % 7, hr = d.getHours();
+    sums[dow][hr] += x.robux; counts[dow][hr]++;
+  }
+  const max = Math.max(1, ...sums.flat());
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  let html = '<div class="heat"><span></span>';
+  html += Array.from({ length: 24 }, (_, h) => `<span class="hl">${h % 3 === 0 ? hourName(h).replace(/\s/g, '').toLowerCase() : ''}</span>`).join('');
+  sums.forEach((row, i) => {
+    html += `<span class="dl">${days[i]}</span>`;
+    row.forEach((v, h) => {
+      const k = v / max;
+      html += `<i class="cell${v ? '' : ' none'}${k > 0.55 ? ' hot' : ''}" style="--k:${(6 + k * 94).toFixed(0)}%" data-tip="${days[i]} ${hourName(h)} · ${v ? `R$ ${fmt.format(v)} from ${counts[i][h]} sale${counts[i][h] === 1 ? '' : 's'}` : 'no sales'}"></i>`;
+    });
+  });
+  html += '</div><div class="heat-legend"><span>Less</span><i style="--k:6%"></i><i style="--k:35%"></i><i style="--k:65%"></i><i style="--k:100%"></i><span>More Robux</span></div><div class="tooltip"></div>';
+  box.innerHTML = html;
+  const tip = box.querySelector('.tooltip');
+  box.querySelector('.heat').onpointermove = (e) => { const c = e.target.closest('.cell'); if (!c) { tip.style.display = 'none'; return; } tip.textContent = c.dataset.tip; placeTip(box, tip, e); };
+  box.querySelector('.heat').onpointerleave = () => { tip.style.display = 'none'; };
+  const best = sums.flatMap((row, i) => row.map((v, h) => [v, i, h])).sort((a, b) => b[0] - a[0])[0];
+  $('rev-heat-meta').textContent = best && best[0] ? `Best: ${days[best[1]]} around ${hourName(best[2])}` : 'Your local time';
+}
+
+// ---- Robux per visit, per game (Monetization) ----
+function renderPerVisit(games, sales) {
+  const box = $('rev-pervisit');
+  if (!box) return;
+  const from = Date.now() - 30 * DAY;
+  const rows = games.map((g) => {
+    const s = sales.filter((x) => x.universeId === g.universeId && x.t >= from);
+    const v = visitsBetween(g, from);
+    return { g, visits: v, robux: sumR(s), sales: s.length };
+  });
+  const maxK = Math.max(0.0001, ...rows.map((r) => (r.visits ? r.robux / r.visits : 0)));
+  box.innerHTML = `<table class="mini"><thead><tr><th>Experience</th><th>Visits</th><th>Robux</th><th>R$ per 1K visits</th><th>Buyers per 1K</th></tr></thead><tbody>${rows.map((r) => {
+    const per = r.visits ? (r.robux / r.visits) * 1000 : null;
+    return `<tr><td>${esc(cleanName(r.g.name))}</td><td>${fmt.format(r.visits)}</td><td>${robux(r.robux)}</td>
+      <td><span class="cellbar"><i style="width:${per == null ? 0 : ((r.robux / r.visits) / maxK) * 100}%"></i></span>${per == null ? '—' : robux(per)}</td>
+      <td>${r.visits ? ((r.sales / r.visits) * 1000).toFixed(1) : '—'}</td></tr>`;
+  }).join('')}</tbody></table>
+  <p class="est-note">Last 30 days, or since tracking began. Higher means each visit is worth more to you.</p>`;
+}
+
+// ---- Compare tab ----
+function renderCompare(games) {
+  if (!$('cmp-table')) return;
+  const comps = data.competitors || [];
+  const rows = [...games.map((g) => ({ g, mine: true })), ...comps.map((g) => ({ g, mine: false }))];
+  const now = data.fetchedAt;
+  const maxCcu = Math.max(1, ...rows.map((r) => r.g.playing));
+  const logW = (v) => (v > 0 ? (Math.log10(v + 1) / Math.log10(maxCcu + 1)) * 100 : 0);
+  const perDay = (g) => {
+    const h = g.history.filter((p) => p[0] >= now - 7 * DAY);
+    if (h.length < 2) return null;
+    const days = (h[h.length - 1][0] - h[0][0]) / DAY;
+    return days > 0.05 ? (h[h.length - 1][2] - h[0][2]) / days : null;
+  };
+  rows.sort((a, b) => b.g.playing - a.g.playing);
+  $('cmp-table').innerHTML = `<thead><tr><th>Experience</th><th>Playing now</th><th>24h trend</th><th>24h peak</th><th>Visits/day</th><th>Visits</th><th>Favorites</th><th>Like ratio</th></tr></thead><tbody>${rows.map(({ g, mine }) => {
+    const h24 = g.history.filter((p) => p[0] >= now - DAY);
+    const pk = Math.max(g.playing, ...h24.map((p) => p[1]));
+    const r = rating(g);
+    const vpd = perDay(g);
+    return `<tr class="${mine ? 'mine' : ''}">
+      <td><div class="game">${g.icon ? `<img src="${esc(g.icon)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'), { className: 'noimg' }))">` : '<div class="noimg"></div>'}
+        <div><a href="https://www.roblox.com/games/${g.placeId}" target="_blank" rel="noopener">${esc(g.name)}</a><div class="genre">${mine ? 'Yours' : esc(g.creator || 'Similar game')}</div></div></div></td>
+      <td><span class="ccu-cell"><span class="cellbar wide"><i style="width:${logW(g.playing)}%"></i></span>${fmt.format(g.playing)}</span></td>
+      <td>${sparkline(h24.map((p) => [p[0], p[1]]), 88, 24, mine ? cssVar('--ink') : cssVar('--ink-3')).replace('<svg', '<svg width="88" height="24"')}</td>
+      <td>${fmt.format(pk)}</td>
+      <td>${vpd == null ? '<span class="faint">collecting</span>' : fmt.format(Math.round(vpd))}</td>
+      <td>${compact.format(g.visits)}</td>
+      <td>${compact.format(g.favorites)}</td>
+      <td>${r == null ? '—' : `${Math.round(r * 100)}%`}</td>
+    </tr>`;
+  }).join('')}</tbody>`;
+  $('cmp-meta').textContent = comps.length ? `${comps.length} similar games · bars use a log scale so small and large games fit together` : 'Add similar games to config.json → "competitors" to compare.';
+  // Your share of players among everything compared, right now.
+  const total = rows.reduce((s, r) => s + r.g.playing, 0);
+  const mineNow = games.reduce((s, g) => s + g.playing, 0);
+  $('cmp-share').innerHTML = `
+    <div class="kpi panel"><div class="label">Your players right now</div><div><span class="value num">${fmt.format(mineNow)}</span></div><div class="sub">${total ? `${((mineNow / total) * 100).toFixed(2)}% of everyone in these games` : ''}</div></div>
+    <div class="kpi panel"><div class="label">Biggest game compared</div><div><span class="value num">${fmt.format(Math.max(0, ...comps.map((c) => c.playing)))}</span></div><div class="sub">${esc(cleanName((comps.slice().sort((a, b) => b.playing - a.playing)[0] || { name: '—' }).name))}</div></div>
+    <div class="kpi panel"><div class="label">Your like ratio vs. theirs</div><div><span class="value num">${(() => { const mine = games.map(rating).filter((x) => x != null); const th = comps.map(rating).filter((x) => x != null); return mine.length && th.length ? `${Math.round((mine.reduce((a, b) => a + b, 0) / mine.length) * 100)}% / ${Math.round((th.reduce((a, b) => a + b, 0) / th.length) * 100)}%` : '—'; })()}</span></div><div class="sub">Average of your games / theirs</div></div>`;
+}
+
+// ---- Reports tab: weekly report, goals, update impact, export, alerts ----
+function weekStats(games, sales, from, to) {
+  let visits = 0, peak = 0;
+  for (const g of games) {
+    visits += visitsBetween(g, from, to);
+    for (const p of g.history) if (p[0] >= from && p[0] < to) peak = Math.max(peak, p[1]);
+  }
+  const s = sales.filter((x) => x.t >= from && x.t < to);
+  const items = new Map();
+  for (const x of s) items.set(x.item, (items.get(x.item) || 0) + x.robux);
+  const best = [...items].sort((a, b) => b[1] - a[1])[0];
+  return { visits, peak, robux: sumR(s), sales: s.length, best };
+}
+
+function delta(a, b) {
+  if (!b) return '<span class="faint">no data last week</span>';
+  const pct = Math.round(((a - b) / b) * 100);
+  return `<span class="delta ${pct >= 0 ? 'up' : 'down'}">${pct >= 0 ? '▲' : '▼'} ${Math.abs(pct)}%</span> <span class="faint">vs ${fmt.format(Math.round(b))}</span>`;
+}
+
+const GOAL_METRICS = {
+  visits: { label: 'Visits', value: (gs) => gs.reduce((s, g) => s + g.visits, 0), rate: (gs) => visitsPerDay(gs) },
+  favorites: { label: 'Favorites', value: (gs) => gs.reduce((s, g) => s + g.favorites, 0), rate: (gs) => gs.reduce((s, g) => s + ratePerDay(g, 3), 0) },
+  robux_month: { label: 'Robux this month', value: (gs, sales) => sumR(sales.filter((x) => x.t >= monthStart() && (gs.length > 1 || x.universeId === gs[0].universeId))), rate: (gs, sales) => { const days = (Date.now() - monthStart()) / DAY; return days > 0.1 ? GOAL_METRICS.robux_month.value(gs, sales) / days : 0; } },
+  robux_total: { label: 'Robux total', value: (gs, sales) => sumR(gs.length > 1 ? sales : sales.filter((x) => x.universeId === gs[0].universeId)), rate: (gs, sales) => sumR((gs.length > 1 ? sales : sales.filter((x) => x.universeId === gs[0].universeId)).filter((x) => x.t >= Date.now() - 7 * DAY)) / 7 },
+  peak: { label: 'Players at once', value: (gs) => Math.max(0, ...gs.flatMap((g) => g.history.map((p) => p[1])), gs.reduce((s, g) => s + g.playing, 0)), rate: () => 0 },
+};
+const monthStart = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).getTime(); };
+let localGoals = [];
+try { localGoals = JSON.parse(load('rgo.goals') || '[]'); } catch { localGoals = []; }
+
+function renderGoals(games, sales) {
+  const goals = [...(data.goals || []).map((g) => ({ ...g, shared: true })), ...localGoals.map((g, i) => ({ ...g, idx: i }))];
+  const ring = (k) => {
+    const r = 26, c = 2 * Math.PI * r;
+    return `<svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--track)" stroke-width="6"/><circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--ink)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(Math.min(1, k) * c).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 32 32)" style="filter:drop-shadow(0 0 6px var(--glow))"/></svg>`;
+  };
+  $('goals').innerHTML = goals.length ? goals.map((goal) => {
+    const m = GOAL_METRICS[goal.metric] || GOAL_METRICS.visits;
+    const gs = goal.game ? games.filter((g) => String(g.universeId) === String(goal.game)) : games;
+    if (!gs.length) return '';
+    const cur = m.value(gs, sales), k = goal.target ? cur / goal.target : 0;
+    const rate = m.rate(gs, sales);
+    const left = goal.target - cur;
+    const by = goal.by ? new Date(goal.by) : null;
+    let pace = '';
+    if (k >= 1) pace = '<span class="delta up">Reached 🎉</span>';
+    else if (rate > 0) {
+      const eta = new Date(Date.now() + (left / rate) * DAY);
+      const ok = !by || eta <= by;
+      pace = `${ok ? '<span class="delta up">On track</span>' : '<span class="delta down">Behind</span>'} <span class="faint">· at this pace ${new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: eta.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined }).format(eta)}</span>`;
+    } else pace = '<span class="faint">Pace not known yet</span>';
+    const fmtV = (v) => (goal.metric.startsWith('robux') ? robux(v) : fmt.format(Math.round(v)));
+    return `<li>
+      <div class="ring">${ring(k)}<b>${Math.min(100, Math.round(k * 100))}%</b></div>
+      <div class="gtxt"><div class="gtitle">${esc(goal.title || `${fmtV(goal.target)} ${m.label.toLowerCase()}`)}</div>
+        <div class="faint">${goal.game ? esc(cleanName(gs[0].name)) : 'All games'}${by ? ` · by ${new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).format(by)}` : ''}</div>
+        <div class="gnum">${fmtV(cur)} <span class="faint">/ ${fmtV(goal.target)}</span></div><div class="gpace">${pace}</div></div>
+      ${goal.shared ? '<span class="faint gtag">from config</span>' : `<button class="icon gdel" type="button" data-goal-del="${goal.idx}" aria-label="Remove goal">✕</button>`}
+    </li>`;
+  }).join('') : '<li class="faint">No goals yet. Add one below.</li>';
+  $('goal-game').innerHTML = '<option value="">All games</option>' + games.map((g) => `<option value="${g.universeId}">${esc(cleanName(g.name))}</option>`).join('');
+}
+
+function renderUpdates(games, sales) {
+  const now = Date.now();
+  const rows = games.flatMap((g) => (g.updates || []).map((t) => ({ g, t }))).sort((a, b) => b.t - a.t).slice(0, 12);
+  $('updates').innerHTML = rows.length ? `<table class="mini"><thead><tr><th>Update</th><th>Avg players</th><th>Visits/day</th><th>Robux/day</th></tr></thead><tbody>${rows.map(({ g, t }) => {
+    const span = Math.min(7 * DAY, now - t);
+    const ready = span >= DAY;
+    const before = { p: avgPlayers(g, t - 7 * DAY, t), v: visitsBetween(g, t - 7 * DAY, t) / 7, r: sumR(sales.filter((x) => x.universeId === g.universeId && x.t >= t - 7 * DAY && x.t < t)) / 7 };
+    const after = { p: avgPlayers(g, t, t + span), v: visitsBetween(g, t, t + span) / (span / DAY), r: sumR(sales.filter((x) => x.universeId === g.universeId && x.t >= t && x.t < t + span)) / (span / DAY) };
+    const cell = (a, b, f) => {
+      if (!ready) return '<span class="faint">wait a day</span>';
+      if (a == null || b == null) return '<span class="faint">—</span>';
+      const pct = b ? Math.round(((a - b) / b) * 100) : null;
+      return `${f(a)} <span class="faint">vs ${f(b)}</span>${pct == null ? '' : ` <span class="delta ${pct >= 0 ? 'up' : 'down'}">${pct >= 0 ? '▲' : '▼'}${Math.abs(pct)}%</span>`}`;
+    };
+    const f1 = (v) => (v < 10 ? v.toFixed(1) : fmt.format(Math.round(v)));
+    return `<tr><td><b>${esc(cleanName(g.name))}</b><div class="faint">${new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(t)}</div></td>
+      <td>${cell(after.p, before.p, f1)}</td><td>${cell(after.v, before.v, f1)}</td><td>${cell(after.r, before.r, (v) => robux(v))}</td></tr>`;
+  }).join('')}</tbody></table><p class="est-note">7 days after each update compared with the 7 days before (or as much as has passed). Updates are marked on the Overview players chart too.</p>` : '<p class="faint">No updates recorded yet. Each time you publish a game, it shows up here.</p>';
+}
+
+function renderReports(games) {
+  if (!$('report')) return;
+  const sales = (data.revenue && data.revenue.sales) || [];
+  const now = Date.now();
+  const cur = weekStats(games, sales, now - 7 * DAY, now), prev = weekStats(games, sales, now - 14 * DAY, now - 7 * DAY);
+  const hasRev = data.revenue && (data.revenue.connected || sales.length);
+  $('report').innerHTML = `
+    <div><div class="k">Visits</div><div class="v">${fmt.format(cur.visits)}</div><div class="s">${delta(cur.visits, prev.visits)}</div></div>
+    <div><div class="k">Peak players</div><div class="v">${fmt.format(cur.peak)}</div><div class="s">${delta(cur.peak, prev.peak)}</div></div>
+    ${hasRev ? `<div><div class="k">Robux</div><div class="v">${robux(cur.robux)}</div><div class="s">${delta(cur.robux, prev.robux)}</div></div>
+    <div><div class="k">Sales</div><div class="v">${fmt.format(cur.sales)}</div><div class="s">${delta(cur.sales, prev.sales)}</div></div>
+    <div><div class="k">Best seller</div><div class="v small">${cur.best ? esc(cur.best[0]) : '—'}</div><div class="s">${cur.best ? robux(cur.best[1]) : 'No sales this week'}</div></div>` : ''}`;
+  renderGoals(games, sales);
+  renderUpdates(games, sales);
+  const a = data.alerts || {};
+  $('alerts-status').innerHTML = a.discord || a.ntfy
+    ? `<span class="delta up">On</span> Sending to ${[a.discord && 'Discord', a.ntfy && 'the ntfy app'].filter(Boolean).join(' and ')}: new sales, player records, visit milestones, game updates, and this report every Monday.`
+    : 'Off. Set it up below to get new sales, player records, visit milestones, game updates and a Monday report on your phone.';
+  $('alerts-setup').hidden = !!(a.discord || a.ntfy);
+}
+
+// ---- export ----
+function download(name, text, type) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = Object.assign(document.createElement('a'), { href: url, download: name });
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+const csv = (rows) => rows.map((r) => r.map((v) => (/[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v)).join(',')).join('\n');
+
+function exportSales() {
+  const names = new Map(data.games.map((g) => [g.universeId, g.name]));
+  const rows = [['time', 'experience', 'item', 'type', 'robux', 'pending']];
+  for (const x of (data.revenue && data.revenue.sales) || []) rows.push([new Date(x.t).toISOString(), names.get(x.universeId) || 'Group store', x.item, x.type, x.robux, x.pending]);
+  download('sales.csv', csv(rows), 'text/csv');
+}
+function exportDaily() {
+  const rows = [['date', 'experience', 'visits_gained', 'avg_players', 'peak_players', 'robux']];
+  const sales = (data.revenue && data.revenue.sales) || [];
+  for (const g of data.games) {
+    const gains = dailyGains(g);
+    const days = new Set(g.history.map((p) => dayStart(p[0])));
+    for (const d of [...days].sort()) {
+      const h = g.history.filter((p) => p[0] >= d && p[0] < d + DAY);
+      rows.push([new Date(d).toISOString().slice(0, 10), g.name, gains.get(d) || 0, (h.reduce((s, p) => s + p[1], 0) / h.length).toFixed(2), Math.max(...h.map((p) => p[1])), sumR(sales.filter((x) => x.universeId === g.universeId && x.t >= d && x.t < d + DAY))]);
+    }
+  }
+  download('daily-stats.csv', csv(rows), 'text/csv');
+}
+
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#exp-sales')) exportSales();
+  if (e.target.closest('#exp-daily')) exportDaily();
+  if (e.target.closest('#exp-json')) download('dashboard-data.json', JSON.stringify(data, null, 2), 'application/json');
+  const del = e.target.closest('[data-goal-del]');
+  if (del) { localGoals.splice(Number(del.dataset.goalDel), 1); store('rgo.goals', JSON.stringify(localGoals)); renderReports(data.games); }
+});
+document.addEventListener('submit', (e) => {
+  if (e.target.id !== 'goal-form') return;
+  e.preventDefault();
+  const f = e.target;
+  const target = Number(f.amount.value);
+  if (!target) return;
+  localGoals.push({ metric: f.metric.value, target, by: f.by.value || null, game: f.game.value || null });
+  store('rgo.goals', JSON.stringify(localGoals));
+  f.reset();
+  renderReports(data.games);
 });
 
 let resizeTimer;

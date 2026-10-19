@@ -39,6 +39,9 @@ jobs:
         env:
           # Optional: login cookie of an account that can view the group's revenue.
           ROBLOX_COOKIE: ${{ secrets.ROBLOX_COOKIE }}
+          # Optional: where alerts and the weekly report go.
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
 
       - name: Save history
         run: |
