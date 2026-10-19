@@ -61,10 +61,10 @@ async function search(url, env, ctx, cors) {
     return json({ error: `Search is not set up yet: this worker has no YOUTUBE_API_KEY secret. ${seen.length ? `It only sees: ${seen.join(', ')}.` : 'It sees no variables or secrets at all. Add the secret, then click Deploy.'}` }, 501, cors);
   }
   const cache = caches.default;
-  const key = new Request(`https://cache.local/search?q=${encodeURIComponent(q.toLowerCase())}`);
+  const key = new Request(`https://cache.local/search-v2?q=${encodeURIComponent(q.toLowerCase())}`);
   const hit = await cache.match(key);
   if (hit) return new Response(hit.body, { headers: { ...cors, 'content-type': 'application/json', 'cache-control': 'no-store' } });
-  const api = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=12&safeSearch=moderate&q=${encodeURIComponent(q)}&key=${encodeURIComponent(apiKey)}`;
+  const api = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=25&safeSearch=moderate&q=${encodeURIComponent(q)}&key=${encodeURIComponent(apiKey)}`;
   const res = await fetch(api);
   const data = await res.json();
   if (!res.ok) {
@@ -78,12 +78,13 @@ async function search(url, env, ctx, cors) {
     }[reason];
     return json({ error: why || `YouTube search failed (${reason || res.status}).` }, 502, cors);
   }
-  const results = (data.items || []).map((it) => ({
+  const found = (data.items || []).map((it) => ({
     id: it.id.videoId,
     title: it.snippet.title,
     channel: it.snippet.channelTitle,
     thumb: (it.snippet.thumbnails.medium || it.snippet.thumbnails.default || {}).url,
   })).filter((r) => r.id);
+  const results = (await withoutShorts(found, apiKey)).slice(0, 12);
   const body = JSON.stringify({ results });
   if (ctx) ctx.waitUntil(cache.put(key, new Response(body, { headers: { 'cache-control': 'max-age=86400' } })));
   return new Response(body, { headers: { ...cors, 'content-type': 'application/json', 'cache-control': 'no-store' } });
@@ -100,4 +101,36 @@ function json(body, status, headers) {
     status,
     headers: { ...headers, 'content-type': 'application/json', 'cache-control': 'no-store' },
   });
+}
+
+// YouTube Shorts are vertical videos: drop anything taller than it is wide,
+// anything a minute or shorter, and anything tagged #shorts. Costs 1 quota
+// unit per search (the search itself costs 100).
+async function withoutShorts(items, apiKey) {
+  const tagged = (r) => /#shorts?\b/i.test(r.title);
+  if (!items.length) return items;
+  try {
+    const ids = items.map((r) => r.id).join(',');
+    const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails,player&maxWidth=320&id=${ids}&key=${encodeURIComponent(apiKey)}`);
+    if (!res.ok) return items.filter((r) => !tagged(r));
+    const info = new Map(((await res.json()).items || []).map((v) => [v.id, v]));
+    return items.filter((r) => {
+      const v = info.get(r.id);
+      if (tagged(r)) return false;
+      if (!v) return true;
+      const w = Number(v.player && v.player.embedWidth), h = Number(v.player && v.player.embedHeight);
+      if (w && h && h > w) return false;
+      return seconds(v.contentDetails && v.contentDetails.duration) > 60;
+    });
+  } catch {
+    return items.filter((r) => !tagged(r));
+  }
+}
+
+// ISO 8601 duration (PT3M25S) to seconds; unknown or live counts as long.
+function seconds(d) {
+  if (!d || d === 'P0D') return Infinity;   // live streams report P0D
+  const m = /^P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(d || '');
+  if (!m) return Infinity;
+  return (+m[1] || 0) * 86400 + (+m[2] || 0) * 3600 + (+m[3] || 0) * 60 + (+m[4] || 0);
 }
