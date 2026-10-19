@@ -52,17 +52,31 @@ export default {
 async function search(url, env, ctx, cors) {
   const q = (url.searchParams.get('q') || '').trim().slice(0, 100);
   if (!q) return json({ error: 'Pass ?q= with something to search for' }, 400, cors);
-  if (!env.YOUTUBE_API_KEY) return json({ error: 'Search is not set up yet: add a YOUTUBE_API_KEY secret to this worker.' }, 501, cors);
+  // Accept small slips in the secret's name (case, spaces, dashes) and stray spaces in the key.
+  const name = Object.keys(env).find((k) => k.replace(/[\s_-]/g, '').toUpperCase() === 'YOUTUBEAPIKEY');
+  const apiKey = name && typeof env[name] === 'string' ? env[name].trim() : '';
+  if (!apiKey) {
+    // List only the names this worker can see (never values) so a misnamed secret is easy to spot.
+    const seen = Object.keys(env).filter((k) => typeof env[k] === 'string');
+    return json({ error: `Search is not set up yet: this worker has no YOUTUBE_API_KEY secret. ${seen.length ? `It only sees: ${seen.join(', ')}.` : 'It sees no variables or secrets at all. Add the secret, then click Deploy.'}` }, 501, cors);
+  }
   const cache = caches.default;
   const key = new Request(`https://cache.local/search?q=${encodeURIComponent(q.toLowerCase())}`);
   const hit = await cache.match(key);
   if (hit) return new Response(hit.body, { headers: { ...cors, 'content-type': 'application/json', 'cache-control': 'no-store' } });
-  const api = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=12&safeSearch=moderate&q=${encodeURIComponent(q)}&key=${env.YOUTUBE_API_KEY}`;
+  const api = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&maxResults=12&safeSearch=moderate&q=${encodeURIComponent(q)}&key=${encodeURIComponent(apiKey)}`;
   const res = await fetch(api);
   const data = await res.json();
   if (!res.ok) {
     const reason = data.error && data.error.errors && data.error.errors[0] && data.error.errors[0].reason;
-    return json({ error: reason === 'quotaExceeded' ? 'Daily search limit reached. Try again tomorrow, or paste a link.' : 'YouTube search failed.' }, 502, cors);
+    const why = {
+      quotaExceeded: 'Daily search limit reached. Try again tomorrow, or paste a link.',
+      keyInvalid: 'Google rejected the YOUTUBE_API_KEY. Copy the key again from Google Cloud → Credentials.',
+      badRequest: 'Google rejected the YOUTUBE_API_KEY. Copy the key again from Google Cloud → Credentials.',
+      accessNotConfigured: 'YouTube Data API v3 is not enabled in your Google Cloud project yet (APIs & Services → Library).',
+      forbidden: 'The API key is not allowed to use YouTube Data API v3. Check its restrictions in Google Cloud → Credentials.',
+    }[reason];
+    return json({ error: why || `YouTube search failed (${reason || res.status}).` }, 502, cors);
   }
   const results = (data.items || []).map((it) => ({
     id: it.id.videoId,
