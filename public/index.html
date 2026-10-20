@@ -943,6 +943,12 @@
   .player.yt:not(.vid-ready) .p-poster .spin { opacity: 1; }
   .p-frame #yt-frame, .p-frame iframe { position: relative; z-index: 1; opacity: 0; transform: scale(1.015); transition: opacity .7s ease, transform .9s cubic-bezier(.16, 1, .3, 1), filter .7s ease; filter: blur(4px); }
   .player.vid-ready .p-frame #yt-frame, .player.vid-ready .p-frame iframe { opacity: 1; transform: none; filter: none; }
+  /* Two stacked players for mixing: the outgoing song dissolves into the incoming one. */
+  .p-frame iframe { position: absolute; inset: 0; }
+  .p-frame div#yt-frame-b { display: none; }
+  .player.vid-ready .p-frame #yt-frame:not(.live), .player.vid-ready .p-frame #yt-frame-b:not(.live), .p-frame #yt-frame:not(.live), .p-frame #yt-frame-b:not(.live) { opacity: 0; pointer-events: none; }
+  .player.mixing .p-frame #yt-frame, .player.mixing .p-frame #yt-frame-b { transition: opacity var(--mix, 8s) linear, transform .9s cubic-bezier(.16, 1, .3, 1), filter var(--mix, 8s) ease; }
+  .player.mixing .p-frame #yt-frame:not(.live), .player.mixing .p-frame #yt-frame-b:not(.live) { filter: blur(2px); }
   .p-frame::after { z-index: 2; }
   .p-ambient { transition: opacity .9s ease; }
   .player.swapping .p-ambient { opacity: 0; }
@@ -1328,7 +1334,7 @@
       </div>
       <button class="p-min" id="p-min" type="button" aria-label="Minimize player"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
-    <div class="p-video" id="p-video"><div class="p-ambient" aria-hidden="true"></div><div class="p-frame"><div class="p-poster" aria-hidden="true"><span class="spin"></span></div><div id="yt-frame"></div></div></div>
+    <div class="p-video" id="p-video"><div class="p-ambient" aria-hidden="true"></div><div class="p-frame"><div class="p-poster" aria-hidden="true"><span class="spin"></span></div><div id="yt-frame"></div><div id="yt-frame-b"></div></div></div>
     <canvas id="p-viz" aria-hidden="true"></canvas>
     <div class="p-progress"><span id="p-cur">0:00</span><div class="p-seek" id="p-seek" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" tabindex="0"><i></i><b></b></div><span id="p-dur">0:00</span></div>
     <div class="p-controls">
@@ -2837,6 +2843,7 @@ const saveQueue = () => store('rgo.queue', JSON.stringify(queue));
 let src = 'mood';      // 'mood' (generated) or 'yt'
 let ytIndex = -1;
 let yt = null, ytReady = null, ytPlaying = false, ytErrors = 0;
+let ytB = null;          // standby player: the next song loads here and is mixed in
 
 function loadYouTubeApi() {
   if (ytReady) return ytReady;
@@ -2912,6 +2919,7 @@ function setShuffle(on) {
 
 async function playYT(i) {
   if (!queue.length) return;
+  cancelMix();
   ytIndex = (i + queue.length) % queue.length;
   if (played[played.length - 1] !== ytIndex) played.push(ytIndex);
   if (played.length > queue.length * 2) played = played.slice(-queue.length);
@@ -2925,12 +2933,13 @@ async function playYT(i) {
   try { await loadYouTubeApi(); } catch (e) { setMsg(`${e.message}. Check your connection and try again.`); return; }
   yt?.setVolume?.(Math.round(music.vol * 100 * ytLevel));
   if (!yt) {
+    makeStandby();
     yt = new YT.Player('yt-frame', {
       width: '100%', height: '200',
       videoId: item.v || undefined,
       playerVars: { autoplay: 1, playsinline: 1, rel: 0, controls: 0, fs: 0, iv_load_policy: 3, disablekb: 1, start: item.start || 0, ...(item.list ? { listType: 'playlist', list: item.list } : {}) },
       events: {
-        onReady: (e) => { e.target.setVolume(Math.round(music.vol * 100 * ytLevel)); e.target.playVideo(); },
+        onReady: (e) => { e.target.setVolume(Math.round(music.vol * 100 * ytLevel)); e.target.playVideo(); e.target.getIframe().classList.add('live'); },
         onStateChange: onYTState,
         onError: onYTError,
       },
@@ -2945,9 +2954,12 @@ async function playYT(i) {
 
 function onYTState(e) {
   const S = YT.PlayerState;
+  if (e.target !== yt) { onStandbyState(e); return; }
+  // The outgoing song ended (or the phone paused it to play the new one): finish the mix now.
+  if (mix && (e.data === S.ENDED || (e.data === S.PAUSED && mix.started))) { commitMix(); return; }
   ytPlaying = e.data === S.PLAYING || e.data === S.BUFFERING;
   const cur = yt.getVideoData && yt.getVideoData();
-  if (cur && cur.video_id && cur.video_id !== lastVid) { lastVid = cur.video_id; beginSwap(); }
+  if (cur && cur.video_id && cur.video_id !== lastVid) { lastVid = cur.video_id; mixFailed = false; beginSwap(); }
   if (e.data === S.PLAYING) endSwap();
   if (e.data === S.PLAYING && ytFadeIn) { ytFadeIn = false; ytFade(1, 1400); }
   if (radio && e.data === S.PLAYING && cur) {
@@ -2987,6 +2999,7 @@ function onYTState(e) {
 }
 
 function onYTError(e) {
+  if (e.target !== yt) { cancelMix(true); return; }   // the next song can't be mixed in; it plays normally instead
   ytErrors++;
   const blocked = e.data === 101 || e.data === 150;
   setMsg(blocked ? "This video's owner doesn't allow playing it outside YouTube, so it was skipped." : "This video couldn't be played, so it was skipped.");
@@ -3006,10 +3019,11 @@ function currentVideoId() {
 }
 
 function startRadio() {
+  cancelMix();
   const seed = (radio && radio.now && radio.now.id) || currentVideoId();
   if (!seed || !yt || !yt.loadPlaylist) { setMsg('Play a YouTube video first, then press next for recommendations.'); return; }
   const seedTitle = (radio && radio.now && radio.now.title) || (queue[ytIndex] && (queue[ytIndex].now || queue[ytIndex].title)) || 'this song';
-  radio = { seed, seedTitle, now: null };
+  radio = { seed, seedTitle, list: `RD${seed}`, now: null };
   ytErrors = 0;
   src = 'yt';
   music.stop();
@@ -3198,7 +3212,8 @@ function updateProgress() {
   $('p-seek').setAttribute('aria-valuenow', dur ? Math.round((cur / dur) * 100) : 0);
   // Fade out over the last 3 seconds so songs flow into each other.
   if (ytEnding && dur - cur > 4) { ytEnding = false; ytFade(1, 600); }   // seeked back from the end
-  if (ytPlaying && dur > 20 && dur - cur < 3.2 && !ytEnding) { ytEnding = true; ytFade(0.05, Math.max(300, (dur - cur) * 1000 - 200)); }
+  if (ytPlaying && !mix && !mixFailed && dur > 45 && dur - cur <= MIX_SECONDS + 1 && dur - cur > 3) startMix(dur - cur);
+  if (ytPlaying && !mix && dur > 20 && dur - cur < 3.2 && !ytEnding) { ytEnding = true; ytFade(0.05, Math.max(300, (dur - cur) * 1000 - 200)); }
   $('p-cur').textContent = fmtTime(cur);
   $('p-dur').textContent = fmtTime(dur);
 }
@@ -3210,7 +3225,7 @@ function seekFromEvent(e, commit) {
   const dur = (yt && yt.getDuration && yt.getDuration()) || 0;
   $('p-seek').style.setProperty('--pos', `${k * 100}%`);
   $('p-cur').textContent = fmtTime(k * dur);
-  if (commit && dur) yt.seekTo(k * dur, true);
+  if (commit && dur) { cancelMix(); yt.seekTo(k * dur, true); }
 }
 $('p-seek').addEventListener('pointerdown', (e) => {
   if (src !== 'yt' || !yt) return;
@@ -3228,6 +3243,7 @@ $('p-seek').addEventListener('pointerup', (e) => {
 });
 $('p-seek').addEventListener('keydown', (e) => {
   if (src !== 'yt' || !yt || !yt.getCurrentTime) return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') cancelMix();
   if (e.key === 'ArrowRight') yt.seekTo(yt.getCurrentTime() + 5, true);
   if (e.key === 'ArrowLeft') yt.seekTo(yt.getCurrentTime() - 5, true);
 });
@@ -3253,8 +3269,116 @@ function ytFade(to, ms, then) {
 }
 function ytQuiet() { clearInterval(ytFadeTimer); ytLevel = 0; ytFadeIn = true; ytEnding = false; yt?.setVolume?.(0); }
 
+// ---- DJ-style mix: the next song starts in a second player and the two overlap ----
+const MIX_SECONDS = 8;
+var mix = null;   // var: read by player events and the progress timer set up earlier in the file          // { target, length, started, t0, timer }
+var mixFailed = false;   // set when the next song refused to load; cleared on the next song
+
+function makeStandby() {
+  if (ytB) return;
+  ytB = new YT.Player('yt-frame-b', {
+    width: '100%', height: '200',
+    playerVars: { autoplay: 0, playsinline: 1, rel: 0, controls: 0, fs: 0, iv_load_policy: 3, disablekb: 1 },
+    events: { onReady: (e) => e.target.setVolume(0), onStateChange: onYTState, onError: onYTError },
+  });
+}
+
+// What plays after the current song, in the same order the next button would use.
+function mixTarget() {
+  if (radio) {
+    const pl = yt.getPlaylist && yt.getPlaylist(), k = yt.getPlaylistIndex ? yt.getPlaylistIndex() : 0;
+    if (queuedNext()) return { queue: nextIndex() };
+    if (pl && k < pl.length - 1 && radio.list) return { list: radio.list, index: k + 1, radio: true };
+    const cur = currentVideoId();
+    return cur ? { list: `RD${cur}`, index: 1, newRadio: cur } : null;
+  }
+  const item = queue[ytIndex];
+  const pl = item && item.list && yt.getPlaylist && yt.getPlaylist();
+  if (pl && pl.length && yt.getPlaylistIndex() < pl.length - 1) return { list: item.list, index: yt.getPlaylistIndex() + 1 };
+  const n = nextIndex();
+  if (n >= 0) return { queue: n };
+  const cur = currentVideoId();
+  return cur ? { list: `RD${cur}`, index: 1, newRadio: cur } : null;
+}
+
+function startMix(left) {
+  if (!ytB || !ytB.loadVideoById || !ytB.getIframe) return;
+  const target = mixTarget();
+  if (!target) return;
+  mix = { target, length: Math.max(3, Math.min(MIX_SECONDS, left - 0.6)), started: false };
+  ytEnding = false;
+  ytB.setVolume(0);
+  const q = target.queue != null ? queue[target.queue] : null;
+  if (q && q.v) ytB.loadVideoById({ videoId: q.v, startSeconds: q.start || 0 });
+  else ytB.loadPlaylist({ list: q ? q.list : target.list, listType: 'playlist', index: q ? 0 : target.index });
+}
+
+// The incoming song started: crossfade volume (equal power, so the loudness stays even) and picture.
+function onStandbyState(e) {
+  if (!mix || mix.started || e.data !== YT.PlayerState.PLAYING) return;
+  mix.started = true;
+  mix.t0 = performance.now();
+  const el = $('player');
+  el.style.setProperty('--mix', `${mix.length}s`);
+  el.classList.add('mixing');
+  ytB.getIframe().classList.add('live');
+  yt.getIframe().classList.remove('live');
+  clearInterval(ytFadeTimer);
+  mix.timer = setInterval(() => {
+    const k = Math.min(1, (performance.now() - mix.t0) / (mix.length * 1000));
+    const base = music.vol * 100;
+    yt.setVolume(Math.round(base * ytLevel * Math.cos((k * Math.PI) / 2)));
+    ytB.setVolume(Math.round(base * Math.sin((k * Math.PI) / 2)));
+    if (k >= 1) commitMix();
+  }, 50);
+}
+
+// Hand over: the incoming player becomes the main one.
+function commitMix() {
+  if (!mix) return;
+  const { target } = mix;
+  clearInterval(mix.timer);
+  const old = yt;
+  yt = ytB; ytB = old;
+  mix = null;
+  try { old.pauseVideo(); } catch {}
+  yt.getIframe().classList.add('live');
+  old.getIframe().classList.remove('live');
+  setTimeout(() => $('player').classList.remove('mixing'), 100);
+  ytLevel = 1; ytFadeIn = false; ytEnding = false; mixFailed = false;
+  yt.setVolume(Math.round(music.vol * 100));
+  if (yt.getPlayerState() !== YT.PlayerState.PLAYING) yt.playVideo();
+  if (target.queue != null) {
+    radio = null;
+    ytIndex = target.queue;
+    if (played[played.length - 1] !== ytIndex) played.push(ytIndex);
+  } else if (target.newRadio) {
+    const seedTitle = (radio && radio.now && radio.now.title) || (queue[ytIndex] && (queue[ytIndex].now || queue[ytIndex].title)) || 'this song';
+    radio = { seed: target.newRadio, seedTitle, list: target.list, now: null };
+    setMsg(`Playing songs like “${seedTitle}”.`);
+  }
+  // Update titles, artwork and the queue as if the new song had just started.
+  const d = yt.getVideoData && yt.getVideoData();
+  lastVid = d && d.video_id;
+  onYTState({ data: YT.PlayerState.PLAYING, target: yt });
+}
+
+// Stop a mix in progress (a manual skip, pause or seek, or the next song failed to load).
+function cancelMix(failed = false) {
+  mixFailed = failed;
+  if (!mix) return;
+  clearInterval(mix.timer);
+  mix = null;
+  try { ytB.stopVideo(); ytB.setVolume(0); } catch {}
+  ytB?.getIframe?.().classList.remove('live');
+  yt?.getIframe?.().classList.add('live');
+  $('player').classList.remove('mixing');
+  yt?.setVolume?.(Math.round(music.vol * 100 * ytLevel));
+}
+
 function togglePlay() {
   if (src === 'yt' && yt && yt.getPlayerState) {
+    cancelMix();
     if (ytPlaying) ytFade(0, 350, () => yt.pauseVideo());
     else { ytQuiet(); yt.playVideo(); }
     return;
@@ -3266,6 +3390,9 @@ function togglePlay() {
 }
 
 function step(dir) {
+  // Next during a mix: jump straight to the song that's already coming in.
+  if (dir > 0 && mix && mix.started) { commitMix(); return; }
+  cancelMix();
   if (src === 'yt' && radio && yt) {
     if (dir > 0 && queuedNext()) return playNext();
     if (dir > 0) return yt.nextVideo();
