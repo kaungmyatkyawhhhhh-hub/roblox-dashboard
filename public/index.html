@@ -1275,6 +1275,20 @@
   .pad { padding: 10px 16px; }
   #members-panel[hidden] { display: none; }
   @media (max-width: 720px) { .growth { grid-template-columns: 1fr; } .best-list li { grid-template-columns: 1fr; gap: 2px; } }
+  .hep { display: flex; gap: 14px; align-items: flex-start; }
+  .hep-ring { position: relative; width: 56px; height: 56px; flex: none; }
+  .hep-ring b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .hep-txt { flex: 1; min-width: 0; display: grid; gap: 3px; font-size: 12.5px; }
+  .hep-num { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .hep-num .faint { font-size: 12px; font-weight: 400; }
+  .hep-when { font-size: 11.5px; }
+  .hep-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 6px; }
+  .hep-form input { width: 130px; height: 32px; font: inherit; font-size: 12.5px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); }
+  .hep-form button { height: 32px; font-size: 12.5px; }
+  .hep-form a { font-size: 12px; color: var(--ink-2); }
+  .hep-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: 10px 24px; padding: 4px 16px 14px; }
+  .hep-row { display: grid; gap: 8px; padding-top: 8px; border-top: 1px solid var(--line-soft); }
+  .hep-row > b { font-size: 13.5px; }
 </style>
 </head>
 <body class="intro-hold">
@@ -1484,6 +1498,10 @@
         <div id="best-time"></div>
       </section>
     </div>
+    <section class="panel">
+      <div class="panel-head"><h2>All-ages eligibility</h2><span class="meta" id="hep-meta"></span></div>
+      <div class="hep-list" id="hep-list"></div>
+    </section>
     <section class="panel" id="members-panel">
       <div class="panel-head"><h2>Group growth</h2><span class="meta" id="members-meta"></span></div>
       <div class="growth">
@@ -2292,6 +2310,7 @@ function renderDrawer(animate = false) {
     <section class="d-sec"><div class="d-sec-head"><h3>Players</h3><span class="faint">${RANGE_NAMES[rangeHours]}</span></div><div class="chart-wrap tight" id="d-ccu"></div></section>
     <section class="d-sec"><div class="d-sec-head"><h3>Visits per day</h3><span class="faint">Last 30 days</span></div><div class="chart-wrap tight" id="d-visits"></div></section>
     <section class="d-sec"><div class="d-sec-head"><h3>Favorites over time</h3><span class="faint">Last 30 days</span></div><div class="chart-wrap tight" id="d-favs"></div></section>
+    <section class="d-sec"><div class="d-sec-head"><h3>All-ages eligibility</h3><span class="faint">Highly engaged players · 60 days</span></div>${allAgesHtml(g)}</section>
     <section class="d-sec"><div class="d-sec-head"><h3>Next milestones</h3></div><ul class="milestones">${milestoneHtml(milestoneRows([g], { includeTotal: false })) || '<li class="faint">Every milestone reached. Legendary.</li>'}</ul></section>
     <section class="d-sec"><div class="d-sec-head"><h3>Details</h3></div>
       <dl class="d-details">
@@ -4281,6 +4300,8 @@ function renderReports(games) {
   renderGoals(games, sales);
   renderUpdates(games, sales);
   renderForecast(games, sales);
+  $('hep-meta').textContent = `Roblox Kids and Select need ${fmt.format(hepTarget())} highly engaged players`;
+  $('hep-list').innerHTML = games.map((g) => `<div class="hep-row"><b>${esc(cleanName(g.name))}</b>${allAgesHtml(g)}</div>`).join('');
   renderBestTime(games);
   renderGrowth(games);
   const a = data.alerts || {};
@@ -4337,6 +4358,69 @@ document.addEventListener('submit', (e) => {
   f.reset();
   renderReports(data.games);
 });
+
+// ---- All-ages eligibility: highly engaged players ----
+// Roblox only shows this count in Creator Hub (no API), so it's entered by hand here.
+// Each entry is kept so the dashboard can work out the pace toward the target.
+let hepLog = {};
+try { hepLog = JSON.parse(load('rgo.hep') || '{}'); } catch { hepLog = {}; }
+const hepTarget = () => Number(data && data.allAgesTarget) || 250;
+function hepEntries(g) {
+  const shared = data && data.allAges && data.allAges[g.universeId];
+  const list = [...(hepLog[g.universeId] || [])];
+  if (shared && shared.count != null) list.push([Date.parse(shared.at) || 0, Number(shared.count)]);
+  return list.filter((e) => e[0] && Number.isFinite(e[1])).sort((a, b) => a[0] - b[0]);
+}
+function allAgesHtml(g) {
+  const list = hepEntries(g), target = hepTarget();
+  const last = list[list.length - 1];
+  const k = last ? Math.min(1, last[1] / target) : 0;
+  const r = 22, c = 2 * Math.PI * r;
+  const ring = `<svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="${r}" fill="none" stroke="var(--track)" stroke-width="5"/><circle cx="28" cy="28" r="${r}" fill="none" stroke="var(--ink)" stroke-width="5" stroke-linecap="round" stroke-dasharray="${(k * c).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 28 28)" style="filter:drop-shadow(0 0 6px var(--glow))"/></svg>`;
+  let status;
+  if (!last) status = '<span class="faint">Not entered yet. Find it in Creator Hub (link below) and type it in.</span>';
+  else if (last[1] >= target) status = '<span class="delta up">Target reached 🎉</span> <span class="faint">Roblox reviews eligibility hourly.</span>';
+  else {
+    // Pace from the oldest entry in the last 30 days to the newest.
+    const ref = list.find((e) => e[0] >= last[0] - 30 * DAY && e !== last);
+    const rate = ref && last[0] - ref[0] > DAY / 2 ? (last[1] - ref[1]) / ((last[0] - ref[0]) / DAY) : null;
+    const left = target - last[1];
+    status = `<b>${fmt.format(left)}</b> to go${rate > 0 ? ` <span class="faint">· about ${fmt.format(Math.ceil(left / rate))} days at ${rate < 10 ? rate.toFixed(1) : fmt.format(Math.round(rate))} a day</span>` : rate != null ? ' <span class="faint">· not growing right now</span>' : ' <span class="faint">· enter it again in a day or two to see your pace</span>'}`;
+  }
+  return `<div class="hep">
+    <div class="hep-ring">${ring}<b>${last ? fmt.format(last[1]) : '?'}</b></div>
+    <div class="hep-txt">
+      <div class="hep-num">${last ? fmt.format(last[1]) : '—'} <span class="faint">/ ${fmt.format(target)} highly engaged players</span></div>
+      <div class="hep-status">${status}</div>
+      ${last ? `<div class="faint hep-when">Last entered ${agoText(last[0])}</div>` : ''}
+      <form class="hep-form" data-hep="${g.universeId}"><input name="count" type="number" min="0" inputmode="numeric" placeholder="Today's count" aria-label="Highly engaged players for ${esc(cleanName(g.name))}" required><button type="submit">Update</button>
+        <a href="https://create.roblox.com/dashboard/creations/experiences/${g.universeId}/overview" target="_blank" rel="noopener">Creator Hub ↗</a></form>
+    </div>
+  </div>`;
+}
+document.addEventListener('submit', (e) => {
+  const f = e.target.closest('[data-hep]');
+  if (!f) return;
+  e.preventDefault();
+  const n = Number(f.count.value);
+  if (!Number.isFinite(n) || n < 0) return;
+  const id = f.dataset.hep;
+  const log = (hepLog[id] ||= []);
+  // One entry per hour is enough; a newer one replaces it.
+  if (log.length && Date.now() - log[log.length - 1][0] < 3600000) log.pop();
+  log.push([Date.now(), Math.round(n)]);
+  hepLog[id] = log.slice(-200);
+  store('rgo.hep', JSON.stringify(hepLog));
+  renderDrawer();
+  if (view === 'reports') renderReports(data.games);
+});
+function agoText(t) {
+  const sec = Math.max(0, (Date.now() - t) / 1000);
+  if (sec < 90) return 'just now';
+  if (sec < 3600) return `${Math.round(sec / 60)} min ago`;
+  if (sec < 86400) return `${Math.round(sec / 3600)} h ago`;
+  return `${Math.round(sec / 86400)} days ago`;
+}
 
 let resizeTimer;
 addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
