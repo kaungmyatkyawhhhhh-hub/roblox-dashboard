@@ -7,11 +7,6 @@
 // music player. That needs a YouTube Data API key saved on the worker as a
 // secret named YOUTUBE_API_KEY (Settings → Variables and Secrets).
 //
-// It also relays messages from Claude Code on your own computer to the dashboard's
-// Claude tab (POST/GET /claude). That needs a KV namespace bound as CLAUDE_FEED and
-// a secret named CLAUDE_FEED_KEY; both requests must send that key, so only you can
-// write or read the feed. See README → "Claude Code feed".
-//
 // Deploy: Cloudflare dashboard → Workers & Pages → Create → Worker,
 // paste this file, Deploy. Then put the worker's URL in config.json → "liveProxy".
 
@@ -21,10 +16,9 @@ export default {
   async fetch(request, env = {}, ctx) {
     const cors = { 'access-control-allow-origin': ALLOWED_ORIGIN, vary: 'origin' };
     if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: { ...cors, 'access-control-allow-methods': 'GET, POST', 'access-control-allow-headers': 'content-type, x-feed-key', 'access-control-max-age': '86400' } });
+      return new Response(null, { headers: { ...cors, 'access-control-allow-methods': 'GET' } });
     }
     const url = new URL(request.url);
-    if (url.pathname === '/claude') return claudeFeed(request, env, cors);
     if (request.method === 'GET' && url.pathname === '/search') return search(url, env, ctx, cors);
     if (request.method !== 'GET' || url.pathname !== '/live') return json({ error: 'Not found' }, 404, cors);
 
@@ -139,55 +133,4 @@ function seconds(d) {
   const m = /^P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(d || '');
   if (!m) return Infinity;
   return (+m[1] || 0) * 86400 + (+m[2] || 0) * 3600 + (+m[3] || 0) * 60 + (+m[4] || 0);
-}
-
-// ---- Claude Code feed ----
-// Keeps the latest 300 messages (prompts you typed and Claude's replies) plus
-// whether each session is busy, in one KV entry.
-const FEED_MAX = 300;
-const FEED_TEXT_MAX = 8000;
-
-async function claudeFeed(request, env, cors) {
-  if (!env.CLAUDE_FEED || !env.CLAUDE_FEED_KEY) {
-    return json({ error: 'The Claude feed is not set up on this worker yet: add the CLAUDE_FEED KV binding and the CLAUDE_FEED_KEY secret.', setup: true }, 501, cors);
-  }
-  if (!sameKey(request.headers.get('x-feed-key') || '', String(env.CLAUDE_FEED_KEY).trim())) {
-    return json({ error: 'Wrong feed key.' }, 401, cors);
-  }
-  const feed = (await env.CLAUDE_FEED.get('feed', 'json')) || { messages: [], sessions: {} };
-  if (request.method === 'GET') {
-    const since = Number(new URL(request.url).searchParams.get('since')) || 0;
-    return json({ messages: feed.messages.filter((m) => m.t > since), sessions: feed.sessions, now: Date.now() }, 200, cors);
-  }
-  if (request.method !== 'POST') return json({ error: 'Not found' }, 404, cors);
-  let body;
-  try { body = await request.json(); } catch { return json({ error: 'Send JSON.' }, 400, cors); }
-  const session = String(body.session || 'unknown').slice(0, 80);
-  const now = Date.now();
-  const s = (feed.sessions[session] ||= { project: '', started: now });
-  if (body.project) s.project = String(body.project).slice(0, 120);
-  if (body.status) s.status = body.status === 'working' ? 'working' : 'idle';
-  s.seen = now;
-  if (body.text && (body.role === 'user' || body.role === 'assistant')) {
-    const text = String(body.text);
-    feed.messages.push({
-      t: Math.max(now, (feed.messages[feed.messages.length - 1] || {}).t + 1 || 0),
-      session, role: body.role,
-      text: text.length > FEED_TEXT_MAX ? `${text.slice(0, FEED_TEXT_MAX)}\n… (shortened)` : text,
-    });
-    feed.messages = feed.messages.slice(-FEED_MAX);
-  }
-  // Forget sessions with nothing left in the feed and no activity for a week.
-  for (const [id, x] of Object.entries(feed.sessions)) {
-    if (now - x.seen > 7 * 86400000 && !feed.messages.some((m) => m.session === id)) delete feed.sessions[id];
-  }
-  await env.CLAUDE_FEED.put('feed', JSON.stringify(feed));
-  return json({ ok: true }, 200, cors);
-}
-
-function sameKey(a, b) {
-  if (!a || a.length !== b.length) return false;
-  let d = 0;
-  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return d === 0;
 }
