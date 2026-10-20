@@ -2589,37 +2589,71 @@ class Ambient {
     const ctx = (this.ctx = new (window.AudioContext || window.webkitAudioContext)());
     this.master = ctx.createGain();
     this.master.gain.value = 0;
-    const comp = ctx.createDynamicsCompressor();
-    comp.threshold.value = -18; comp.ratio.value = 3;
+
+    // Everything melodic goes into the bus; the duck gain lets the kick push it down a
+    // little on each beat so the low end stays clean.
+    this.bus = ctx.createGain();
+    this.duck = ctx.createGain();
+    this.dry = ctx.createGain();     // drums and bass: no reverb
+    this.mix = ctx.createGain();
+    this.bus.connect(this.duck);
+    this.duck.connect(this.mix);
+    this.dry.connect(this.mix);
+
+    // Reverb: short pre-delay, low end and harsh highs filtered out so it stays airy, not muddy.
+    const pre = ctx.createDelay(0.2); pre.delayTime.value = 0.028;
+    const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 220;
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 6500;
+    const verb = ctx.createConvolver(); verb.buffer = this.impulse(3.6, 2.6);
+    const wet = ctx.createGain(); wet.gain.value = 0.42;
+    this.bus.connect(pre); pre.connect(hp); hp.connect(lp); lp.connect(verb); verb.connect(wet); wet.connect(this.duck);
+
+    // Ping-pong echo for plucks: bounces left and right.
+    this.echo = ctx.createGain();
+    const dl = ctx.createDelay(1), dr = ctx.createDelay(1);
+    dl.delayTime.value = 0.36; dr.delayTime.value = 0.36;
+    const fb = ctx.createGain(); fb.gain.value = 0.34;
+    const tone = ctx.createBiquadFilter(); tone.type = 'lowpass'; tone.frequency.value = 3200;
+    const merge = ctx.createChannelMerger(2), echoOut = ctx.createGain(); echoOut.gain.value = 0.32;
+    this.echo.connect(tone); tone.connect(dl); dl.connect(dr); dr.connect(fb); fb.connect(dl);
+    dl.connect(merge, 0, 0); dr.connect(merge, 0, 1); merge.connect(echoOut); echoOut.connect(this.bus);
+
+    // Master: warm low shelf, a touch of air, gentle tape saturation, glue compression, then a limiter.
+    const low = ctx.createBiquadFilter(); low.type = 'lowshelf'; low.frequency.value = 140; low.gain.value = 2.5;
+    const mud = ctx.createBiquadFilter(); mud.type = 'peaking'; mud.frequency.value = 320; mud.Q.value = 0.9; mud.gain.value = -2;
+    const air = ctx.createBiquadFilter(); air.type = 'highshelf'; air.frequency.value = 9000; air.gain.value = 2.5;
+    const sat = ctx.createWaveShaper(); sat.curve = this.tape(1.6); sat.oversample = '2x';
+    const glue = ctx.createDynamicsCompressor();
+    glue.threshold.value = -20; glue.ratio.value = 2.5; glue.knee.value = 10; glue.attack.value = 0.02; glue.release.value = 0.25;
+    const limit = ctx.createDynamicsCompressor();
+    limit.threshold.value = -3; limit.ratio.value = 20; limit.knee.value = 0; limit.attack.value = 0.002; limit.release.value = 0.12;
+    const makeup = ctx.createGain(); makeup.gain.value = 0.8;
+    this.mix.connect(low); low.connect(mud); mud.connect(air); air.connect(sat); sat.connect(glue); glue.connect(makeup); makeup.connect(limit); limit.connect(this.master);
+
     this.analyser = ctx.createAnalyser();
     this.analyser.fftSize = 256;
     this.analyser.smoothingTimeConstant = 0.82;
-    this.bus = ctx.createGain();
-    this.dry = ctx.createGain();
-    const verb = ctx.createConvolver();
-    verb.buffer = this.impulse(3.4, 2.4);
-    const wet = ctx.createGain();
-    wet.gain.value = 0.5;
-    this.bus.connect(this.dry);
-    this.bus.connect(verb);
-    verb.connect(wet);
-    this.dry.connect(comp);
-    wet.connect(comp);
-    comp.connect(this.master);
     this.master.connect(this.analyser);
     this.analyser.connect(ctx.destination);
-    // Echo for plucks.
-    this.echo = ctx.createDelay(1);
-    this.echo.delayTime.value = 0.36;
-    const fb = ctx.createGain();
-    fb.gain.value = 0.32;
-    const echoOut = ctx.createGain();
-    echoOut.gain.value = 0.35;
-    this.echo.connect(fb); fb.connect(this.echo);
-    this.echo.connect(echoOut); echoOut.connect(this.bus);
+
     this.noise = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
     const d = this.noise.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+
+  // Soft-clipping curve: rounds off peaks like tape, adding warm harmonics.
+  tape(amount) {
+    const n = 2048, c = new Float32Array(n), k = Math.tanh(amount);
+    for (let i = 0; i < n; i++) { const x = (i / (n - 1)) * 2 - 1; c[i] = Math.tanh(amount * x) / k; }
+    return c;
+  }
+
+  // Place a sound in the stereo field (-1 left … 1 right).
+  out(g, pan, dest = this.bus) {
+    if (!pan || !this.ctx.createStereoPanner) { g.connect(dest); return; }
+    const p = this.ctx.createStereoPanner();
+    p.pan.value = pan;
+    g.connect(p); p.connect(dest);
   }
 
   impulse(sec, decay) {
@@ -2647,19 +2681,27 @@ class Ambient {
     f.frequency.linearRampToValueAtTime(600, t + dur + 2);
     const end = this.env(g, t, level, 2.2, Math.max(0, dur - 2.2), 3);
     f.connect(g); g.connect(this.bus);
-    for (const n of notes) for (const det of [-8, 8]) {
-      const o = ctx.createOscillator();
-      o.type = 'sawtooth'; o.frequency.value = hz(n); o.detune.value = det;
-      o.connect(f); o.start(t); o.stop(end);
+    // Three slightly detuned voices per note, panned left, centre and right, for a wide, lush pad.
+    for (const n of notes) for (const [det, pan] of [[-11, -0.7], [0, 0], [11, 0.7]]) {
+      const o = ctx.createOscillator(), v = ctx.createGain();
+      o.type = 'sawtooth'; o.frequency.value = hz(n); o.detune.value = det + (Math.random() - 0.5) * 4;
+      v.gain.value = pan ? 0.8 : 0.55;
+      o.connect(v);
+      if (ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = pan; v.connect(p); p.connect(f); } else v.connect(f);
+      o.start(t); o.stop(end);
     }
   }
 
   pluck(n, t, level, decay) {
-    const ctx = this.ctx, o = ctx.createOscillator(), g = ctx.createGain();
+    const ctx = this.ctx, o = ctx.createOscillator(), o2 = ctx.createOscillator(), a2 = ctx.createGain(), g = ctx.createGain(), f = ctx.createBiquadFilter();
     o.type = 'triangle'; o.frequency.value = hz(n);
-    const end = this.env(g, t, level, 0.006, 0, decay);
-    o.connect(g); g.connect(this.bus); g.connect(this.echo);
-    o.start(t); o.stop(end);
+    o2.type = 'sine'; o2.frequency.value = hz(n) * 2; a2.gain.value = 0.22;
+    f.type = 'lowpass'; f.Q.value = 1.2;
+    f.frequency.setValueAtTime(5200, t); f.frequency.exponentialRampToValueAtTime(900, t + decay * 0.7);
+    const end = this.env(g, t, level, 0.004, 0, decay);
+    o.connect(f); o2.connect(a2); a2.connect(f); f.connect(g);
+    this.out(g, (Math.random() - 0.5) * 0.8); g.connect(this.echo);
+    o.start(t); o2.start(t); o.stop(end); o2.stop(end);
   }
 
   keys(n, t, dur, level) {
@@ -2668,7 +2710,7 @@ class Ambient {
     lfo.frequency.value = 4.2; lfoAmt.gain.value = 0.25; trem.gain.value = 0.75;
     lfo.connect(lfoAmt); lfoAmt.connect(trem.gain);
     const end = this.env(g, t, level, 0.01, 0.2, Math.min(dur, 2.4));
-    g.connect(trem); trem.connect(this.bus);
+    g.connect(trem); this.out(trem, Math.max(-0.5, Math.min(0.5, (n - 60) / 24)));
     for (const [mult, amp] of [[1, 1], [2, 0.18]]) {
       const o = ctx.createOscillator(), a = ctx.createGain();
       o.type = 'sine'; o.frequency.value = hz(n) * mult; a.gain.value = amp;
@@ -2678,35 +2720,42 @@ class Ambient {
   }
 
   bass(n, t, dur, level) {
-    const ctx = this.ctx, o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    // Triangle for body plus a pure sine sub an octave down, so it's felt on headphones too.
+    const ctx = this.ctx, o = ctx.createOscillator(), sub = ctx.createOscillator(), sg = ctx.createGain(), f = ctx.createBiquadFilter(), g = ctx.createGain();
     o.type = 'triangle'; o.frequency.value = hz(n);
-    f.type = 'lowpass'; f.frequency.value = 420;
+    sub.type = 'sine'; sub.frequency.value = hz(n - 12); sg.gain.value = 0.55;
+    f.type = 'lowpass'; f.frequency.value = 480; f.Q.value = 0.8;
     const end = this.env(g, t, level, 0.03, Math.max(0, dur - 0.4), 0.5);
-    o.connect(f); f.connect(g); g.connect(this.dry);
-    o.start(t); o.stop(end);
+    o.connect(f); sub.connect(sg); sg.connect(f); f.connect(g); g.connect(this.dry);
+    o.start(t); sub.start(t); o.stop(end); sub.stop(end);
   }
 
   kick(t, level) {
     const ctx = this.ctx, o = ctx.createOscillator(), g = ctx.createGain();
-    o.frequency.setValueAtTime(130, t);
-    o.frequency.exponentialRampToValueAtTime(42, t + 0.14);
-    const end = this.env(g, t, level, 0.002, 0.02, 0.32);
+    o.frequency.setValueAtTime(150, t);
+    o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+    const end = this.env(g, t, level, 0.002, 0.03, 0.36);
     o.connect(g); g.connect(this.dry);
     o.start(t); o.stop(end);
+    this.noiseHit(t, level * 0.18, 'bandpass', 3500, 0.012);   // the "click" that helps it cut through
+    // Duck pads and reverb under the kick, then let them swell back.
+    this.duck.gain.cancelScheduledValues(t);
+    this.duck.gain.setValueAtTime(0.62, t);
+    this.duck.gain.setTargetAtTime(1, t + 0.02, 0.09);
   }
 
-  noiseHit(t, level, type, freq, decay, toBus = false) {
+  noiseHit(t, level, type, freq, decay, toBus = false, pan = 0) {
     const ctx = this.ctx, src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
     src.buffer = this.noise;
     src.playbackRate.value = 0.9 + Math.random() * 0.2;
     f.type = type; f.frequency.value = freq;
     const end = this.env(g, t, level, 0.001, 0, decay);
-    src.connect(f); f.connect(g); g.connect(toBus ? this.bus : this.dry);
+    src.connect(f); f.connect(g); this.out(g, pan, toBus ? this.bus : this.dry);
     src.start(t, Math.random()); src.stop(end);
   }
 
   snare(t, level) { this.noiseHit(t, level, 'bandpass', 1800, 0.18, true); }
-  hat(t, level) { this.noiseHit(t, level, 'highpass', 7500, 0.045); }
+  hat(t, level) { this.noiseHit(t, level, 'highpass', 7500, 0.045, false, (this.hatSide = -(this.hatSide || 0.35))); }
   crackle(t) { this.noiseHit(t, 0.02 + Math.random() * 0.03, 'highpass', 3000, 0.008); }
 
   start() {
@@ -2874,14 +2923,14 @@ async function playYT(i) {
   beginSwap();
   renderPlayer();
   try { await loadYouTubeApi(); } catch (e) { setMsg(`${e.message}. Check your connection and try again.`); return; }
-  yt?.setVolume?.(Math.round(music.vol * 100));
+  yt?.setVolume?.(Math.round(music.vol * 100 * ytLevel));
   if (!yt) {
     yt = new YT.Player('yt-frame', {
       width: '100%', height: '200',
       videoId: item.v || undefined,
       playerVars: { autoplay: 1, playsinline: 1, rel: 0, controls: 0, fs: 0, iv_load_policy: 3, disablekb: 1, start: item.start || 0, ...(item.list ? { listType: 'playlist', list: item.list } : {}) },
       events: {
-        onReady: (e) => { e.target.setVolume(Math.round(music.vol * 100)); e.target.playVideo(); },
+        onReady: (e) => { e.target.setVolume(Math.round(music.vol * 100 * ytLevel)); e.target.playVideo(); },
         onStateChange: onYTState,
         onError: onYTError,
       },
@@ -2900,6 +2949,7 @@ function onYTState(e) {
   const cur = yt.getVideoData && yt.getVideoData();
   if (cur && cur.video_id && cur.video_id !== lastVid) { lastVid = cur.video_id; beginSwap(); }
   if (e.data === S.PLAYING) endSwap();
+  if (e.data === S.PLAYING && ytFadeIn) { ytFadeIn = false; ytFade(1, 1400); }
   if (radio && e.data === S.PLAYING && cur) {
     radio.now = { id: cur.video_id, title: cur.title || 'Recommended song', author: cur.author || '' };
   }
@@ -2975,6 +3025,7 @@ function beginSwap() {
   const el = $('player');
   el.classList.remove('vid-ready');
   el.classList.add('swapping');
+  if (src === 'yt') ytQuiet();
   clearTimeout(beginSwap.t);
   beginSwap.t = setTimeout(() => el.classList.remove('swapping'), 450);
 }
@@ -3100,7 +3151,7 @@ function showVolume() {
 
 function setVolume(v) {
   music.setVolume(v);
-  yt?.setVolume?.(Math.round(v * 100));
+  yt?.setVolume?.(Math.round(v * 100 * ytLevel));
   store('rgo.vol', v);
   showVolume();
 }
@@ -3145,6 +3196,9 @@ function updateProgress() {
   const dur = yt.getDuration() || 0, cur = yt.getCurrentTime() || 0;
   $('p-seek').style.setProperty('--pos', `${dur ? (cur / dur) * 100 : 0}%`);
   $('p-seek').setAttribute('aria-valuenow', dur ? Math.round((cur / dur) * 100) : 0);
+  // Fade out over the last 3 seconds so songs flow into each other.
+  if (ytEnding && dur - cur > 4) { ytEnding = false; ytFade(1, 600); }   // seeked back from the end
+  if (ytPlaying && dur > 20 && dur - cur < 3.2 && !ytEnding) { ytEnding = true; ytFade(0.05, Math.max(300, (dur - cur) * 1000 - 200)); }
   $('p-cur').textContent = fmtTime(cur);
   $('p-dur').textContent = fmtTime(dur);
 }
@@ -3183,9 +3237,26 @@ $('p-mute').onclick = () => {
   if (music.vol > 0) { lastVol = music.vol; setVolume(0); } else setVolume(lastVol || 0.6);
 };
 
+// Smooth volume fades for YouTube: fade in when a song starts or resumes, fade out
+// before pausing and over a song's last seconds. (YouTube's sound can't be processed
+// further: it plays inside YouTube's own frame.)
+var ytFadeTimer = 0, ytLevel = 1, ytFadeIn = false, ytEnding = false;   // var: used by code above that can run first
+function ytFade(to, ms, then) {
+  clearInterval(ytFadeTimer);
+  const from = ytLevel, t0 = performance.now();
+  ytFadeTimer = setInterval(() => {
+    const k = Math.min(1, (performance.now() - t0) / ms);
+    ytLevel = from + (to - from) * (k * k * (3 - 2 * k));
+    yt?.setVolume?.(Math.round(music.vol * 100 * ytLevel));
+    if (k >= 1) { clearInterval(ytFadeTimer); if (then) then(); }
+  }, 30);
+}
+function ytQuiet() { clearInterval(ytFadeTimer); ytLevel = 0; ytFadeIn = true; ytEnding = false; yt?.setVolume?.(0); }
+
 function togglePlay() {
   if (src === 'yt' && yt && yt.getPlayerState) {
-    if (ytPlaying) yt.pauseVideo(); else yt.playVideo();
+    if (ytPlaying) ytFade(0, 350, () => yt.pauseVideo());
+    else { ytQuiet(); yt.playVideo(); }
     return;
   }
   if (src === 'yt' && queue.length) { playYT(Math.max(0, ytIndex)); return; }
