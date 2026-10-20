@@ -14,6 +14,17 @@ A black-and-white, one-screen analytics dashboard for every Roblox experience ow
 - **Reports tab:** this week vs. last week (visits, peak players, Robux, sales, best seller); goals with progress rings and a projected finish date (add your own in the page, or list shared ones in `config.json` → `goals`, e.g. `{ "metric": "visits", "target": 5000, "by": "2026-12-31" }`; metrics: `visits`, `favorites`, `robux_month`, `robux_total`, `peak`); update impact (7 days before vs. after each publish); month forecast (visits and Robux by month end at the last 7 days' pace); best time to publish an update (an hour before your busiest stretch of the week); group member growth next to total visits; CSV/JSON export.
 - **Monetization extras:** a when-people-buy heatmap and Robux per 1K visits per game. Game updates are also marked on the Overview players chart.
 
+### Claude Code feed (Claude tab)
+
+The Claude tab shows the conversation from Claude Code on your own computer: what you ask and what Claude replies, which session is busy, updated every few seconds. Messages go through your Cloudflare worker and are stored in your own KV namespace; reading or writing them needs your private feed key, so the public page shows nothing without it.
+
+1. On your computer, download `tools/claude-feed.js` and run `node claude-feed.js install https://<your worker>.workers.dev`. It adds two hooks (`UserPromptSubmit`, `Stop`) to `~/.claude/settings.json` and prints your feed key. (Or ask Claude Code to do it; the Claude tab has a ready-to-copy request.)
+2. Cloudflare → Storage & Databases → KV → create a namespace `claude-feed`. In the worker → Bindings → add a KV namespace binding named `CLAUDE_FEED`.
+3. Worker → Settings → Variables and Secrets → add a secret `CLAUDE_FEED_KEY` with the key from step 1. Deploy the updated `worker/worker.js`.
+4. Restart Claude Code and paste the key into the Claude tab.
+
+`node ~/.claude/claude-feed.js test` sends a test message; `node ~/.claude/claude-feed.js uninstall` stops sending. The feed keeps the latest 300 messages.
+
 ### Alerts and the weekly report
 
 The collector can notify you about new sales, new player records, visit milestones, game updates and sudden like-ratio drops (the last 24 hours' votes at least 15 points below the game's usual ratio), plus a weekly report every Monday. Add either repository secret:

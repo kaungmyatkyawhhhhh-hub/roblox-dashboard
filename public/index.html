@@ -1269,6 +1269,54 @@
   .pad { padding: 10px 16px; }
   #members-panel[hidden] { display: none; }
   @media (max-width: 720px) { .growth { grid-template-columns: 1fr; } .best-list li { grid-template-columns: 1fr; gap: 2px; } }
+  /* ================= Claude tab ================= */
+  .tabs button { position: relative; }
+  .cf-dot { position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 8px var(--glow); animation: cfpulse 1.4s ease-in-out infinite; }
+  @keyframes cfpulse { 50% { opacity: .3; } }
+  .cf { display: grid; grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); height: calc(100vh - 110px); min-height: 420px; overflow: hidden; padding: 0; }
+  .cf[hidden], .cf-setup[hidden] { display: none; }
+  .cf-side { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--line-soft); }
+  .cf-sessions { list-style: none; margin: 0; padding: 4px 8px; overflow-y: auto; flex: 1; display: grid; align-content: start; gap: 2px; }
+  .cf-sessions li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; padding: 9px 10px; border-radius: 10px; cursor: pointer; font-size: 12.5px; }
+  .cf-sessions li:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+  .cf-sessions li.on { background: color-mix(in srgb, var(--ink) 10%, transparent); box-shadow: inset 0 0 0 1px var(--glass-line); }
+  .cf-sessions li b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cf-sessions li > .faint:not(.cf-time) { grid-column: 1 / -1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cf-sessions li .cf-time { grid-column: 1 / -1; font-size: 11px; }
+  .cf-busy { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink); animation: cfpulse 1.4s ease-in-out infinite; }
+  .cf-lock { margin: 8px; height: 32px; font-size: 12px; background: transparent; color: var(--ink-3); }
+  .cf-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .cf-head { display: flex; align-items: baseline; gap: 12px; padding: 14px 18px 10px; border-bottom: 1px solid var(--line-soft); font-size: 14px; }
+  .cf-head .faint { font-size: 12px; }
+  .cf-log { flex: 1; overflow-y: auto; padding: 16px 18px 24px; display: flex; flex-direction: column; gap: 14px; overscroll-behavior: contain; }
+  .cf-msg { max-width: min(760px, 92%); }
+  .cf-msg.user { align-self: flex-end; }
+  .cf-msg.user .cf-text { background: var(--ink); color: var(--bg); border-radius: 16px 16px 4px 16px; padding: 10px 14px; }
+  .cf-msg.user .cf-who { text-align: right; }
+  .cf-msg.assistant .cf-text { background: var(--panel-2); border: 1px solid var(--line-soft); border-radius: 16px 16px 16px 4px; padding: 12px 15px; }
+  .cf-who { font-size: 11px; color: var(--ink-3); margin: 0 4px 4px; font-weight: 600; }
+  .cf-text { font-size: 13.5px; line-height: 1.55; overflow-wrap: anywhere; }
+  .cf-text pre { margin: 8px 0; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--bg) 70%, transparent); border: 1px solid var(--line-soft); overflow-x: auto; font-size: 12px; line-height: 1.45; }
+  .cf-msg.user .cf-text pre { background: color-mix(in srgb, var(--bg) 12%, transparent); }
+  .cf-text code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; }
+  .cf-text :not(pre) > code { padding: 1px 5px; border-radius: 5px; background: color-mix(in srgb, var(--ink) 10%, transparent); }
+  .cf-text a { color: inherit; }
+  .cf-text .cf-h { display: inline-block; margin-top: 4px; }
+  .cf-dots { display: inline-flex; gap: 4px; }
+  .cf-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-2); animation: cfpulse 1s ease-in-out infinite; }
+  .cf-dots i:nth-child(2) { animation-delay: .15s; } .cf-dots i:nth-child(3) { animation-delay: .3s; }
+  .cf-empty { padding: 12px; font-size: 12.5px; }
+  .cf-key { display: flex; gap: 8px; padding: 6px 16px 0; flex-wrap: wrap; }
+  .cf-key input { flex: 1 1 240px; height: 38px; font: inherit; font-size: 13px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); }
+  .cf-key button { height: 38px; }
+  .cf-copy { display: flex; gap: 8px; align-items: flex-start; margin-top: 6px; padding: 10px 12px; border-radius: 10px; background: var(--panel-2); border: 1px solid var(--line-soft); }
+  .cf-copy code { flex: 1; min-width: 0; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; color: var(--ink); }
+  .cf-copy button { height: 30px; font-size: 12px; flex: none; }
+  @media (max-width: 720px) {
+    .cf { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); height: calc(100vh - 150px); }
+    .cf-side { border-right: 0; border-bottom: 1px solid var(--line-soft); max-height: 170px; }
+    .cf-lock { display: none; }
+  }
 </style>
 </head>
 <body class="intro-hold">
@@ -1294,7 +1342,7 @@
 <canvas class="eq-bottom" id="eq-bottom" aria-hidden="true"></canvas>
 <header class="bar">
   <div class="brand"><span class="mark"></span><span class="who-bar"><img id="avatar" alt="" hidden><b id="owner">Experience Overview</b><span id="owner-sub"></span></span></div>
-  <nav class="tabs" aria-label="Views"><button type="button" data-tab="overview" aria-pressed="true">Overview</button><button type="button" data-tab="money" aria-pressed="false">Monetization</button><button type="button" data-tab="compare" aria-pressed="false">Compare</button><button type="button" data-tab="reports" aria-pressed="false">Reports</button></nav>
+  <nav class="tabs" aria-label="Views"><button type="button" data-tab="overview" aria-pressed="true">Overview</button><button type="button" data-tab="money" aria-pressed="false">Monetization</button><button type="button" data-tab="compare" aria-pressed="false">Compare</button><button type="button" data-tab="reports" aria-pressed="false">Reports</button><button type="button" data-tab="claude" aria-pressed="false">Claude<i class="cf-dot" id="cf-dot" hidden></i></button></nav>
   <span class="spacer"></span>
   <form id="form">
     <div class="field"><label for="user">Creator</label><input id="user" placeholder="Username or ID" autocomplete="off"></div>
@@ -1521,6 +1569,31 @@
         </div>
       </section>
     </div>
+  </div>
+  <div class="view" data-view="claude" hidden>
+    <section class="panel cf" id="cf">
+      <aside class="cf-side">
+        <div class="panel-head"><h2>Claude Code</h2><span class="meta" id="cf-meta"></span></div>
+        <ul class="cf-sessions" id="cf-sessions"></ul>
+        <button type="button" class="cf-lock" id="cf-lock">Forget key on this device</button>
+      </aside>
+      <div class="cf-main">
+        <div class="cf-head"><b id="cf-title">Messages</b><span class="faint" id="cf-status"></span></div>
+        <div class="cf-log" id="cf-log" aria-live="polite"></div>
+      </div>
+    </section>
+    <section class="panel cf-setup" id="cf-setup" hidden>
+      <div class="panel-head"><h2>See your Claude Code messages here</h2><span class="meta">Private: only someone with your key can read them</span></div>
+      <form class="cf-key" id="cf-key"><input name="key" type="password" placeholder="Paste your feed key" aria-label="Feed key" autocomplete="off" required><button class="primary" type="submit">Show my messages</button></form>
+      <p class="est-note" id="cf-err"></p>
+      <ol class="setup">
+        <li><b>On your computer</b>, open Claude Code (in the VS Code terminal) and send it this:<div class="cf-copy"><code id="cf-cmd">Download https://raw.githubusercontent.com/kaungmyatkyawhhhhh-hub/roblox-dashboard/main/tools/claude-feed.js and run: node claude-feed.js install https://roblox-live.kaungmyatkyaw-hhhhh.workers.dev — then show me the key it prints.</code><button type="button" id="cf-copy">Copy</button></div></li>
+        <li><b>In Cloudflare</b>: Storage &amp; Databases → KV → <b>Create</b> a namespace called <b>claude-feed</b>.</li>
+        <li>Open your <b>roblox-live</b> worker → <b>Bindings</b> → <b>Add binding</b> → KV namespace. Variable name <b>CLAUDE_FEED</b>, namespace <b>claude-feed</b>. Deploy.</li>
+        <li>Worker → Settings → Variables and Secrets → <b>Add</b>: type Secret, name <b>CLAUDE_FEED_KEY</b>, value = the key from step 1. Deploy.</li>
+        <li>Restart Claude Code, paste the key above, and send Claude a message.</li>
+      </ol>
+    </section>
   </div>
 </template>
 
@@ -3534,8 +3607,8 @@ const ROBLOX_CUT = 0.3;          // Roblox keeps 30% of game pass and developer 
 const DEVEX_USD = 0.0038;        // Developer Exchange rate, USD per Robux (2025)
 const TIERS = [[1, 25], [26, 50], [51, 100], [101, 250], [251, 500], [501, Infinity]];
 const robux = (v) => `R$ ${fmt.format(Math.round(v))}`;
-const VIEW_HASH = { money: '#monetization', compare: '#compare', reports: '#reports' };
-let view = Object.keys(VIEW_HASH).find((k) => VIEW_HASH[k] === location.hash) || (['money', 'compare', 'reports'].includes(load('rgo.view')) && !location.hash ? load('rgo.view') : 'overview');
+const VIEW_HASH = { money: '#monetization', compare: '#compare', reports: '#reports', claude: '#claude' };
+let view = Object.keys(VIEW_HASH).find((k) => VIEW_HASH[k] === location.hash) || (['money', 'compare', 'reports', 'claude'].includes(load('rgo.view')) && !location.hash ? load('rgo.view') : 'overview');
 let est = { rate: Number(load('rgo.rate')) || 1, avg: Number(load('rgo.avg')) || 0 };
 
 function setView(v) {
@@ -3547,6 +3620,7 @@ function setView(v) {
   if (v === 'money' && data) renderMoney(data.games);
   if (v === 'compare' && data) renderCompare(data.games);
   if (v === 'reports' && data) renderReports(data.games);
+  if (v === 'claude') { renderClaude(); pollClaude(); }
   if (v === 'overview' && data) { animateChart = true; render(); }
 }
 
@@ -4140,10 +4214,119 @@ document.addEventListener('submit', (e) => {
   renderReports(data.games);
 });
 
+// ---- Claude tab: messages from Claude Code on your computer (via tools/claude-feed.js) ----
+let cfKey = load('rgo.cfkey') || '';
+let cfFeed = { messages: [], sessions: {} };
+let cfSession = load('rgo.cfsession') || '';
+let cfTimer = 0, cfError = '';
+
+function mdLite(text) {
+  // Code blocks, inline code, bold and links; everything else as plain text.
+  const blocks = String(text).split(/```[^\n]*\n?/);
+  return blocks.map((b, i) => {
+    if (i % 2) return `<pre><code>${esc(b.replace(/\n$/, ''))}</code></pre>`;
+    return esc(b)
+      .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>')
+      .replace(/^#{1,6} (.+)$/gm, '<b class="cf-h">$1</b>')
+      .replace(/(https?:\/\/[^\s<)]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>')
+      .replace(/\n/g, '<br>');
+  }).join('');
+}
+
+const agoText = (t) => {
+  const s = Math.max(0, (Date.now() - t) / 1000);
+  if (s < 45) return 'just now';
+  if (s < 3600) return `${Math.round(s / 60)} min ago`;
+  if (s < 86400) return `${Math.round(s / 3600)} h ago`;
+  return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(t);
+};
+
+async function fetchClaude() {
+  const proxy = data && data.liveProxy;
+  if (!proxy || !cfKey) return;
+  try {
+    const res = await fetch(`${proxy.replace(/\/$/, '')}/claude`, { headers: { 'x-feed-key': cfKey }, cache: 'no-store' });
+    const body = await res.json().catch(() => ({}));
+    if (res.status === 401) { cfError = 'That key doesn’t match the CLAUDE_FEED_KEY secret on your worker.'; cfKey = ''; store('rgo.cfkey', null); }
+    else if (res.status === 404) cfError = 'Your worker needs the updated code. Paste the new worker/worker.js into Cloudflare and click Deploy.';
+    else if (!res.ok) cfError = body.error || 'Couldn’t load messages.';
+    else { cfError = ''; const sig = JSON.stringify([body.messages.length, body.messages.at(-1)?.t, body.sessions]); if (sig !== fetchClaude.sig) { fetchClaude.sig = sig; cfFeed = body; } else return; }
+  } catch { cfError = 'Couldn’t reach your worker.'; }
+  renderClaude();
+}
+
+function pollClaude() {
+  clearTimeout(cfTimer);
+  if (!cfKey) return;
+  fetchClaude().finally(() => {
+    // Every 4 seconds on this tab; every 30 seconds elsewhere, just for the "working" dot.
+    cfTimer = setTimeout(pollClaude, document.hidden ? 60000 : view === 'claude' ? 4000 : 30000);
+  });
+}
+
+function renderClaude() {
+  if (!$('cf')) return;
+  const sessions = Object.entries(cfFeed.sessions || {}).map(([id, x]) => ({ id, ...x, last: Math.max(x.seen || 0, ...cfFeed.messages.filter((m) => m.session === id).map((m) => m.t)) })).sort((a, b) => b.last - a.last);
+  const working = sessions.some((x) => x.status === 'working' && Date.now() - x.seen < 30 * 60000);
+  $('cf-dot').hidden = !working;
+  $('cf').hidden = !cfKey;
+  $('cf-setup').hidden = !!cfKey;
+  $('cf-err').textContent = cfError;
+  if (!cfKey) return;
+  if (!sessions.some((x) => x.id === cfSession)) cfSession = sessions[0] ? sessions[0].id : '';
+  $('cf-meta').textContent = cfError || `${sessions.length} session${sessions.length === 1 ? '' : 's'}`;
+  $('cf-sessions').innerHTML = sessions.length ? sessions.map((x) => {
+    const msgs = cfFeed.messages.filter((m) => m.session === x.id);
+    const lastMsg = msgs[msgs.length - 1];
+    const preview = lastMsg ? `${lastMsg.role === 'user' ? '' : 'Claude: '}${lastMsg.text}` : '';
+    return `<li class="${x.id === cfSession ? 'on' : ''}" data-cf="${esc(x.id)}">
+      <b>${esc(x.project || 'Claude Code')}</b>${x.status === 'working' ? '<span class="cf-busy">working</span>' : ''}
+      <span class="faint">${esc(preview.slice(0, 80) || 'No messages yet')}</span>
+      <span class="faint cf-time">${agoText(x.last)}</span>
+    </li>`;
+  }).join('') : '<li class="faint cf-empty">Nothing yet. Send a message in Claude Code and it shows up here.</li>';
+  const cur = sessions.find((x) => x.id === cfSession);
+  $('cf-title').textContent = cur ? (cur.project || 'Claude Code') : 'Messages';
+  $('cf-status').innerHTML = cur ? (cur.status === 'working' ? '<span class="cf-busy">Claude is working…</span>' : `Last activity ${agoText(cur.last)}`) : '';
+  const log = $('cf-log');
+  const atBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 60;
+  const msgs = cfFeed.messages.filter((m) => m.session === cfSession);
+  log.innerHTML = msgs.length ? msgs.map((m) => `<div class="cf-msg ${m.role}">
+      <div class="cf-who">${m.role === 'user' ? 'You' : 'Claude'} <span class="faint">${new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(m.t)}</span></div>
+      <div class="cf-text">${m.text ? mdLite(m.text) : '<span class="faint">(no text, only tool use)</span>'}</div>
+    </div>`).join('') + (cur && cur.status === 'working' ? '<div class="cf-msg assistant typing"><div class="cf-who">Claude</div><div class="cf-text"><span class="cf-dots"><i></i><i></i><i></i></span></div></div>' : '')
+    : '<p class="faint cf-empty">No messages in this session yet.</p>';
+  if (atBottom || renderClaude.last !== cfSession) log.scrollTop = log.scrollHeight;
+  renderClaude.last = cfSession;
+}
+
+document.addEventListener('click', (e) => {
+  const li = e.target.closest('[data-cf]');
+  if (li) { cfSession = li.dataset.cf; store('rgo.cfsession', cfSession); renderClaude(); }
+  if (e.target.closest('#cf-lock')) { cfKey = ''; store('rgo.cfkey', null); cfFeed = { messages: [], sessions: {} }; clearTimeout(cfTimer); renderClaude(); }
+  if (e.target.closest('#cf-copy')) {
+    navigator.clipboard?.writeText($('cf-cmd').textContent).then(() => { $('cf-copy').textContent = 'Copied'; setTimeout(() => { $('cf-copy').textContent = 'Copy'; }, 1500); }).catch(() => {});
+  }
+});
+document.addEventListener('submit', (e) => {
+  if (e.target.id !== 'cf-key') return;
+  e.preventDefault();
+  cfKey = e.target.key.value.trim();
+  if (!cfKey) return;
+  store('rgo.cfkey', cfKey);
+  e.target.reset();
+  cfError = '';
+  pollClaude();
+});
+document.addEventListener('visibilitychange', () => { if (!document.hidden && cfKey) pollClaude(); });
+
 let resizeTimer;
 addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
 loadStatic().then((ok) => {
+  renderClaude();
+  pollClaude();
   if (!ok) return refresh(true);
   const m = location.hash.match(/^#game-(\d+)$/);
   if (m) openGame(m[1], false);
