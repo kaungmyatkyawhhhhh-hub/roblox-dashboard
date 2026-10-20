@@ -61,6 +61,24 @@ function weeklySummary(games, sales, now) {
   return { cur: span(now - 7 * DAY, now), prev: span(now - 14 * DAY, now - 7 * DAY) };
 }
 
+// A sudden like-ratio drop: the votes cast in the last 24 hours are at least
+// 15 points less positive than the game's ratio before them. Needs 8+ new votes.
+function ratioDrop(g, now) {
+  const h = g.history.filter((p) => p[4] != null && p[5] != null);
+  if (h.length < 2) return null;
+  const end = h[h.length - 1];
+  const start = h.find((p) => p[0] >= now - DAY);
+  if (!start || start === end) return null;
+  const up = end[4] - start[4], down = end[5] - start[5];
+  const votes = up + down;
+  const total = start[4] + start[5];
+  if (votes < 8 || up < 0 || down < 0 || total < 10) return null;
+  const recent = Math.round((up / votes) * 100), before = Math.round((start[4] / total) * 100);
+  if (before - recent < 15) return null;
+  const upd = Date.parse(g.updated);
+  return { recent, before, votes, update: upd && now - upd < 3 * DAY };
+}
+
 const change = (a, b) => (b ? `${a >= b ? '▲' : '▼'} ${Math.abs(Math.round(((a - b) / b) * 100))}%` : '');
 
 async function runAlerts({ state, games, newSales, sales, now, siteUrl, revenueConnected }) {
@@ -88,6 +106,15 @@ async function runAlerts({ state, games, newSales, sales, now, siteUrl, revenueC
     const was = state.updated ? state.updated[g.universeId] : undefined;
     if (was && g.updated && was !== g.updated && !first) events.push([`🛠 ${clean(g.name)} was updated`, ['Its before-and-after impact shows on the dashboard after a few days.']]);
     if (g.updated) next.updated[g.universeId] = g.updated;
+    const drop = ratioDrop(g, now);
+    const lastWarn = (state.ratioWarned || {})[g.universeId] || 0;
+    if (drop && !first && now - lastWarn > DAY) {
+      events.push([`👎 ${clean(g.name)}: likes are dropping`, [
+        `Only ${drop.recent}% of the last ${drop.votes} votes were likes, vs ${drop.before}% before.`,
+        drop.update ? 'This started after your latest update, so something in it may be broken.' : 'Worth checking for a bug or a broken feature.',
+      ]]);
+      (next.ratioWarned ||= {})[g.universeId] = now;
+    }
   }
 
   // Weekly report: the first run of each week (Monday, UTC).

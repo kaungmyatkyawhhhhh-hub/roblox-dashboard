@@ -1257,6 +1257,18 @@
   .p-queue li.rec-head { cursor: default; padding: 10px 6px 2px; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); background: none; box-shadow: none; }
   .p-queue li.rec img { filter: none; }
   .p-queue li.rec .qt b { font-weight: 500; }
+  .growth { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 0 12px 10px; }
+  .growth .k, .best .k { font-size: 11.5px; color: var(--ink-3); padding: 2px 6px; }
+  .best { display: grid; gap: 14px; padding: 6px 16px 4px; }
+  .best .v { font-size: 26px; font-weight: 650; letter-spacing: -.02em; padding: 2px 6px; text-shadow: 0 0 24px var(--glow); }
+  .best .s { font-size: 12.5px; color: var(--ink-2); padding: 2px 6px; line-height: 1.5; }
+  .best-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .best-list li { display: grid; grid-template-columns: 84px auto minmax(0, 1fr); gap: 12px; align-items: baseline; padding: 8px 6px; border-top: 1px solid var(--line-soft); font-size: 12.5px; }
+  .best-list li > span:first-child { color: var(--ink-3); font-size: 11.5px; }
+  .best-list li .faint { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pad { padding: 10px 16px; }
+  #members-panel[hidden] { display: none; }
+  @media (max-width: 720px) { .growth { grid-template-columns: 1fr; } .best-list li { grid-template-columns: 1fr; gap: 2px; } }
 </style>
 </head>
 <body class="intro-hold">
@@ -1454,6 +1466,24 @@
       <div class="panel-head"><h2>This week</h2><span class="meta">Last 7 days vs. the 7 before</span></div>
       <div class="est-out report" id="report"></div>
       <p class="est-note" id="alerts-status"></p>
+    </section>
+    <div class="row-m reports-row">
+      <section class="panel">
+        <div class="panel-head"><h2>Month forecast</h2><span class="meta" id="fc-meta"></span></div>
+        <div class="est-out report" id="forecast"></div>
+        <div class="pervisit" id="forecast-games"></div>
+      </section>
+      <section class="panel">
+        <div class="panel-head"><h2>Best time to update</h2><span class="meta">From when your players are online</span></div>
+        <div id="best-time"></div>
+      </section>
+    </div>
+    <section class="panel" id="members-panel">
+      <div class="panel-head"><h2>Group growth</h2><span class="meta" id="members-meta"></span></div>
+      <div class="growth">
+        <div><div class="k">Members</div><div class="chart-wrap" id="members-chart"></div></div>
+        <div><div class="k">Total visits</div><div class="chart-wrap" id="visits-chart"></div></div>
+      </div>
     </section>
     <div class="row-m reports-row">
       <section class="panel">
@@ -3914,6 +3944,130 @@ function renderUpdates(games, sales) {
   }).join('')}</tbody></table><p class="est-note">7 days after each update compared with the 7 days before (or as much as has passed). Updates are marked on the Overview players chart too.</p>` : '<p class="faint">No updates recorded yet. Each time you publish a game, it shows up here.</p>';
 }
 
+// ---- forecasts, best time to update, group growth ----
+function monthForecast(games, sales) {
+  const now = Date.now(), d = new Date(now);
+  const start = monthStart(), end = new Date(d.getFullYear(), d.getMonth() + 1, 1).getTime();
+  const daysLeft = (end - now) / DAY, daysIn = (now - start) / DAY;
+  const rows = games.map((g) => {
+    const visitRate = ratePerDay(g, 2);
+    const mine = sales.filter((x) => x.universeId === g.universeId);
+    const recent = mine.filter((x) => x.t >= now - 7 * DAY);
+    const firstSale = mine.length ? Math.min(...mine.map((x) => x.t)) : now;
+    const robuxRate = sumR(recent) / Math.max(1, Math.min(7, (now - firstSale) / DAY));
+    const covered = g.history.length && g.history[0][0] <= start + DAY;
+    const visitsSoFar = visitsBetween(g, start);
+    const robuxSoFar = sumR(mine.filter((x) => x.t >= start));
+    return { g, visitRate, robuxRate, covered, visitsSoFar, robuxSoFar,
+      visitsMonth: visitsSoFar + visitRate * daysLeft, robuxMonth: robuxSoFar + robuxRate * daysLeft,
+      visitsTotal: g.visits + visitRate * daysLeft };
+  });
+  // Group store sales (no game) still count toward the month's Robux.
+  const other = sales.filter((x) => !games.some((g) => g.universeId === x.universeId));
+  const otherRate = sumR(other.filter((x) => x.t >= now - 7 * DAY)) / 7;
+  const otherSoFar = sumR(other.filter((x) => x.t >= start));
+  return { rows, daysLeft, otherSoFar, otherMonth: otherSoFar + otherRate * daysLeft };
+}
+
+function renderForecast(games, sales) {
+  const f = monthForecast(games, sales);
+  const hasRev = data.revenue && (data.revenue.connected || sales.length);
+  const monthName = new Intl.DateTimeFormat(undefined, { month: 'long' }).format(new Date());
+  const sum = (k) => f.rows.reduce((s, r) => s + r[k], 0);
+  const partial = f.rows.some((r) => !r.covered);
+  $('fc-meta').textContent = `By the end of ${monthName} · ${Math.ceil(f.daysLeft)} day${Math.ceil(f.daysLeft) === 1 ? '' : 's'} left`;
+  $('forecast').innerHTML = `
+    <div><div class="k">Visits in ${esc(monthName)}</div><div class="v">≈ ${fmt.format(Math.round(sum('visitsMonth')))}</div><div class="s">${fmt.format(sum('visitsSoFar'))} so far${partial ? '<span class="faint"> since tracking began</span>' : ''}</div></div>
+    <div><div class="k">Total visits by then</div><div class="v">≈ ${compactNum(sum('visitsTotal'))}</div><div class="s">at ${fmt.format(Math.round(sum('visitRate')))} visits a day</div></div>
+    ${hasRev ? `<div><div class="k">Robux in ${esc(monthName)}</div><div class="v">≈ ${robux(sum('robuxMonth') + f.otherMonth)}</div><div class="s">${robux(sum('robuxSoFar') + f.otherSoFar)} so far · pace of the last 7 days</div></div>` : ''}`;
+  $('forecast-games').innerHTML = games.length > 1 ? `<table class="mini"><thead><tr><th>Game</th><th>Visits/day</th><th>Visits in ${esc(monthName)}</th>${hasRev ? `<th>Robux in ${esc(monthName)}</th>` : ''}</tr></thead><tbody>${f.rows.map((r) => `<tr><td><b>${esc(cleanName(r.g.name))}</b></td><td>${fmt.format(Math.round(r.visitRate))}</td><td>≈ ${fmt.format(Math.round(r.visitsMonth))}</td>${hasRev ? `<td>≈ ${robux(r.robuxMonth)}</td>` : ''}</tr>`).join('')}</tbody></table><p class="est-note">Projections assume the next days go like the last 7. They update every 5 minutes.</p>` : '';
+}
+const compactNum = (v) => new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(v);
+
+function weekGrid(games) {
+  const sums = Array.from({ length: 7 }, () => new Array(24).fill(0));
+  const counts = Array.from({ length: 7 }, () => new Array(24).fill(0));
+  for (const [t, p] of totalSeries(games, 720)) {
+    const d = new Date(t), dow = (d.getDay() + 6) % 7, hr = d.getHours();
+    sums[dow][hr] += p; counts[dow][hr]++;
+  }
+  let filled = 0;
+  const avg = sums.map((row, i) => row.map((v, j) => (counts[i][j] ? (filled++, v / counts[i][j]) : null)));
+  return { avg, filled };
+}
+
+function renderBestTime(games) {
+  const { avg, filled } = weekGrid(games);
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const at = (k) => { const i = ((k % 168) + 168) % 168; return avg[Math.floor(i / 24)][i % 24]; };
+  const name = (k) => { const i = ((k % 168) + 168) % 168; return `${days[Math.floor(i / 24)]} ${hourName(i % 24)}`; };
+  if (filled < 84) {
+    // Not enough of the week yet: fall back to the daily pattern (hour of day only).
+    const byHour = Array.from({ length: 24 }, (_, h) => { const v = avg.map((row) => row[h]).filter((x) => x != null); return v.length ? v.reduce((x, y) => x + y, 0) / v.length : null; });
+    if (byHour.some((v) => v == null)) {
+      $('best-time').innerHTML = `<p class="faint pad">Needs about a day more of data to find your busiest hours. Check back soon.</p>`;
+      return;
+    }
+    const sc = (h) => (byHour[h % 24] + byHour[(h + 1) % 24] + byHour[(h + 2) % 24]) / 3;
+    const order = Array.from({ length: 24 }, (_, h) => h).sort((x, y) => sc(y) - sc(x));
+    const top = order[0], quietH = order[23];
+    const mean = byHour.reduce((x, y) => x + y, 0) / 24;
+    $('best-time').innerHTML = `
+      <div class="best">
+        <div class="best-main"><div class="k">Publish around</div><div class="v">${esc(hourName((top + 23) % 24))}</div>
+          <div class="s">1 hour before your busiest hours, ${esc(hourName(top))}–${esc(hourName((top + 3) % 24))}, when ${avgText(sc(top))} players are on${mean ? ` (${(sc(top) / mean).toFixed(1)}× your average)` : ''}.</div></div>
+        <ul class="best-list"><li><span>Quietest</span><b>${esc(hourName(quietH))}</b><span class="faint">best for risky fixes, fewest players affected</span></li></ul>
+      </div>
+      <p class="est-note">Based on your daily pattern so far (${Math.round((filled / 168) * 100)}% of the week covered). Once there's a full week of data, this picks the best day too. Your local time.</p>`;
+    return;
+  }
+  // Busiest 3-hour stretch of the week; publish an hour before it starts so the
+  // new version is live (and tested) when most players arrive.
+  const span = 3;
+  const score = (k) => { let s = 0, n = 0; for (let j = 0; j < span; j++) { const v = at(k + j); if (v != null) { s += v; n++; } } return n ? s / n : -1; };
+  const ranked = Array.from({ length: 168 }, (_, k) => ({ k, s: score(k) })).filter((x) => x.s >= 0).sort((a, b) => b.s - a.s);
+  const picks = [];
+  for (const x of ranked) { if (picks.every((p) => Math.abs(p.k - x.k) >= 12 && 168 - Math.abs(p.k - x.k) >= 12)) picks.push(x); if (picks.length === 3) break; }
+  const quiet = [...ranked].reverse().find((x) => x.s >= 0);
+  const best = picks[0];
+  const weekAvg = ranked.reduce((s, x) => s + x.s, 0) / ranked.length;
+  const times = (k) => `${hourName(((k % 24) + 24) % 24)}–${hourName((k + span) % 24)}`;
+  $('best-time').innerHTML = `
+    <div class="best">
+      <div class="best-main"><div class="k">Publish on</div><div class="v">${esc(name(best.k - 1))}</div>
+        <div class="s">1 hour before your busiest stretch, ${esc(days[Math.floor((((best.k % 168) + 168) % 168) / 24)])} ${esc(times(best.k))}, when ${avgText(best.s)} players are on (${weekAvg ? `${(best.s / weekAvg).toFixed(1)}× your average` : ''}).</div></div>
+      <ul class="best-list">${picks.slice(1).map((p) => `<li><span>Also good</span><b>${esc(name(p.k - 1))}</b><span class="faint">${avgText(p.s)} players at peak</span></li>`).join('')}
+        ${quiet ? `<li><span>Quietest</span><b>${esc(name(quiet.k))}</b><span class="faint">best for risky fixes, fewest players affected</span></li>` : ''}</ul>
+    </div>
+    <p class="est-note">Your local time. Updating just before a peak means players join the new version, and you have an hour to catch problems.</p>`;
+}
+
+function renderGrowth(games) {
+  const groups = (data.owners || []).filter((o) => o.type === 'group' && o.members && o.members.length);
+  $('members-panel').hidden = !groups.length;
+  if (!groups.length) return;
+  const ms = groups[0].members;
+  const first = ms[0], last = ms[ms.length - 1];
+  const weekAgo = ms.find((p) => p[0] >= Date.now() - 7 * DAY) || first;
+  const gained = last[1] - weekAgo[1];
+  // Total visits over time, one point per hour, carrying each game's latest count forward.
+  const hours = new Map();
+  for (const g of games) for (const p of g.history) if (p[2] != null) {
+    const h = Math.floor(p[0] / 3600000) * 3600000;
+    (hours.get(h) || hours.set(h, new Map()).get(h)).set(g.universeId, p[2]);
+  }
+  const latest = new Map(), vs = [];
+  for (const h of [...hours.keys()].sort((a, b) => a - b)) {
+    for (const [id, v] of hours.get(h)) latest.set(id, v);
+    if (latest.size === games.length) vs.push([h, [...latest.values()].reduce((a, b) => a + b, 0)]);
+  }
+  const vStart = vs.find((p) => p[0] >= weekAgo[0]);
+  const totalV = vs.length && vStart ? vs[vs.length - 1][1] - vStart[1] : 0;
+  $('members-meta').textContent = `${fmt.format(last[1])} members · ${gained >= 0 ? '+' : ''}${fmt.format(gained)} this week${totalV > 0 && gained > 0 ? ` · ${(gained / totalV * 1000).toFixed(1)} new members per 1K visits` : ''}`;
+  lineChart($('members-chart'), [{ name: 'Members', color: cssVar('--accent'), points: ms }], { legend: false, height: 170, floor: null, label: 'Group members over time' });
+  lineChart($('visits-chart'), [{ name: 'Total visits', color: cssVar('--series-2'), points: vs }], { legend: false, height: 170, floor: null, label: 'Total visits over time' });
+}
+
 function renderReports(games) {
   if (!$('report')) return;
   const sales = (data.revenue && data.revenue.sales) || [];
@@ -3928,10 +4082,13 @@ function renderReports(games) {
     <div><div class="k">Best seller</div><div class="v small">${cur.best ? esc(cur.best[0]) : '—'}</div><div class="s">${cur.best ? robux(cur.best[1]) : 'No sales this week'}</div></div>` : ''}`;
   renderGoals(games, sales);
   renderUpdates(games, sales);
+  renderForecast(games, sales);
+  renderBestTime(games);
+  renderGrowth(games);
   const a = data.alerts || {};
   $('alerts-status').innerHTML = a.discord || a.ntfy
-    ? `<span class="delta up">On</span> Sending to ${[a.discord && 'Discord', a.ntfy && 'the ntfy app'].filter(Boolean).join(' and ')}: new sales, player records, visit milestones, game updates, and this report every Monday.`
-    : 'Off. Set it up below to get new sales, player records, visit milestones, game updates and a Monday report on your phone.';
+    ? `<span class="delta up">On</span> Sending to ${[a.discord && 'Discord', a.ntfy && 'the ntfy app'].filter(Boolean).join(' and ')}: new sales, player records, visit milestones, game updates, a sudden drop in likes, and this report every Monday.`
+    : 'Off. Set it up below to get new sales, player records, visit milestones, game updates, like-ratio drops and a Monday report on your phone.';
   $('alerts-setup').hidden = !!(a.discord || a.ntfy);
 }
 

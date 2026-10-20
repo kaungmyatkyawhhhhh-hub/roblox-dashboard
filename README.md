@@ -11,12 +11,12 @@ A black-and-white, one-screen analytics dashboard for every Roblox experience ow
 - **Monetization tab:** your real Robux and sales (when connected, see below): Robux today, 7 days, 30 days and all tracked, Premium Payouts, pending Robux, Robux per day, top items and recent sales, for all games or one selected game. Below that: every game pass and developer product with prices, store stats and a price-tier chart. Without a connection it shows an earnings estimator instead.
 
 - **Compare tab:** your games next to similar public games (`competitors` in `config.json`, as universe ids, place ids like `place:123`, or game links): players now (log-scale bars), 24h trend and peak, visits per day, visits, favorites, like ratio.
-- **Reports tab:** this week vs. last week (visits, peak players, Robux, sales, best seller); goals with progress rings and a projected finish date (add your own in the page, or list shared ones in `config.json` → `goals`, e.g. `{ "metric": "visits", "target": 5000, "by": "2026-12-31" }`; metrics: `visits`, `favorites`, `robux_month`, `robux_total`, `peak`); update impact (7 days before vs. after each publish); CSV/JSON export.
+- **Reports tab:** this week vs. last week (visits, peak players, Robux, sales, best seller); goals with progress rings and a projected finish date (add your own in the page, or list shared ones in `config.json` → `goals`, e.g. `{ "metric": "visits", "target": 5000, "by": "2026-12-31" }`; metrics: `visits`, `favorites`, `robux_month`, `robux_total`, `peak`); update impact (7 days before vs. after each publish); month forecast (visits and Robux by month end at the last 7 days' pace); best time to publish an update (an hour before your busiest stretch of the week); group member growth next to total visits; CSV/JSON export.
 - **Monetization extras:** a when-people-buy heatmap and Robux per 1K visits per game. Game updates are also marked on the Overview players chart.
 
 ### Alerts and the weekly report
 
-The collector can notify you about new sales, new player records, visit milestones and game updates, plus a weekly report every Monday. Add either repository secret:
+The collector can notify you about new sales, new player records, visit milestones, game updates and sudden like-ratio drops (the last 24 hours' votes at least 15 points below the game's usual ratio), plus a weekly report every Monday. Add either repository secret:
 
 - `DISCORD_WEBHOOK`: a Discord channel webhook URL (channel settings → Integrations → Webhooks).
 - `NTFY_TOPIC`: a private topic name you subscribe to in the free ntfy app.

@@ -48,7 +48,8 @@ async function main() {
   const compHistory = history._comp || {};
   const updates = history._updates || {};
   const alertState = history._alerts || {};
-  for (const k of ['_comp', '_updates', '_alerts']) delete history[k];
+  const members = history._members || {};
+  for (const k of ['_comp', '_updates', '_alerts', '_members']) delete history[k];
   // Re-key saved sales (older versions used Roblox's non-unique ids) and drop duplicates.
   const seenKeys = new Set();
   ledger = ledger.filter((x) => {
@@ -61,9 +62,20 @@ async function main() {
   const owners = [];
   if (config.user) owners.push({ type: 'user', ...(await resolveUser(String(config.user))) });
   for (const id of config.groups || []) owners.push({ type: 'group', ...(await resolveGroup(id)) });
+  const now = Date.now();
+  // Group member counts over time: one sample per hour is plenty.
+  for (const o of owners) {
+    if (o.type !== 'group' || !o.memberCount) continue;
+    const h = (members[o.id] || []).filter((p) => now - p[0] <= HISTORY_MS);
+    const last = h[h.length - 1];
+    if (last && Math.floor(last[0] / HOUR) === Math.floor(now / HOUR)) h[h.length - 1] = [now, o.memberCount];
+    else h.push([now, o.memberCount]);
+    members[o.id] = h;
+    o.members = h;
+  }
+  history._members = members;
   if (!owners.length) throw new Error('config.json needs a "user" or at least one entry in "groups"');
 
-  const now = Date.now();
   const seen = new Set();
   const games = [];
   for (const owner of owners) {
