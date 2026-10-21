@@ -1891,7 +1891,10 @@ function renderChart(games, top, colorOf) {
   const topIds = new Set(top.map((g) => g.universeId));
   const others = games.filter((g) => !topIds.has(g.universeId));
   $('range').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', Number(b.dataset.range) === rangeHours));
-  const step = staticMode ? `${data.intervalMinutes || 5}-min samples` : '1-min samples';
+  // Say how far apart the samples really are (GitHub can delay its scheduled runs).
+  const gaps = games.flatMap((g) => within(g, rangeHours).map((p, i, a) => (i ? p[0] - a[i - 1][0] : null)).filter((x) => x != null)).sort((x, y) => x - y);
+  const typical = gaps.length ? gaps[Math.floor(gaps.length / 2)] / 60000 : (data.intervalMinutes || 5);
+  const step = !staticMode ? '1-min samples' : typical >= 90 ? `a sample every ~${Math.round(typical / 60)} h` : `${Math.max(1, Math.round(typical))}-min samples`;
   // Until tracking covers the chosen range, say where the data actually starts.
   const firstT = Math.min(...games.flatMap((g) => (g.history[0] ? [g.history[0][0]] : [])));
   const since = isFinite(firstT) && data.fetchedAt - firstT < rangeHours * 3600000 * 0.9

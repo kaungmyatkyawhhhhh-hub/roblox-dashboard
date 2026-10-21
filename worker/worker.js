@@ -7,12 +7,36 @@
 // music player. That needs a YouTube Data API key saved on the worker as a
 // secret named YOUTUBE_API_KEY (Settings → Variables and Secrets).
 //
+// It can also keep the dashboard updating every 5 minutes. GitHub delays its own
+// scheduled runs by hours on quiet repositories, so a Cron Trigger on this worker
+// (Settings → Triggers → Cron: */5 * * * *) starts the updater instead. That needs
+// a GitHub token saved on the worker as a secret named GITHUB_TOKEN (fine-grained,
+// only this repository, permission "Actions: Read and write").
+//
 // Deploy: Cloudflare dashboard → Workers & Pages → Create → Worker,
 // paste this file, Deploy. Then put the worker's URL in config.json → "liveProxy".
 
 const ALLOWED_ORIGIN = 'https://kaungmyatkyawhhhhh-hub.github.io';
 
+const REPO = 'kaungmyatkyawhhhhh-hub/roblox-dashboard';
+
 export default {
+  // Cron Trigger: start the dashboard updater on GitHub.
+  async scheduled(event, env = {}, ctx) {
+    if (!env.GITHUB_TOKEN) return;
+    const res = await fetch(`https://api.github.com/repos/${env.GITHUB_REPO || REPO}/actions/workflows/dashboard.yml/dispatches`, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${String(env.GITHUB_TOKEN).trim()}`,
+        accept: 'application/vnd.github+json',
+        'user-agent': 'roblox-live-worker',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ ref: 'main' }),
+    });
+    if (!res.ok) console.log(`GitHub said ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  },
+
   async fetch(request, env = {}, ctx) {
     const cors = { 'access-control-allow-origin': ALLOWED_ORIGIN, vary: 'origin' };
     if (request.method === 'OPTIONS') {

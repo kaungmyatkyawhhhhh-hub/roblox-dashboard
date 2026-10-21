@@ -14,6 +14,14 @@ A black-and-white, one-screen analytics dashboard for every Roblox experience ow
 - **Reports tab:** this week vs. last week (visits, peak players, Robux, sales, best seller); goals with progress rings and a projected finish date (add your own in the page, or list shared ones in `config.json` → `goals`, e.g. `{ "metric": "visits", "target": 5000, "by": "2026-12-31" }`; metrics: `visits`, `favorites`, `robux_month`, `robux_total`, `peak`); update impact (7 days before vs. after each publish); month forecast (visits and Robux by month end at the last 7 days' pace); best time to publish an update (an hour before your busiest stretch of the week); group member growth next to total visits; CSV/JSON export.
 - **Monetization extras:** a when-people-buy heatmap and Robux per 1K visits per game. Game updates are also marked on the Overview players chart.
 
+### Updating every 5 minutes reliably
+
+GitHub only runs scheduled workflows when it has capacity, and on quiet repositories that can mean every few hours. The worker can start the updater itself:
+
+1. GitHub → Settings → Developer settings → Fine-grained tokens → Generate new token. Repository access: only `roblox-dashboard`. Permissions: **Actions: Read and write**. Copy the token.
+2. Cloudflare → the worker → Settings → Variables and Secrets → add a secret `GITHUB_TOKEN` with that token. Deploy the latest `worker/worker.js`.
+3. Worker → Settings → Triggers → Cron Triggers → add `*/5 * * * *`.
+
 ### All-ages eligibility
 
 Roblox Kids and Select (all-ages audiences) need 250 highly engaged players per game in a 60-day window. Roblox shows that count only in Creator Hub, with no API, so the game drawer and the Reports tab let you type in the number you see there; the dashboard keeps each entry (in that browser) and shows progress and the pace toward the target. To show a count to everyone, add it to `config.json`: `"allAges": { "<universe id>": { "count": 120, "at": "2026-10-20" } }`. Change the target with `"allAgesTarget"` if Roblox changes it.
