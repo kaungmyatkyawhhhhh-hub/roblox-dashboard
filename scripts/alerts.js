@@ -103,9 +103,16 @@ async function runAlerts({ state, games, newSales, sales, now, siteUrl, revenueC
     const crossed = MILESTONES.filter((m) => prevVisits !== undefined && prevVisits < m && g.visits >= m).pop();
     if (crossed && !first) events.push([`🎉 ${clean(g.name)} passed ${compact.format(crossed)} visits`, [`${fmt.format(g.visits)} visits total`]]);
     next.visits[g.universeId] = g.visits;
+    // Only real publishes when the version history is readable; otherwise any save or publish.
+    const mark = g.updatesKind === 'published' ? (g.lastPublished ? `p${g.lastPublished}` : null) : g.updated;
     const was = state.updated ? state.updated[g.universeId] : undefined;
-    if (was && g.updated && was !== g.updated && !first) events.push([`🛠 ${clean(g.name)} was updated`, ['Its before-and-after impact shows on the dashboard after a few days.']]);
-    if (g.updated) next.updated[g.universeId] = g.updated;
+    const sameKind = was && String(was).startsWith('p') === String(mark).startsWith('p');
+    if (was && mark && was !== mark && sameKind && !first) {
+      events.push(g.updatesKind === 'published'
+        ? [`🚀 ${clean(g.name)} was published`, ['Its before-and-after impact shows on the dashboard after a few days.']]
+        : [`🛠 ${clean(g.name)} was saved or published`, ['Roblox shows the same change for a Studio save and a publish.']]);
+    }
+    if (mark) next.updated[g.universeId] = mark;
     const drop = ratioDrop(g, now);
     const lastWarn = (state.ratioWarned || {})[g.universeId] || 0;
     if (drop && !first && now - lastWarn > DAY) {

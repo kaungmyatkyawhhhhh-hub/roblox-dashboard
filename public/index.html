@@ -1523,7 +1523,7 @@
         <p class="est-note">Goals you add here are saved in this browser. Goals in config.json show for everyone.</p>
       </section>
       <section class="panel">
-        <div class="panel-head"><h2>Update impact</h2><span class="meta">Before vs. after each publish</span></div>
+        <div class="panel-head"><h2>Update impact</h2><span class="meta" id="updates-meta">Before vs. after each publish</span></div>
         <div class="updates" id="updates"></div>
       </section>
     </div>
@@ -1904,7 +1904,7 @@ function renderChart(games, top, colorOf) {
     const pts = totalSeries(others, rangeHours);
     if (pts.length) series.push({ name: `All others (${others.length})`, color: cssVar('--series-other'), dash: '1 5', points: pts });
   }
-  const markers = games.flatMap((g) => (g.updates || []).map((t) => ({ t, label: 'Update', title: `${g.name} updated ${new Date(t).toLocaleString()}` })));
+  const markers = games.flatMap((g) => (g.updates || []).map((t) => ({ t, label: g.updatesKind === 'published' ? 'Publish' : 'Save', title: `${g.name} ${g.updatesKind === 'published' ? 'published' : 'saved or published'} ${new Date(t).toLocaleString()}` })));
   lineChart($('chart'), series, { markers, animate: animateChart, height: innerWidth < 600 ? 190 : 200, label: `Concurrent users, ${RANGE_NAMES[rangeHours].toLowerCase()}` });
   animateChart = false;
 }
@@ -2315,7 +2315,8 @@ function renderDrawer(animate = false) {
     <section class="d-sec"><div class="d-sec-head"><h3>Details</h3></div>
       <dl class="d-details">
         <dt>Created</dt><dd>${date(g.created)}</dd>
-        <dt>Last updated</dt><dd>${date(g.updated)} <span class="faint">· ${agoIso(g.updated)}</span></dd>
+        ${g.lastPublished ? `<dt>Last published</dt><dd>${date(new Date(g.lastPublished).toISOString())} <span class="faint">· ${agoIso(new Date(g.lastPublished).toISOString())}</span></dd>` : ''}
+        <dt>${g.updatesKind === 'published' ? 'Last saved' : 'Last saved or published'}</dt><dd>${date(g.updated)} <span class="faint">· ${agoIso(g.updated)}</span></dd>
         <dt>Owner</dt><dd>${esc(g.ownerName || g.creator || '—')}</dd>
         <dt>Universe ID</dt><dd class="num">${g.universeId}</dd>
         <dt>Place ID</dt><dd class="num">${g.placeId}</dd>
@@ -4143,7 +4144,10 @@ function renderGoals(games, sales) {
 
 function renderUpdates(games, sales) {
   const now = Date.now();
-  const rows = games.flatMap((g) => (g.updates || []).map((t) => ({ g, t }))).sort((a, b) => b.t - a.t).slice(0, 12);
+  // Several saves or publishes within a few hours count as one: compare against the first.
+  const rows = games.flatMap((g) => (g.updates || []).filter((t, i, a) => !i || t - a[i - 1] > 6 * 3600000).map((t) => ({ g, t }))).sort((a, b) => b.t - a.t).slice(0, 12);
+  const published = games.some((g) => g.updatesKind === 'published');
+  $('updates-meta').textContent = published ? 'Before vs. after each publish' : 'Before vs. after each save or publish';
   $('updates').innerHTML = rows.length ? `<table class="mini"><thead><tr><th>Update</th><th>Avg players</th><th>Visits/day</th><th>Robux/day</th></tr></thead><tbody>${rows.map(({ g, t }) => {
     const span = Math.min(7 * DAY, now - t);
     const ready = span >= DAY;
@@ -4158,7 +4162,7 @@ function renderUpdates(games, sales) {
     const f1 = (v) => (v < 10 ? v.toFixed(1) : fmt.format(Math.round(v)));
     return `<tr><td><b>${esc(cleanName(g.name))}</b><div class="faint">${new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(t)}</div></td>
       <td>${cell(after.p, before.p, f1)}</td><td>${cell(after.v, before.v, f1)}</td><td>${cell(after.r, before.r, (v) => robux(v))}</td></tr>`;
-  }).join('')}</tbody></table><p class="est-note">7 days after each update compared with the 7 days before (or as much as has passed). Updates are marked on the Overview players chart too.</p>` : '<p class="faint">No updates recorded yet. Each time you publish a game, it shows up here.</p>';
+  }).join('')}</tbody></table><p class="est-note">7 days after each update compared with the 7 days before (or as much as has passed). Updates are marked on the Overview players chart too.${published ? '' : ' Roblox reports a Studio save the same way as a publish, so saves show here too.'}</p>` : '<p class="faint">No updates recorded yet. Each time you publish a game, it shows up here.</p>';
 }
 
 // ---- forecasts, best time to update, group growth ----

@@ -6,10 +6,11 @@
 
 const fs = require('fs');
 const path = require('path');
-const { saleKey, resolveUser, resolveGroup, fetchGames, fetchOwnerGames, fetchStore, fetchRevenueSummary, fetchGroupSales } = require('../lib/roblox');
+const { saleKey, fetchPublishTimes, resolveUser, resolveGroup, fetchGames, fetchOwnerGames, fetchStore, fetchRevenueSummary, fetchGroupSales } = require('../lib/roblox');
 const { runAlerts } = require('./alerts');
 
 const HOUR = 60 * 60 * 1000;
+const collect = {};   // run-wide flags
 const HISTORY_MS = 30 * 24 * HOUR;
 const FULL_RES_MS = 48 * HOUR; // older samples are thinned to one per hour
 const STORE_MS = HOUR;          // store listings change rarely; refresh hourly
@@ -88,11 +89,27 @@ async function main() {
       if (!cached || now - cached.fetchedAt > STORE_MS) {
         try { cached = stores[g.universeId] = await fetchStore(g.universeId); } catch (e) { console.warn(`store ${g.universeId}: ${e.message}`); }
       }
-      // Every publish changes the "updated" time; keep a list of them for update-impact charts.
-      const ups = (updates[g.universeId] ||= []);
-      const ut = Date.parse(g.updated);
-      if (ut && !ups.includes(ut)) { ups.push(ut); ups.sort((a, b) => a - b); }
-      games.push({ ...g, ownerType: owner.type, ownerName: owner.name, history: h, store: cached || null, updates: ups });
+      // Real publishes come from the place's version history (needs the ROBLOX_COOKIE
+      // login to have edit access). Roblox's public "updated" time also changes when
+      // the game is only saved in Studio, so without that access the list is
+      // "saved or published".
+      let ups, updatesKind = 'saved';
+      if (process.env.ROBLOX_COOKIE && g.placeId) {
+        try {
+          ups = (await fetchPublishTimes(g.placeId, process.env.ROBLOX_COOKIE)).filter((t) => now - t <= HISTORY_MS).sort((a, b) => a - b);
+          updatesKind = 'published';
+          updates[g.universeId] = ups;
+        } catch (e) {
+          if (!collect.warned) console.warn(`publish history: ${e.message} (the ROBLOX_COOKIE account needs permission to edit the group's experiences)`);
+          collect.warned = true;
+        }
+      }
+      if (!ups) {
+        ups = (updates[g.universeId] ||= []);
+        const ut = Date.parse(g.updated);
+        if (ut && !ups.includes(ut)) { ups.push(ut); ups.sort((a, b) => a - b); }
+      }
+      games.push({ ...g, ownerType: owner.type, ownerName: owner.name, history: h, store: cached || null, updates: ups, updatesKind, lastPublished: updatesKind === 'published' ? ups[ups.length - 1] || null : null });
     }
   }
   // Drop experiences that are no longer listed.
