@@ -1289,6 +1289,8 @@
   .hep-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: 10px 24px; padding: 4px 16px 14px; }
   .hep-row { display: grid; gap: 8px; padding-top: 8px; border-top: 1px solid var(--line-soft); }
   .hep-row > b { font-size: 13.5px; }
+  .ov-head { margin-bottom: 10px; }
+  .ov-head[hidden] { display: none; }
 </style>
 </head>
 <body class="intro-hold">
@@ -1379,6 +1381,7 @@
 
 <template id="dashboard">
   <div class="view" data-view="overview">
+  <div class="rev-head ov-head"><div class="seg rev-game" id="ov-game" role="group" aria-label="Show game"></div></div>
   <section class="kpis reveal-group" id="kpis"></section>
 
   <div class="row-a">
@@ -1815,21 +1818,30 @@ function sparkline(points, w, h, color, cls = '') {
   </svg>`;
 }
 
+let ovGame = load('rgo.ovgame') || 'all';
 function render() {
   if (!data || !$('kpis')) return;
   gradId = 0;
   const games = data.games;
   const ranked = [...games].sort((a, b) => b.playing - a.playing || b.visits - a.visits);
   const top = ranked.slice(0, 5);
+  // Colours follow the full ranking so a game keeps its colour when it's picked on its own.
   const colorOf = new Map(top.map((g, i) => [g.universeId, SERIES[i]]));
   const rankOf = new Map(ranked.map((g, i) => [g.universeId, i + 1]));
-  renderKpis(games);
-  renderChart(games, top, colorOf);
-  renderHeatmap(games);
-  renderHighlights(games);
-  barChart($('visits'), visitBars(games, colorOf, 14), { label: 'Visits per day', height: 158 });
-  $('milestones').innerHTML = milestoneHtml(milestoneRows(games).slice(0, 3)) || '<li class="faint">Every milestone reached. Legendary.</li>';
-  renderCards(ranked, colorOf);
+  // Overview game picker: "All games" or one game for every panel on this tab.
+  if (ovGame !== 'all' && !games.some((g) => String(g.universeId) === ovGame)) ovGame = 'all';
+  $('ov-game').parentElement.hidden = games.length < 2;
+  $('ov-game').innerHTML = [['all', 'All games'], ...ranked.map((g) => [String(g.universeId), cleanName(g.name)])]
+    .map(([id, name]) => `<button type="button" data-ov="${id}" aria-pressed="${id === ovGame}" title="${esc(name)}">${esc(name)}</button>`).join('');
+  const shown = ovGame === 'all' ? games : games.filter((g) => String(g.universeId) === ovGame);
+  const shownRanked = ranked.filter((g) => shown.includes(g));
+  renderKpis(shown);
+  renderChart(shown, top.filter((g) => shown.includes(g)), colorOf);
+  renderHeatmap(shown);
+  renderHighlights(shown);
+  barChart($('visits'), visitBars(shown, colorOf, 14), { label: 'Visits per day', height: 158 });
+  $('milestones').innerHTML = milestoneHtml(milestoneRows(shown).slice(0, 3)) || '<li class="faint">Every milestone reached. Legendary.</li>';
+  renderCards(shownRanked, colorOf);
   if (view === 'money') renderMoney(games);
   if (view === 'compare') renderCompare(games);
   if (view === 'reports') renderReports(games);
@@ -3967,6 +3979,14 @@ function renderRevenue(games) {
   renderPerVisit(revGame === 'all' ? games : games.filter((g) => String(g.universeId) === revGame), sales);
 }
 
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-ov]');
+  if (!b) return;
+  ovGame = b.dataset.ov;
+  store('rgo.ovgame', ovGame);
+  animateChart = true;
+  render();
+});
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-rev]');
   if (!b) return;
