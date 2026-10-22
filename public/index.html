@@ -4023,20 +4023,19 @@ function renderSalesHeat(sales) {
 function renderPerVisit(games, sales) {
   const box = $('rev-pervisit');
   if (!box) return;
-  const from = Date.now() - 30 * DAY;
+  // All time: the game's total visits on Roblox against every sale recorded for it.
   const rows = games.map((g) => {
-    const s = sales.filter((x) => x.universeId === g.universeId && x.t >= from);
-    const v = visitsBetween(g, from);
-    return { g, visits: v, robux: sumR(s), sales: s.length };
+    const s = sales.filter((x) => x.universeId === g.universeId);
+    return { g, visits: g.visits, robux: sumR(s), sales: s.length };
   });
   const maxK = Math.max(0.0001, ...rows.map((r) => (r.visits ? r.robux / r.visits : 0)));
-  box.innerHTML = `<table class="mini"><thead><tr><th>Experience</th><th>Visits</th><th>Robux</th><th>R$ per 1K visits</th><th>Buyers per 1K</th></tr></thead><tbody>${rows.map((r) => {
+  box.innerHTML = `<table class="mini"><thead><tr><th>Experience</th><th>Visits</th><th>Robux</th><th>R$ per 1K visits</th><th>Sales per 1K visits</th></tr></thead><tbody>${rows.map((r) => {
     const per = r.visits ? (r.robux / r.visits) * 1000 : null;
     return `<tr><td>${esc(cleanName(r.g.name))}</td><td>${fmt.format(r.visits)}</td><td>${robux(r.robux)}</td>
       <td><span class="cellbar"><i style="width:${per == null ? 0 : ((r.robux / r.visits) / maxK) * 100}%"></i></span>${per == null ? '—' : robux(per)}</td>
       <td>${r.visits ? ((r.sales / r.visits) * 1000).toFixed(1) : '—'}</td></tr>`;
   }).join('')}</tbody></table>
-  <p class="est-note">Last 30 days, or since tracking began. Higher means each visit is worth more to you.</p>`;
+  <p class="est-note">All time: each game's total Roblox visits and every sale${sales.length ? ` since ${dayFmt.format(Math.min(...sales.map((x) => x.t)))}` : ''}. Higher means each visit is worth more to you.</p>`;
 }
 
 // ---- Compare tab ----
