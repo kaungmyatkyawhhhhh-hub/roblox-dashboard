@@ -4618,7 +4618,7 @@ function renderLeaderboard(games, sales) {
       <td>${r.price != null ? robux(r.price) : '—'}</td>
       <td>${r.sales ? fmt.format(r.sales) : '<span class="tag-dead">Never sold</span>'}</td>
       <td><span class="cellbar"><i style="width:${(r.robux / maxR) * 100}%"></i></span>${robux(r.robux)}</td>
-      <td>${r.sales ? `${Math.round(r.share * 100)}%` : '—'}</td>
+      <td>${r.sales ? (r.share < 0.005 ? '<1%' : `${Math.round(r.share * 100)}%`) : '—'}</td>
       <td>${r.sales ? r.per1k.toFixed(1) : '—'}</td>
       <td class="faint">${r.last ? agoText(r.last) : '—'}</td>
     </tr>`).join('')}</tbody></table>
