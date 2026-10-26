@@ -6,7 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { saleKey, fetchPublishTimes, resolveUser, resolveGroup, fetchGames, fetchOwnerGames, fetchStore, fetchRevenueSummary, fetchGroupSales } = require('../lib/roblox');
+const { fetchGameIcons, saleKey, fetchPublishTimes, resolveUser, resolveGroup, fetchGames, fetchOwnerGames, fetchStore, fetchRevenueSummary, fetchGroupSales } = require('../lib/roblox');
 const { runAlerts } = require('./alerts');
 
 const HOUR = 60 * 60 * 1000;
@@ -50,7 +50,9 @@ async function main() {
   const updates = history._updates || {};
   const alertState = history._alerts || {};
   const members = history._members || {};
-  for (const k of ['_comp', '_updates', '_alerts', '_members']) delete history[k];
+  const meta = history._meta || {};          // last known details of each game, kept if it goes private
+  const archive = history._archive || {};    // games that went private or were removed: { privatedAt }
+  for (const k of ['_comp', '_updates', '_alerts', '_members', '_meta', '_archive']) delete history[k];
   // Roblox sometimes lists a new sale before its details (item, game) are filled in,
   // then lists it again with them under a different key. Drop the detail-less copy.
   const twinOf = (x, list) => list.find((v) => v !== x && v.itemId && v.robux === x.robux && Math.abs(v.t - x.t) < 5000);
@@ -114,12 +116,35 @@ async function main() {
         if (ut && !ups.includes(ut)) { ups.push(ut); ups.sort((a, b) => a - b); }
       }
       games.push({ ...g, ownerType: owner.type, ownerName: owner.name, history: h, store: cached || null, updates: ups, updatesKind, lastPublished: updatesKind === 'published' ? ups[ups.length - 1] || null : null });
+      const { history: _h, playing: _p, ...details } = games[games.length - 1];
+      meta[g.universeId] = { ...details, store: undefined };
+      delete archive[g.universeId];   // public again
     }
   }
-  // Drop experiences that are no longer listed.
-  for (const id of Object.keys(history)) if (!seen.has(Number(id))) delete history[id];
-  for (const id of Object.keys(stores)) if (!seen.has(Number(id))) delete stores[id];
+  // A game that's no longer listed (made private or removed) is archived, not deleted:
+  // its history, store and sales stay, it just stops appearing as a live game.
+  const archived = [];
+  const tracked = new Set([...Object.keys(history), ...Object.keys(meta)].filter((k) => /^\d+$/.test(k)));
+  for (const id of tracked) {
+    if (seen.has(Number(id))) continue;
+    const a = (archive[id] ||= { privatedAt: now });
+    const h = thin(history[id] || [], now);
+    history[id] = h;
+    const last = h[h.length - 1] || [];
+    // Games tracked before details were saved: rebuild them from what's left.
+    let m = meta[id];
+    if (!m) {
+      const sale = ledger.find((x) => String(x.universeId) === id && x.place);
+      let icon = null;
+      try { icon = (await fetchGameIcons([Number(id)]))[0] || null; } catch {}
+      m = meta[id] = { universeId: Number(id), name: sale ? sale.place : `Experience ${id}`, icon, thumbnail: null, visits: last[2] || 0, favorites: last[3] || 0, upVotes: last[4] || 0, downVotes: last[5] || 0, updates: updates[id] || [] };
+    }
+    archived.push({ ...m, playing: 0, archived: true, privatedAt: a.privatedAt, history: h, store: stores[id] || null, updates: updates[id] || m.updates || [] });
+  }
   history._store = stores;
+  history._meta = meta;
+  history._archive = archive;
+  if (archived.length) console.log(`archived (private or removed): ${archived.map((g) => g.name).join(', ')}`);
 
   // Real revenue, when a cookie for an account that can view group revenue is set
   // as the ROBLOX_COOKIE secret. Published as-is (the owner chose a public page).
@@ -180,7 +205,7 @@ async function main() {
     for (const id of Object.keys(compHistory)) if (!list.some((g) => String(g.universeId) === id)) delete compHistory[id];
   } catch (e) { console.warn(`competitors: ${e.message}`); }
   history._comp = compHistory;
-  for (const id of Object.keys(updates)) if (!seen.has(Number(id))) delete updates[id];
+  for (const id of Object.keys(updates)) if (!seen.has(Number(id)) && !archive[id]) delete updates[id];
   history._updates = updates;
 
   const repo = process.env.GITHUB_REPOSITORY;
@@ -192,7 +217,7 @@ async function main() {
 
   fs.writeFileSync(historyFile, JSON.stringify(history));
   fs.mkdirSync(path.dirname(outFile), { recursive: true });
-  fs.writeFileSync(outFile, JSON.stringify({ fetchedAt: now, intervalMinutes: 5, liveProxy: config.liveProxy || '', owners, games, revenue, competitors, alerts, goals: config.goals || [], events: config.events || [], allAges: config.allAges || {}, allAgesTarget: config.allAgesTarget || 250 }));
+  fs.writeFileSync(outFile, JSON.stringify({ fetchedAt: now, intervalMinutes: 5, liveProxy: config.liveProxy || '', owners, games, revenue, competitors, alerts, archived, goals: config.goals || [], events: config.events || [], allAges: config.allAges || {}, allAgesTarget: config.allAgesTarget || 250 }));
   const ccu = games.reduce((s, g) => s + g.playing, 0);
   console.log(`${games.length} experiences, ${ccu} playing, ${owners.map((o) => o.name).join(', ')}`);
 }

@@ -4005,7 +4005,11 @@ document.addEventListener('click', (e) => { const t = e.target.closest('.tabs bu
 let revGame = load('rgo.revgame') || 'all';
 const REV_KEYS = { itemSaleRobux: 'Sales', premiumPayouts: 'Premium Payouts', groupPremiumPayouts: 'Premium Payouts', immersiveAdRevenue: 'Ads', subscriptionsRevenue: 'Subscriptions' };
 
+// Games that were made private or removed: no longer live, but their sales and history stay.
+const archivedGames = () => (data && data.archived) || [];
+const privateLabel = (g) => (g.archived ? `${g.name} (private)` : g.name);
 function renderRevenue(games) {
+  games = [...games, ...archivedGames().filter((g) => !games.some((x) => x.universeId === g.universeId))];
   const rev = data.revenue || {};
   const sales = rev.sales || [];
   const has = rev.connected || sales.length;
@@ -4016,11 +4020,11 @@ function renderRevenue(games) {
   $('estimator').hidden = !!rev.connected;
   if (!has) return;
 
-  const gameName = new Map(games.map((g) => [String(g.universeId), g.name]));
+  const gameName = new Map(games.map((g) => [String(g.universeId), privateLabel(g)]));
   gameName.set('null', 'Avatar shop items');   // sold from the group's catalog, not inside a game
   const known = new Set(games.map((g) => String(g.universeId)));
   if (revGame !== 'all' && !known.has(revGame)) revGame = 'all';
-  $('rev-game').innerHTML = [['all', 'All games'], ...games.map((g) => [String(g.universeId), g.name])]
+  $('rev-game').innerHTML = [['all', 'All games'], ...games.map((g) => [String(g.universeId), privateLabel(g)])]
     .map(([id, name]) => `<button type="button" data-rev="${id}" aria-pressed="${id === revGame}" title="${esc(name)}">${esc(name)}</button>`).join('');
 
   const mine = revGame === 'all' ? sales : sales.filter((x) => String(x.universeId) === revGame);
@@ -4178,7 +4182,7 @@ function renderPerVisit(games, sales) {
   const maxK = Math.max(0.0001, ...rows.map((r) => (r.visits ? r.robux / r.visits : 0)));
   box.innerHTML = `<table class="mini"><thead><tr><th>Experience</th><th>Visits</th><th>Robux</th><th>R$ per 1K visits</th><th>Sales per 1K visits</th></tr></thead><tbody>${rows.map((r) => {
     const per = r.visits ? (r.robux / r.visits) * 1000 : null;
-    return `<tr><td>${esc(cleanName(r.g.name))}</td><td>${fmt.format(r.visits)}</td><td>${robux(r.robux)}</td>
+    return `<tr><td>${esc(cleanName(r.g.name))}${r.g.archived ? ' <span class="faint">(private)</span>' : ''}</td><td>${fmt.format(r.visits)}</td><td>${robux(r.robux)}</td>
       <td><span class="cellbar"><i style="width:${per == null ? 0 : ((r.robux / r.visits) / maxK) * 100}%"></i></span>${per == null ? '—' : robux(per)}</td>
       <td>${r.visits ? ((r.sales / r.visits) * 1000).toFixed(1) : '—'}</td></tr>`;
   }).join('')}</tbody></table>
@@ -4475,7 +4479,7 @@ function download(name, text, type) {
 const csv = (rows) => rows.map((r) => r.map((v) => (/[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v)).join(',')).join('\n');
 
 function exportSales() {
-  const names = new Map(data.games.map((g) => [g.universeId, g.name]));
+  const names = new Map([...data.games, ...archivedGames()].map((g) => [g.universeId, privateLabel(g)]));
   const rows = [['time', 'experience', 'item', 'type', 'robux', 'pending']];
   for (const x of (data.revenue && data.revenue.sales) || []) rows.push([new Date(x.t).toISOString(), names.get(x.universeId) || 'Avatar shop', x.item, x.type, x.robux, x.pending]);
   download('sales.csv', csv(rows), 'text/csv');
@@ -4609,7 +4613,7 @@ function renderLeaderboard(games, sales) {
   box.innerHTML = `<table class="mini lb"><thead><tr>${th('name', 'Item')}${multi ? '<th>Game</th>' : ''}<th>Type</th>${th('price', 'Price')}${th('sales', 'Sales')}${th('robux', 'Robux earned')}<th>Share of game</th>${th('per1k', 'Sales per 1K visits')}<th>Last sale</th></tr></thead><tbody>${rows.map((r, i) => `
     <tr class="${r.sales ? '' : 'dead'}">
       <td><span class="lb-item"><span class="lb-rank">${i + 1}</span><span class="lb-ph">${r.icon ? `<img src="${esc(r.icon)}" alt="" loading="lazy" onerror="this.remove()">` : ''}</span><b>${esc(r.name)}</b>${!r.listed && r.sales ? '<span class="faint"> · not for sale now</span>' : ''}</span></td>
-      ${multi ? `<td class="faint">${esc(cleanName(r.game.name))}</td>` : ''}
+      ${multi ? `<td class="faint">${esc(cleanName(r.game.name))}${r.game.archived ? ' (private)' : ''}</td>` : ''}
       <td class="faint">${r.kind === 'pass' ? 'Game pass' : 'Product'}</td>
       <td>${r.price != null ? robux(r.price) : '—'}</td>
       <td>${r.sales ? fmt.format(r.sales) : '<span class="tag-dead">Never sold</span>'}</td>
@@ -4632,7 +4636,7 @@ document.addEventListener('click', (e) => {
 let localEvents = [];
 try { localEvents = JSON.parse(load('rgo.events') || '[]'); } catch { localEvents = []; }
 function eventStats(g, sales, from, to) {
-  const list = g ? [g] : data.games;
+  const list = g ? [g] : data.games;   // a picked game may be archived (private)
   const ids = new Set(list.map((x) => x.universeId));
   const days = Math.max(1 / 24, (to - from) / DAY);
   const h = list.flatMap((x) => x.history.filter((p) => p[0] >= from && p[0] < to));
@@ -4662,7 +4666,7 @@ function renderEvents(games, sales) {
   };
   $('ev-game').innerHTML = '<option value="">All games</option>' + games.map((g) => `<option value="${g.universeId}">${esc(cleanName(g.name))}</option>`).join('');
   $('events').innerHTML = all.length ? all.map((ev) => {
-    const g = ev.game ? games.find((x) => String(x.universeId) === String(ev.game)) : null;
+    const g = ev.game ? [...games, ...archivedGames()].find((x) => String(x.universeId) === String(ev.game)) : null;
     const len = ev.e - ev.s;
     const live = now < ev.e;
     const during = eventStats(g, sales, ev.s, Math.min(ev.e, now));
