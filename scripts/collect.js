@@ -192,7 +192,7 @@ async function main() {
 
   fs.writeFileSync(historyFile, JSON.stringify(history));
   fs.mkdirSync(path.dirname(outFile), { recursive: true });
-  fs.writeFileSync(outFile, JSON.stringify({ fetchedAt: now, intervalMinutes: 5, liveProxy: config.liveProxy || '', owners, games, revenue, competitors, alerts, goals: config.goals || [], allAges: config.allAges || {}, allAgesTarget: config.allAgesTarget || 250 }));
+  fs.writeFileSync(outFile, JSON.stringify({ fetchedAt: now, intervalMinutes: 5, liveProxy: config.liveProxy || '', owners, games, revenue, competitors, alerts, goals: config.goals || [], events: config.events || [], allAges: config.allAges || {}, allAgesTarget: config.allAgesTarget || 250 }));
   const ccu = games.reduce((s, g) => s + g.playing, 0);
   console.log(`${games.length} experiences, ${ccu} playing, ${owners.map((o) => o.name).join(', ')}`);
 }

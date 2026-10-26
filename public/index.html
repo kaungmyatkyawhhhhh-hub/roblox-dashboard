@@ -1291,6 +1291,52 @@
   .hep-row > b { font-size: 13.5px; }
   .ov-head { margin-bottom: 10px; }
   .ov-head[hidden] { display: none; }
+  .lb td, .lb th { vertical-align: middle; }
+  .lb th[data-lb] { cursor: pointer; }
+  .lb th.sorted { color: var(--ink); }
+  .lb-item { display: inline-flex; align-items: center; gap: 10px; }
+  .lb-ph { width: 26px; height: 26px; border-radius: 7px; flex: none; background: var(--panel-2); overflow: hidden; }
+  .lb-ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .lb-rank { width: 18px; text-align: right; color: var(--ink-3); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .lb tr.dead td { opacity: .62; }
+  .tag-dead { font-size: 11px; padding: 2px 8px; border-radius: 99px; border: 1px dashed var(--ink-3); color: var(--ink-2); }
+  #leaderboard { padding: 4px 8px 6px; max-height: 460px; overflow: auto; }
+  .events { display: grid; gap: 14px; padding: 6px 16px 4px; }
+  .ev { display: grid; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--line-soft); }
+  .ev-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13.5px; }
+  .ev-head > div { flex: 1; min-width: 0; }
+  .ev-status { font-size: 11px; padding: 3px 9px; border-radius: 99px; border: 1px solid var(--line); color: var(--ink-2); }
+  .ev-status.on { background: var(--ink); color: var(--bg); border-color: var(--ink); box-shadow: 0 0 14px -2px var(--glow); }
+  .ev .mini td:first-child { color: var(--ink-2); }
+  .ev-empty { display: grid; gap: 10px; justify-items: start; padding: 4px 0 8px; }
+  .ev-empty button { height: 34px; font-size: 12.5px; }
+  .ev-date { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-3); flex: 1 1 200px; }
+  .ev-date input { flex: 1; }
+  .p-head-btns { display: inline-flex; gap: 2px; }
+  .p-save-form { display: flex; gap: 6px; margin: -2px 0 8px; }
+  .p-save-form[hidden] { display: none; }
+  .p-save-form input { flex: 1; min-width: 0; height: 32px; font: inherit; font-size: 12.5px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); }
+  .p-save-form button { height: 32px; font-size: 12px; }
+  .p-playlists { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; grid-template-columns: minmax(0, 1fr); }
+  .p-playlists li { display: flex; align-items: center; gap: 10px; padding: 6px; border-radius: 12px; cursor: pointer; }
+  .p-playlists li:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+  .p-playlists .qt { flex: 1; min-width: 0; }
+  .p-playlists .pl-btn { width: 28px; height: 28px; padding: 0; border-radius: 50%; display: grid; place-items: center; background: transparent; border: 1px solid var(--glass-line); color: var(--ink-2); font-size: 15px; }
+  .p-playlists .pl-btn:hover { background: var(--ink); color: var(--bg); }
+  .p-playlists .rm { width: 26px; height: 26px; padding: 0; border-radius: 50%; display: grid; place-items: center; background: transparent; border-color: transparent; color: var(--ink-3); opacity: 0; }
+  .p-playlists li:hover .rm, .p-playlists .rm:focus-visible { opacity: 1; }
+  .p-keys { margin-top: 14px; font-size: 12px; color: var(--ink-3); }
+  .p-keys summary { cursor: pointer; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; list-style: none; }
+  .p-keys summary::-webkit-details-marker { display: none; }
+  .p-keys summary::after { content: " +"; }
+  .p-keys[open] summary::after { content: " −"; }
+  .p-keys dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 10px 0 0; }
+  .p-keys dt { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; color: var(--ink); white-space: nowrap; }
+  .p-keys dd { margin: 0; color: var(--ink-2); }
+  a.who-bar { color: inherit; text-decoration: none; border-radius: 10px; transition: opacity .15s; }
+  a.who-bar:hover { opacity: .8; }
+  a.who-bar:hover #owner { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  a.who-bar:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 </style>
 </head>
 <body class="intro-hold">
@@ -1315,7 +1361,7 @@
 <div class="vignette" aria-hidden="true"></div>
 <canvas class="eq-bottom" id="eq-bottom" aria-hidden="true"></canvas>
 <header class="bar">
-  <div class="brand"><span class="mark"></span><span class="who-bar"><img id="avatar" alt="" hidden><b id="owner">Experience Overview</b><span id="owner-sub"></span></span></div>
+  <div class="brand"><span class="mark"></span><a class="who-bar" id="owner-link" target="_blank" rel="noopener"><img id="avatar" alt="" hidden><b id="owner">Experience Overview</b><span id="owner-sub"></span></a></div>
   <nav class="tabs" aria-label="Views"><button type="button" data-tab="overview" aria-pressed="true">Overview</button><button type="button" data-tab="money" aria-pressed="false">Monetization</button><button type="button" data-tab="compare" aria-pressed="false">Compare</button><button type="button" data-tab="reports" aria-pressed="false">Reports</button></nav>
   <span class="spacer"></span>
   <form id="form">
@@ -1364,10 +1410,16 @@
     <form class="p-add" id="p-add"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1.2-1.2a2.8 2.8 0 0 1 4 4L11 8.5M9 11.5l-1.2 1.2a2.8 2.8 0 0 1-4-4L5 7.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input id="p-url" placeholder="Search YouTube or paste a link" autocomplete="off" aria-label="YouTube link"><button type="submit" aria-label="Add to queue">+</button></form>
     <ul class="p-results" id="p-results" hidden></ul>
     <div class="p-msg" id="p-msg" role="status"></div>
-    <div class="p-list-head"><span>Your queue</span><button type="button" id="p-clear" hidden>Clear</button></div>
+    <div class="p-list-head"><span>Your queue</span><span class="p-head-btns"><button type="button" id="p-save" hidden>Save as playlist</button><button type="button" id="p-clear" hidden>Clear</button></span></div>
+    <form class="p-save-form" id="p-save-form" hidden><input name="name" placeholder="Playlist name" aria-label="Playlist name" maxlength="40" required><button type="submit">Save</button><button type="button" id="p-save-cancel">Cancel</button></form>
     <ul class="p-queue" id="p-queue"></ul>
+    <div class="p-list-head" id="p-pl-head" hidden><span>Saved playlists</span></div>
+    <ul class="p-queue p-playlists" id="p-playlists"></ul>
     <div class="p-list-head"><span>Ambient · generated live</span></div>
     <div class="p-stations" id="p-stations"></div>
+    <details class="p-keys"><summary>Keyboard shortcuts</summary>
+      <dl><dt>Space</dt><dd>Play / pause</dd><dt>Shift + → / ←</dt><dd>Next / previous song</dd><dt>→ / ←</dt><dd>Skip 10 seconds</dd><dt>↑ / ↓</dt><dd>Volume</dd><dt>M</dt><dd>Mute</dd><dt>S</dt><dd>Shuffle</dd><dt>L</dt><dd>Open / close the player</dd></dl>
+    </details>
   </div>
 </div>
 
@@ -1456,6 +1508,7 @@
         <section class="panel"><div class="panel-head"><h2>When people buy</h2><span class="meta" id="rev-heat-meta"></span></div><div class="chart-wrap" id="rev-heat"></div></section>
         <section class="panel"><div class="panel-head"><h2>Earnings per visit</h2><span class="meta">Which game monetizes better</span></div><div class="pervisit" id="rev-pervisit"></div></section>
       </div>
+      <section class="panel"><div class="panel-head"><h2>Item leaderboard</h2><span class="meta" id="lb-meta"></span></div><div class="table-scroll" id="leaderboard"></div></section>
     </section>
     <section class="kpis" id="m-kpis"></section>
     <div class="row-m">
@@ -1504,6 +1557,18 @@
     <section class="panel">
       <div class="panel-head"><h2>All-ages eligibility</h2><span class="meta" id="hep-meta"></span></div>
       <div class="hep-list" id="hep-list"></div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h2>Events</h2><span class="meta">During vs. the same length before and after</span></div>
+      <div class="events" id="events"></div>
+      <form class="goal-form ev-form" id="ev-form">
+        <input name="name" placeholder="Event name" aria-label="Event name" required>
+        <select name="game" id="ev-game" aria-label="Game"></select>
+        <label class="ev-date">Start <input name="start" type="datetime-local" required></label>
+        <label class="ev-date">End <input name="end" type="datetime-local" required></label>
+        <button class="primary" type="submit">Track event</button>
+      </form>
+      <p class="est-note">Events you add are saved in this browser. Ones in config.json ("events") show for everyone.</p>
     </section>
     <section class="panel" id="members-panel">
       <div class="panel-head"><h2>Group growth</h2><span class="meta" id="members-meta"></span></div>
@@ -1669,6 +1734,10 @@ function showOwners(owners, count) {
   $('owner').textContent = owners.map((o) => (o.type === 'group' ? o.name : o.displayName || o.name)).join(' · ');
   const kind = owners.length > 1 ? 'Roblox creators' : main.type === 'group' ? 'Roblox group' : `@${main.name}`;
   $('owner-sub').textContent = `${kind} · ${count} experience${count === 1 ? '' : 's'}`;
+  // Logo and name open the group (or profile) on Roblox.
+  const link = $('owner-link');
+  link.href = main.type === 'group' ? `https://www.roblox.com/communities/${main.id}` : `https://www.roblox.com/users/${main.id}/profile`;
+  link.title = `Open ${main.name} on Roblox`;
   if (main.avatar) {
     $('avatar').src = main.avatar;
     $('avatar').hidden = false;
@@ -3185,6 +3254,8 @@ function renderPlayer() {
     }
   }
   $('p-clear').hidden = !queue.length;
+  $('p-save').hidden = !queue.length;
+  renderPlaylists();
   showVolume();
 }
 
@@ -3552,6 +3623,61 @@ $('p-queue').onclick = (e) => {
   const li = e.target.closest('[data-q]');
   if (li) playYT(Number(li.dataset.q));
 };
+// ---- saved playlists ----
+let playlists = [];
+try { playlists = JSON.parse(load('rgo.playlists') || '[]').filter((p) => p && p.name && Array.isArray(p.items)); } catch { playlists = []; }
+const savePlaylists = () => store('rgo.playlists', JSON.stringify(playlists));
+function renderPlaylists() {
+  if (!$('p-playlists')) return;
+  $('p-pl-head').hidden = !playlists.length;
+  $('p-playlists').innerHTML = playlists.map((p, i) => {
+    const first = p.items.find((x) => x.v);
+    return `<li data-pl="${i}">
+      <span class="qthumb">${first ? `<img src="https://i.ytimg.com/vi/${esc(first.v)}/mqdefault.jpg" alt="" loading="lazy">` : '<span class="ph"></span>'}</span>
+      <span class="qt"><b>${esc(p.name)}</b><span>${p.items.length} song${p.items.length === 1 ? '' : 's'}</span></span>
+      <button type="button" class="pl-btn" data-pl-add="${i}" title="Add to the end of your queue" aria-label="Add ${esc(p.name)} to queue">+</button>
+      <button type="button" class="rm" data-pl-rm="${i}" aria-label="Delete ${esc(p.name)}">✕</button>
+    </li>`;
+  }).join('');
+}
+$('p-save').onclick = () => { const f = $('p-save-form'); f.hidden = false; f.name.value = ''; f.name.focus(); };
+$('p-save-cancel').onclick = () => { $('p-save-form').hidden = true; };
+$('p-save-form').onsubmit = (e) => {
+  e.preventDefault();
+  const name = e.target.name.value.trim();
+  if (!name || !queue.length) return;
+  const items = queue.map(({ v, list, title, author, start }) => ({ v, list, title, author, start }));
+  const at = playlists.findIndex((p) => p.name.toLowerCase() === name.toLowerCase());
+  if (at >= 0) playlists[at] = { name, items, at: Date.now() }; else playlists.unshift({ name, items, at: Date.now() });
+  savePlaylists();
+  e.target.hidden = true;
+  setMsg(at >= 0 ? `Updated “${name}”.` : `Saved “${name}” (${items.length} song${items.length === 1 ? '' : 's'}).`);
+  renderPlaylists();
+};
+$('p-playlists').onclick = (e) => {
+  const rm = e.target.closest('[data-pl-rm]');
+  if (rm) { const p = playlists.splice(Number(rm.dataset.plRm), 1)[0]; savePlaylists(); setMsg(`Deleted “${p.name}”.`); renderPlaylists(); return; }
+  const add = e.target.closest('[data-pl-add]');
+  if (add) {
+    const p = playlists[Number(add.dataset.plAdd)];
+    let n = 0;
+    for (const it of p.items) if (!queue.some((q) => (it.v ? q.v === it.v : q.list === it.list))) { queue.push({ ...it }); n++; }
+    saveQueue(); renderPlayer();
+    setMsg(n ? `Added ${n} song${n === 1 ? '' : 's'} from “${p.name}” to your queue.` : `Everything in “${p.name}” is already queued.`);
+    return;
+  }
+  const li = e.target.closest('[data-pl]');
+  if (li) {
+    // Play the playlist: it replaces the queue.
+    const p = playlists[Number(li.dataset.pl)];
+    queue = p.items.map((x) => ({ ...x }));
+    saveQueue();
+    played = [];
+    playYT(shuffle ? Math.floor(Math.random() * queue.length) : 0);
+    setMsg(`Playing “${p.name}”.`);
+  }
+};
+
 $('p-clear').onclick = () => {
   queue = []; saveQueue();
   if (src === 'yt') { yt?.stopVideo?.(); ytPlaying = false; ytIndex = -1; src = 'mood'; radio = null; $('player').classList.remove('yt'); }
@@ -3977,6 +4103,7 @@ function renderRevenue(games) {
     </li>`).join('') : '<li class="faint">No sales yet.</li>';
   renderSalesHeat(mine);
   renderPerVisit(revGame === 'all' ? games : games.filter((g) => String(g.universeId) === revGame), sales);
+  renderLeaderboard(revGame === 'all' ? games : games.filter((g) => String(g.universeId) === revGame), sales);
 }
 
 document.addEventListener('click', (e) => {
@@ -4326,6 +4453,7 @@ function renderReports(games) {
   renderGoals(games, sales);
   renderUpdates(games, sales);
   renderForecast(games, sales);
+  renderEvents(games, sales);
   $('hep-meta').textContent = `Roblox Kids and Select need ${fmt.format(hepTarget())} highly engaged players`;
   $('hep-list').innerHTML = games.map((g) => `<div class="hep-row"><b>${esc(cleanName(g.name))}</b>${allAgesHtml(g)}</div>`).join('');
   renderBestTime(games);
@@ -4447,6 +4575,154 @@ function agoText(t) {
   if (sec < 86400) return `${Math.round(sec / 3600)} h ago`;
   return `${Math.round(sec / 86400)} days ago`;
 }
+
+// ---- item leaderboard: every game pass and developer product, all time ----
+let lbSort = load('rgo.lbsort') || 'robux';
+function renderLeaderboard(games, sales) {
+  const box = $('leaderboard');
+  if (!box) return;
+  const items = new Map();
+  const keyOf = (uid, kind, id, name) => (kind === 'pass' ? `${uid}|pass|${id}` : `${uid}|product|${name}`);
+  for (const g of games) for (const x of storeItems(g)) {
+    items.set(keyOf(g.universeId, x.kind, x.id, x.name), { name: x.name, kind: x.kind, price: x.price, icon: x.icon, game: g, listed: x.forSale !== false, sales: 0, robux: 0, last: 0 });
+  }
+  // Game passes match by id; developer products by name (sales use a different product id).
+  for (const x of sales) {
+    const g = games.find((gg) => gg.universeId === x.universeId);
+    if (!g) continue;
+    const kind = x.type === 'GamePass' ? 'pass' : 'product';
+    const k = keyOf(g.universeId, kind, x.itemId, x.item);
+    if (!items.has(k)) items.set(k, { name: x.item, kind, price: null, game: g, listed: false, sales: 0, robux: 0, last: 0 });
+    const it = items.get(k);
+    it.sales++; it.robux += x.robux; it.last = Math.max(it.last, x.t);
+  }
+  const gameTotal = new Map(games.map((g) => [g.universeId, 0]));
+  for (const it of items.values()) gameTotal.set(it.game.universeId, gameTotal.get(it.game.universeId) + it.robux);
+  const rows = [...items.values()].map((it) => ({ ...it, share: gameTotal.get(it.game.universeId) ? it.robux / gameTotal.get(it.game.universeId) : 0, per1k: it.game.visits ? (it.sales / it.game.visits) * 1000 : 0 }));
+  const sorters = { robux: (a, b) => b.robux - a.robux || b.sales - a.sales, sales: (a, b) => b.sales - a.sales || b.robux - a.robux, price: (a, b) => (b.price || 0) - (a.price || 0), per1k: (a, b) => b.per1k - a.per1k, name: (a, b) => a.name.localeCompare(b.name) };
+  rows.sort(sorters[lbSort] || sorters.robux);
+  const unsold = rows.filter((r) => !r.sales && r.listed).length;
+  $('lb-meta').textContent = `${rows.length} items · all time${unsold ? ` · ${unsold} never sold` : ''}`;
+  const th = (k, label) => `<th${k ? ` data-lb="${k}" aria-sort="${lbSort === k ? 'descending' : 'none'}" class="${lbSort === k ? 'sorted' : ''}"` : ''}>${label}</th>`;
+  const multi = games.length > 1;
+  const maxR = Math.max(1, ...rows.map((r) => r.robux));
+  box.innerHTML = `<table class="mini lb"><thead><tr>${th('name', 'Item')}${multi ? '<th>Game</th>' : ''}<th>Type</th>${th('price', 'Price')}${th('sales', 'Sales')}${th('robux', 'Robux earned')}<th>Share of game</th>${th('per1k', 'Sales per 1K visits')}<th>Last sale</th></tr></thead><tbody>${rows.map((r, i) => `
+    <tr class="${r.sales ? '' : 'dead'}">
+      <td><span class="lb-item"><span class="lb-rank">${i + 1}</span><span class="lb-ph">${r.icon ? `<img src="${esc(r.icon)}" alt="" loading="lazy" onerror="this.remove()">` : ''}</span><b>${esc(r.name)}</b>${!r.listed && r.sales ? '<span class="faint"> · not for sale now</span>' : ''}</span></td>
+      ${multi ? `<td class="faint">${esc(cleanName(r.game.name))}</td>` : ''}
+      <td class="faint">${r.kind === 'pass' ? 'Game pass' : 'Product'}</td>
+      <td>${r.price != null ? robux(r.price) : '—'}</td>
+      <td>${r.sales ? fmt.format(r.sales) : '<span class="tag-dead">Never sold</span>'}</td>
+      <td><span class="cellbar"><i style="width:${(r.robux / maxR) * 100}%"></i></span>${robux(r.robux)}</td>
+      <td>${r.sales ? `${Math.round(r.share * 100)}%` : '—'}</td>
+      <td>${r.sales ? r.per1k.toFixed(1) : '—'}</td>
+      <td class="faint">${r.last ? agoText(r.last) : '—'}</td>
+    </tr>`).join('')}</tbody></table>
+    <p class="est-note">Robux after Roblox's fee. "Never sold" items are worth re-pricing, re-placing in the game, or removing. Click a column to sort.</p>`;
+}
+document.addEventListener('click', (e) => {
+  const h = e.target.closest('[data-lb]');
+  if (!h) return;
+  lbSort = h.dataset.lb;
+  store('rgo.lbsort', lbSort);
+  renderRevenue(data.games);
+});
+
+// ---- event tracker ----
+let localEvents = [];
+try { localEvents = JSON.parse(load('rgo.events') || '[]'); } catch { localEvents = []; }
+function eventStats(g, sales, from, to) {
+  const list = g ? [g] : data.games;
+  const ids = new Set(list.map((x) => x.universeId));
+  const days = Math.max(1 / 24, (to - from) / DAY);
+  const h = list.flatMap((x) => x.history.filter((p) => p[0] >= from && p[0] < to));
+  const s = sales.filter((x) => ids.has(x.universeId) && x.t >= from && x.t < to);
+  const items = new Map();
+  for (const x of s) items.set(x.item, (items.get(x.item) || 0) + x.robux);
+  return {
+    has: h.length > 1,
+    avg: h.length ? list.reduce((a, x) => a + (avgPlayers(x, from, to) || 0), 0) : null,
+    peak: h.length ? Math.max(...h.map((p) => p[1])) : null,
+    visits: list.reduce((a, x) => a + visitsBetween(x, from, to), 0) / days,
+    robux: sumR(s) / days,
+    sales: s.length,
+    best: [...items].sort((a, b) => b[1] - a[1])[0],
+  };
+}
+function renderEvents(games, sales) {
+  const all = [...(data.events || []).map((e) => ({ ...e, shared: true })), ...localEvents.map((e, i) => ({ ...e, idx: i }))]
+    .map((e) => ({ ...e, s: Date.parse(e.start), e: Date.parse(e.end) })).filter((e) => e.s && e.e > e.s).sort((a, b) => b.s - a.s);
+  const now = Date.now();
+  const fmtD = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
+  const f1 = (v) => (v == null ? '—' : v < 10 ? v.toFixed(1) : fmt.format(Math.round(v)));
+  const cmp = (a, b, f) => {
+    if (a == null || b == null || !b) return `<span class="faint">${b == null ? 'no data' : ''}</span>`;
+    const pct = Math.round(((a - b) / b) * 100);
+    return `<span class="delta ${pct >= 0 ? 'up' : 'down'}">${pct >= 0 ? '▲' : '▼'}${Math.abs(pct)}%</span> <span class="faint">vs ${f(b)}</span>`;
+  };
+  $('ev-game').innerHTML = '<option value="">All games</option>' + games.map((g) => `<option value="${g.universeId}">${esc(cleanName(g.name))}</option>`).join('');
+  $('events').innerHTML = all.length ? all.map((ev) => {
+    const g = ev.game ? games.find((x) => String(x.universeId) === String(ev.game)) : null;
+    const len = ev.e - ev.s;
+    const live = now < ev.e;
+    const during = eventStats(g, sales, ev.s, Math.min(ev.e, now));
+    const before = eventStats(g, sales, ev.s - len, ev.s);
+    const after = now > ev.e ? eventStats(g, sales, ev.e, Math.min(ev.e + len, now)) : null;
+    const status = now < ev.s ? 'Starts ' + fmtD.format(ev.s) : live ? `Live · ends ${fmtD.format(ev.e)} (${Math.ceil((ev.e - now) / DAY)} day${Math.ceil((ev.e - now) / DAY) === 1 ? '' : 's'} left)` : `Ended ${fmtD.format(ev.e)}`;
+    const row = (label, k, f) => `<tr><td>${label}</td><td><b>${f(during[k])}</b> ${cmp(during[k], before.has || k === 'robux' || k === 'sales' ? before[k] : null, f)}</td><td>${after ? `${f(after[k])} ${cmp(after[k], during[k], f)}` : `<span class="faint">${live ? 'after it ends' : '—'}</span>`}</td></tr>`;
+    return `<div class="ev">
+      <div class="ev-head"><div><b>${esc(ev.name)}</b> <span class="faint">· ${g ? esc(cleanName(g.name)) : 'All games'} · ${fmtD.format(ev.s)}–${fmtD.format(ev.e)}</span></div>
+        <span class="ev-status ${live && now >= ev.s ? 'on' : ''}">${status}</span>${ev.shared ? '<span class="faint gtag">from config</span>' : `<button class="icon gdel" type="button" data-ev-del="${ev.idx}" aria-label="Remove event">✕</button>`}</div>
+      ${now < ev.s ? '<p class="faint">Numbers appear once it starts.</p>' : `<table class="mini"><thead><tr><th></th><th>During (vs. before)</th><th>After (vs. during)</th></tr></thead><tbody>
+        ${row('Avg players', 'avg', f1)}${row('Peak players', 'peak', f1)}${row('Visits a day', 'visits', f1)}${row('Robux a day', 'robux', (v) => robux(v))}
+        <tr><td>Best seller</td><td>${during.best ? `${esc(during.best[0])} <span class="faint">${robux(during.best[1])}</span>` : '<span class="faint">no sales</span>'}</td><td>${after && after.best ? `${esc(after.best[0])} <span class="faint">${robux(after.best[1])}</span>` : ''}</td></tr>
+      </tbody></table>${before.has ? '' : '<p class="est-note">No player data from before it started (tracking began later), so players and visits can’t be compared yet.</p>'}`}
+    </div>`;
+  }).join('') : `<div class="ev-empty"><p class="faint">No events yet. Add one below, for example your Halloween event.</p>
+      <button type="button" id="ev-halloween">Track Break A Bed’s Halloween event (ends Nov 1)</button></div>`;
+}
+document.addEventListener('click', (e) => {
+  const del = e.target.closest('[data-ev-del]');
+  if (del) { localEvents.splice(Number(del.dataset.evDel), 1); store('rgo.events', JSON.stringify(localEvents)); renderReports(data.games); }
+  if (e.target.closest('#ev-halloween')) {
+    const f = $('ev-form'), bab = data.games.find((g) => /break a bed/i.test(g.name));
+    f.name.value = 'Halloween event';
+    if (bab) f.game.value = String(bab.universeId);
+    f.end.value = `${new Date().getFullYear()}-11-01T00:00`;
+    f.start.focus();
+  }
+});
+document.addEventListener('submit', (e) => {
+  if (e.target.id !== 'ev-form') return;
+  e.preventDefault();
+  const f = e.target;
+  const start = new Date(f.start.value), end = new Date(f.end.value);
+  if (!(end > start)) { f.end.setCustomValidity('The end has to be after the start.'); f.end.reportValidity(); f.end.setCustomValidity(''); return; }
+  localEvents.push({ name: f.name.value.trim(), game: f.game.value || null, start: start.toISOString(), end: end.toISOString() });
+  store('rgo.events', JSON.stringify(localEvents));
+  f.reset();
+  renderReports(data.games);
+});
+
+// ---- keyboard shortcuts (ignored while typing in a box) ----
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
+  const t = e.target;
+  if (t.closest && t.closest('input, textarea, select, [contenteditable="true"], [role="slider"]')) return;
+  if ((e.key === ' ' || e.key === 'Enter') && t.closest && t.closest('button, a, summary, [data-id], [data-q], [data-res], [data-pl], [data-rec-at]')) return;
+  const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  let done = true;
+  if (key === ' ' || key === 'k') togglePlay();
+  else if (key === 'ArrowRight' && e.shiftKey) step(1);
+  else if (key === 'ArrowLeft' && e.shiftKey) step(-1);
+  else if ((key === 'ArrowRight' || key === 'ArrowLeft') && src === 'yt' && yt && yt.seekTo) { cancelMix(); yt.seekTo(Math.max(0, yt.getCurrentTime() + (key === 'ArrowRight' ? 10 : -10)), true); updateProgress(); }
+  else if (key === 'ArrowUp' || key === 'ArrowDown') { setVolume(Math.min(1, Math.max(0, Math.round((music.vol + (key === 'ArrowUp' ? 0.05 : -0.05)) * 100) / 100))); setMsg(`Volume ${Math.round(music.vol * 100)}`); }
+  else if (key === 'm') $('p-mute').click();
+  else if (key === 's') setShuffle(!shuffle);
+  else if (key === 'l') setPlayerOpen(!$('player').classList.contains('open'));
+  else done = false;
+  if (done) e.preventDefault();
+});
 
 let resizeTimer;
 addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
