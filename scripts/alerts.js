@@ -92,7 +92,7 @@ async function runAlerts({ state, games, newSales, sales, now, siteUrl, revenueC
     // Sales since the last run.
     for (const x of newSales.slice(0, 5)) {
       const g = games.find((gg) => gg.universeId === x.universeId);
-      events.push([`💰 +R$ ${fmt.format(x.robux)} · ${x.item}`, [g ? clean(g.name) : 'Group store', x.pending ? 'Pending' : '']]);
+      events.push([`💰 +R$ ${fmt.format(x.robux)} · ${x.item}`, [g ? clean(g.name) : x.itemId ? 'Avatar shop' : 'Details not out yet', x.pending ? 'Pending' : '']]);
     }
     if (newSales.length > 5) events.push([`💰 ${newSales.length - 5} more sales`, [`R$ ${fmt.format(newSales.slice(5).reduce((a, x) => a + x.robux, 0))} more`]]);
     // New player record across all games.

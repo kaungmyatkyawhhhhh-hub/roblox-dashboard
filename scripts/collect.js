@@ -51,6 +51,10 @@ async function main() {
   const alertState = history._alerts || {};
   const members = history._members || {};
   for (const k of ['_comp', '_updates', '_alerts', '_members']) delete history[k];
+  // Roblox sometimes lists a new sale before its details (item, game) are filled in,
+  // then lists it again with them under a different key. Drop the detail-less copy.
+  const twinOf = (x, list) => list.find((v) => v !== x && v.itemId && v.robux === x.robux && Math.abs(v.t - x.t) < 5000);
+  ledger = ledger.filter((x) => x.itemId || !twinOf(x, ledger));
   // Re-key saved sales (older versions used Roblox's non-unique ids) and drop duplicates.
   const seenKeys = new Set();
   ledger = ledger.filter((x) => {
@@ -130,7 +134,14 @@ async function main() {
       for (const g of groups) {
         summaries[g.id] = await fetchRevenueSummary(g.id, cookie);
         const fresh = await fetchGroupSales(g.id, cookie, known);
-        for (const x of fresh) { x.groupId = g.id; ledger.push(x); newSales.push(x); }
+        for (const x of fresh) {
+          x.groupId = g.id;
+          // Details arrived for a sale saved earlier without them: fill it in, it's not a new sale.
+          const early = x.itemId && ledger.find((v) => !v.itemId && v.robux === x.robux && Math.abs(v.t - x.t) < 5000);
+          if (early) { Object.assign(early, x); continue; }
+          ledger.push(x);
+          newSales.push(x);
+        }
         // Pending sales settle a few days later; update the ones Roblox now shows as settled.
         for (const x of ledger) if (x.pending && fresh.settled.has(x.id)) x.pending = false;
       }

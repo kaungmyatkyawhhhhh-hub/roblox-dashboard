@@ -3891,7 +3891,7 @@ function renderRevenue(games) {
   if (!has) return;
 
   const gameName = new Map(games.map((g) => [String(g.universeId), g.name]));
-  gameName.set('null', 'Group store items');
+  gameName.set('null', 'Avatar shop items');   // sold from the group's catalog, not inside a game
   const known = new Set(games.map((g) => String(g.universeId)));
   if (revGame !== 'all' && !known.has(revGame)) revGame = 'all';
   $('rev-game').innerHTML = [['all', 'All games'], ...games.map((g) => [String(g.universeId), g.name])]
@@ -4349,7 +4349,7 @@ const csv = (rows) => rows.map((r) => r.map((v) => (/[",\n]/.test(String(v)) ? `
 function exportSales() {
   const names = new Map(data.games.map((g) => [g.universeId, g.name]));
   const rows = [['time', 'experience', 'item', 'type', 'robux', 'pending']];
-  for (const x of (data.revenue && data.revenue.sales) || []) rows.push([new Date(x.t).toISOString(), names.get(x.universeId) || 'Group store', x.item, x.type, x.robux, x.pending]);
+  for (const x of (data.revenue && data.revenue.sales) || []) rows.push([new Date(x.t).toISOString(), names.get(x.universeId) || 'Avatar shop', x.item, x.type, x.robux, x.pending]);
   download('sales.csv', csv(rows), 'text/csv');
 }
 function exportDaily() {

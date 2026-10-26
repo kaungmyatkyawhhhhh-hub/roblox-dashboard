@@ -37,7 +37,6 @@ jobs:
       - name: Collect stats
         run: node scripts/collect.js history.json site/data.json
         env:
-          DEBUG_SALES: '1'
           # Optional: login cookie of an account that can view the group's revenue.
           ROBLOX_COOKIE: ${{ secrets.ROBLOX_COOKIE }}
           # Optional: where alerts and the weekly report go.
