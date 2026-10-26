@@ -185,6 +185,14 @@ async function main() {
       ledger.sort((a, b) => b.t - a.t);
       ledger = ledger.slice(0, 20000);
       revenue = { connected: true, updatedAt: now, summaries, sales: ledger };
+      // Check the saved sales against Roblox's own totals, so missing sales show up in the log.
+      for (const [gid, sum] of Object.entries(summaries)) {
+        for (const [period, days] of [['day', 1], ['week', 7], ['month', 30]]) {
+          const mine = ledger.filter((x) => String(x.groupId) === gid && now - x.t <= days * 86400000).reduce((t, x) => t + x.robux, 0);
+          const theirs = sum[period] ? (sum[period].itemSaleRobux || 0) + (sum[period].pendingRobux || 0) : null;
+          console.log(`sales check ${period}: saved R$ ${mine} vs Roblox item sales+pending R$ ${theirs} (item sales R$ ${sum[period] && sum[period].itemSaleRobux}, pending R$ ${sum[period] && sum[period].pendingRobux})`);
+        }
+      }
       console.log(`revenue: ${ledger.length} sales saved; summary fields: ${Object.keys(Object.values(summaries)[0]?.month || {}).join(', ')}`);
     } catch (e) {
       const expired = /401|403/.test(e.message);
