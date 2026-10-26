@@ -4034,6 +4034,11 @@ function renderRevenue(games) {
   const d7 = since(now - 7 * DAY), d30 = since(now - 30 * DAY);
   const first = mine.length ? mine[mine.length - 1].t : null;
   const pending = sum(mine.filter((x) => x.pending));
+  // Roblox's own figures for the whole group: pending Robux and the current balance.
+  const summaries = Object.values(rev.summaries || {});
+  const groupPending = summaries.length ? summaries.reduce((t, x) => t + ((x.day && x.day.pendingRobux) || 0), 0) : pending;
+  const fundsList = Object.values(rev.funds || {}).filter((f) => f && f.robux != null);
+  const balance = fundsList.length ? fundsList.reduce((t, f) => t + f.robux, 0) : null;
 
   // Roblox's own monthly summary (whole group) for Premium Payouts and a cross-check.
   let premium = 0, monthTotal = 0;
@@ -4045,12 +4050,13 @@ function renderRevenue(games) {
   const tiles = [
     { label: 'Robux today', value: robux(sum(since(today))), sub: `${since(today).length} sale${since(today).length === 1 ? '' : 's'}` },
     { label: 'Last 7 days', value: robux(sum(d7)), sub: `${d7.length} sales` },
-    { label: 'Last 30 days', value: robux(sum(d30)), sub: revGame === 'all' && monthTotal ? `Roblox: ${robux(monthTotal)} this month` : `${d30.length} sales · avg ${robux(d30.length ? sum(d30) / d30.length : 0)}` },
+    { label: 'Last 30 days', value: robux(sum(d30)), sub: revGame === 'all' && monthTotal ? `Roblox: ${robux(monthTotal)} this month${premium ? ` · ${robux(premium)} Premium` : ''}` : `${d30.length} sales · avg ${robux(d30.length ? sum(d30) / d30.length : 0)}` },
     { label: 'All tracked', value: robux(sum(mine)), sub: first ? `${fmt.format(mine.length)} sales since ${new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).format(first)}` : 'No sales yet' },
     revGame === 'all'
-      ? { label: 'Premium Payouts', value: robux(premium), sub: pending ? `This month · ${robux(pending)} pending sales` : 'This month' }
-      : { label: 'Pending', value: robux(pending), sub: 'Settles in a few days' },
+      ? { label: 'Group balance', value: balance == null ? '—' : robux(balance), sub: balance == null ? 'Not available yet' : `+ ${robux(groupPending)} pending` }
+      : { label: 'Pending', value: robux(pending), sub: 'This game · settles in a few days' },
   ];
+  if (revGame === 'all') tiles.splice(3, 1, { label: 'Pending', value: robux(groupPending), sub: `From Roblox · ${fmt.format(mine.length)} sales tracked, ${robux(sum(mine))} all time` });
   $('rev-kpis').innerHTML = tiles.map((t, i) => `
     <div class="panel kpi" style="--i:${i}">
       <div class="label">${t.label}</div>

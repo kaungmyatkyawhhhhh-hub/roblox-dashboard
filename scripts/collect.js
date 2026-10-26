@@ -6,7 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { fetchGameIcons, saleKey, fetchPublishTimes, resolveUser, resolveGroup, fetchGames, fetchOwnerGames, fetchStore, fetchRevenueSummary, fetchGroupSales } = require('../lib/roblox');
+const { fetchGroupFunds, fetchGameIcons, saleKey, fetchPublishTimes, resolveUser, resolveGroup, fetchGames, fetchOwnerGames, fetchStore, fetchRevenueSummary, fetchGroupSales } = require('../lib/roblox');
 const { runAlerts } = require('./alerts');
 
 const HOUR = 60 * 60 * 1000;
@@ -168,9 +168,12 @@ async function main() {
     try {
       const known = new Set(ledger.map((x) => x.id));
       const summaries = {};
+      const funds = {};
       for (const g of groups) {
         summaries[g.id] = await fetchRevenueSummary(g.id, cookie);
-        const fresh = await fetchGroupSales(g.id, cookie, known);
+        const oldestPending = Math.min(...ledger.filter((x) => x.pending && String(x.groupId) === String(g.id)).map((x) => x.t));
+        const fresh = await fetchGroupSales(g.id, cookie, known, 60, oldestPending);
+        try { funds[g.id] = { robux: await fetchGroupFunds(g.id, cookie), at: now }; } catch (e) { console.warn(`group balance: ${e.message}`); }
         for (const x of fresh) {
           x.groupId = g.id;
           // Details arrived for a sale saved earlier without them: fill it in, it's not a new sale.
@@ -184,15 +187,8 @@ async function main() {
       }
       ledger.sort((a, b) => b.t - a.t);
       ledger = ledger.slice(0, 20000);
-      revenue = { connected: true, updatedAt: now, summaries, sales: ledger };
-      // Check the saved sales against Roblox's own totals, so missing sales show up in the log.
-      for (const [gid, sum] of Object.entries(summaries)) {
-        for (const [period, days] of [['day', 1], ['week', 7], ['month', 30]]) {
-          const mine = ledger.filter((x) => String(x.groupId) === gid && now - x.t <= days * 86400000).reduce((t, x) => t + x.robux, 0);
-          const theirs = sum[period] ? (sum[period].itemSaleRobux || 0) + (sum[period].pendingRobux || 0) : null;
-          console.log(`sales check ${period}: saved R$ ${mine} vs Roblox item sales+pending R$ ${theirs} (item sales R$ ${sum[period] && sum[period].itemSaleRobux}, pending R$ ${sum[period] && sum[period].pendingRobux})`);
-        }
-      }
+      revenue = { connected: true, updatedAt: now, summaries, funds, sales: ledger };
+      console.log(`pending: saved R$ ${ledger.filter((x) => x.pending).reduce((t, x) => t + x.robux, 0)} vs Roblox R$ ${Object.values(summaries).reduce((t, x) => t + ((x.day && x.day.pendingRobux) || 0), 0)}; balance ${JSON.stringify(funds)}`);
       console.log(`revenue: ${ledger.length} sales saved; summary fields: ${Object.keys(Object.values(summaries)[0]?.month || {}).join(', ')}`);
     } catch (e) {
       const expired = /401|403/.test(e.message);
