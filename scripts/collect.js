@@ -53,6 +53,18 @@ async function main() {
   const meta = history._meta || {};          // last known details of each game, kept if it goes private
   const archive = history._archive || {};    // games that went private or were removed: { privatedAt }
   for (const k of ['_comp', '_updates', '_alerts', '_members', '_meta', '_archive']) delete history[k];
+  // One-off restores (restore/<universe id>.json): put back a game's saved history
+  // if it was lost, e.g. deleted before private games were archived.
+  const restoreDir = path.join(__dirname, '..', 'restore');
+  for (const f of fs.existsSync(restoreDir) ? fs.readdirSync(restoreDir).filter((n) => /^\d+\.json$/.test(n)) : []) {
+    const r = JSON.parse(fs.readFileSync(path.join(restoreDir, f), 'utf8'));
+    const id = String(r.universeId);
+    if (history[id] && history[id].length) continue;
+    history[id] = r.history || [];
+    if (r.store && !stores[id]) stores[id] = r.store;
+    if (r.updates && !updates[id]) updates[id] = r.updates;
+    console.log(`restored ${history[id].length} samples for ${id}`);
+  }
   // Roblox sometimes lists a new sale before its details (item, game) are filled in,
   // then lists it again with them under a different key. Drop the detail-less copy.
   const twinOf = (x, list) => list.find((v) => v !== x && v.itemId && v.robux === x.robux && Math.abs(v.t - x.t) < 5000);
