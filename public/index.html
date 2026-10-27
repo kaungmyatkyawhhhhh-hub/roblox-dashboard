@@ -2009,7 +2009,19 @@ function renderChart(games, top, colorOf) {
     const pts = totalSeries(others, rangeHours);
     if (pts.length) series.push({ name: `All others (${others.length})`, color: cssVar('--series-other'), dash: '1 5', points: pts });
   }
-  const markers = games.flatMap((g) => (g.updates || []).map((t) => ({ t, label: g.updatesKind === 'published' ? 'Publish' : 'Save', title: `${g.name} ${g.updatesKind === 'published' ? 'published' : 'saved or published'} ${new Date(t).toLocaleString()}` })));
+  // Publishes close together (each within 15 minutes of the one before) are one burst:
+  // draw a single line at the last one.
+  const markers = games.flatMap((g) => {
+    const verb = g.updatesKind === 'published' ? 'published' : 'saved or published';
+    const ts = [...(g.updates || [])].sort((x, y) => x - y);
+    const out = [];
+    for (let i = 0; i < ts.length; i++) {
+      let n = 1;
+      while (i + 1 < ts.length && ts[i + 1] - ts[i] <= 15 * 60000) { i++; n++; }
+      out.push({ t: ts[i], label: g.updatesKind === 'published' ? 'Publish' : 'Save', title: `${g.name} ${verb} ${new Date(ts[i]).toLocaleString()}${n > 1 ? ` (last of ${n} in a row)` : ''}` });
+    }
+    return out;
+  });
   lineChart($('chart'), series, { markers, animate: animateChart, height: innerWidth < 600 ? 190 : 200, label: `Concurrent users, ${RANGE_NAMES[rangeHours].toLowerCase()}` });
   animateChart = false;
 }
