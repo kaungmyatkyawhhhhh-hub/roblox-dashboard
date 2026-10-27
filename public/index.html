@@ -1337,6 +1337,26 @@
   a.who-bar:hover { opacity: .8; }
   a.who-bar:hover #owner { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
   a.who-bar:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .ms-add { height: 26px; padding: 0 10px; font-size: 11.5px; border-radius: 99px; background: transparent; color: var(--ink-2); }
+  .ms-add:hover { background: var(--ink); color: var(--bg); }
+  .ms-val { display: inline-flex; align-items: center; gap: 4px; }
+  .ms-pen { width: 22px; height: 22px; padding: 0; margin-left: 4px; border-radius: 50%; display: grid; place-items: center; background: transparent; border-color: transparent; color: var(--ink-3); opacity: .55; }
+  .milestones li:hover .ms-pen, .ms-pen:focus-visible { opacity: 1; }
+  .ms-pen:hover { color: var(--ink); border-color: var(--glass-line); }
+  .ms-tag { color: var(--ink); }
+  .milestones li.is-goal .ms-bar i { box-shadow: 0 0 12px var(--glow); }
+  .goal-edit { display: grid; gap: 8px; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel-2); }
+  .ge-row { display: flex; gap: 8px; }
+  .ge-row select, .ge-row input { flex: 1; min-width: 0; height: 32px; font: inherit; font-size: 12.5px; padding: 0 8px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+  .ge-btns button { height: 30px; font-size: 12px; }
+  .ge-btns .ge-del { margin-left: auto; color: var(--ink-3); background: transparent; }
+  .gbtns { display: inline-flex; align-items: center; gap: 4px; }
+  #goal-cancel[hidden] { display: none; }
+  .milestones { grid-template-columns: minmax(0, 1fr); }
+  .milestones li, .goal-edit { min-width: 0; }
+  .ms-top { min-width: 0; }
+  .ms-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ms-val { flex: none; }
 </style>
 </head>
 <body class="intro-hold">
@@ -1468,7 +1488,7 @@
       <div class="chart-wrap" id="visits"></div>
     </section>
     <section class="panel reveal">
-      <div class="panel-head"><h2>Next milestones</h2></div>
+      <div class="panel-head"><h2 id="ms-title">Next milestones</h2><button type="button" class="ms-add" data-goal-new>+ Goal</button></div>
       <ul class="milestones" id="milestones"></ul>
     </section>
   </div>
@@ -1587,8 +1607,9 @@
           <input name="by" type="date" aria-label="By date">
           <select name="game" id="goal-game" aria-label="Game"></select>
           <button class="primary" type="submit">Add goal</button>
+          <button type="button" id="goal-cancel" hidden>Cancel</button>
         </form>
-        <p class="est-note">Goals you add here are saved in this browser. Goals in config.json show for everyone.</p>
+        <p class="est-note">Goals you add or change are saved in this browser and also show on the Overview. Goals in config.json show for everyone.</p>
       </section>
       <section class="panel">
         <div class="panel-head"><h2>Update impact</h2><span class="meta" id="updates-meta">Before vs. after each publish</span></div>
@@ -1909,7 +1930,7 @@ function render() {
   renderHeatmap(shown);
   renderHighlights(shown);
   barChart($('visits'), visitBars(shown, colorOf, 14), { label: 'Visits per day', height: 158 });
-  $('milestones').innerHTML = milestoneHtml(milestoneRows(shown).slice(0, 3)) || '<li class="faint">Every milestone reached. Legendary.</li>';
+  renderOverviewGoals(shown);
   renderCards(shownRanked, colorOf);
   if (view === 'money') renderMoney(games);
   if (view === 'compare') renderCompare(games);
@@ -2309,16 +2330,16 @@ function ratePerDay(g, col) {
 
 function milestoneRows(games, { includeTotal = true } = {}) {
   const rows = [];
-  const add = (name, what, value, rate) => {
+  const add = (name, what, value, rate, game) => {
     const next = MILESTONES.find((m) => m > value);
     if (!next) return;
     const prev = [...MILESTONES].reverse().find((m) => m <= value) || 0;
-    rows.push({ name, what, value, next, k: (value - prev) / (next - prev), eta: rate > 0 ? (next - value) / rate : null });
+    rows.push({ name, what, value, next, k: (value - prev) / (next - prev), eta: rate > 0 ? (next - value) / rate : null, metric: what, game: game || null });
   };
   if (includeTotal && games.length > 1) add('All experiences', 'visits', games.reduce((s, g) => s + g.visits, 0), games.reduce((s, g) => s + ratePerDay(g, 2), 0));
   for (const g of games) {
-    add(g.name, 'visits', g.visits, ratePerDay(g, 2));
-    add(g.name, 'favorites', g.favorites, ratePerDay(g, 3));
+    add(g.name, 'visits', g.visits, ratePerDay(g, 2), String(g.universeId));
+    add(g.name, 'favorites', g.favorites, ratePerDay(g, 3), String(g.universeId));
   }
   return rows.sort((a, b) => b.k - a.k);
 }
@@ -4266,10 +4287,111 @@ const GOAL_METRICS = {
 };
 const monthStart = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).getTime(); };
 let localGoals = [];
+let reportEditing = null;   // key of the goal loaded into the Reports form
 try { localGoals = JSON.parse(load('rgo.goals') || '[]'); } catch { localGoals = []; }
 
+// ---- goals: shared by the Overview panel and the Reports tab ----
+// Goals from config.json can be changed too: the changed copy is saved in this
+// browser and the original is hidden here.
+let hiddenShared = [];
+try { hiddenShared = JSON.parse(load('rgo.goalsHidden') || '[]'); } catch { hiddenShared = []; }
+const sharedKey = (g) => `${g.metric}|${g.game || ''}|${g.target}|${g.by || ''}`;
+const saveGoals = () => { store('rgo.goals', JSON.stringify(localGoals)); store('rgo.goalsHidden', JSON.stringify(hiddenShared)); };
+function allGoals() {
+  return [
+    ...(data.goals || []).filter((g) => !hiddenShared.includes(sharedKey(g))).map((g) => ({ ...g, shared: true, key: `s:${sharedKey(g)}` })),
+    ...localGoals.map((g, i) => ({ ...g, idx: i, key: `l:${i}` })),
+  ];
+}
+function goalProgress(goal, games, sales) {
+  const m = GOAL_METRICS[goal.metric] || GOAL_METRICS.visits;
+  const gs = goal.game ? games.filter((g) => String(g.universeId) === String(goal.game)) : games;
+  if (!gs.length) return null;
+  const cur = m.value(gs, sales), rate = m.rate(gs, sales);
+  const k = goal.target ? cur / goal.target : 0;
+  return { m, gs, cur, rate, k, eta: k < 1 && rate > 0 ? (goal.target - cur) / rate : null, fmtV: (v) => (goal.metric.startsWith('robux') ? robux(v) : fmt.format(Math.round(v))) };
+}
+let editingGoal = null;   // key of the goal being edited in the Overview panel
+function goalEditor(goal, games) {
+  const metrics = Object.entries(GOAL_METRICS).map(([k, v]) => `<option value="${k}"${k === goal.metric ? ' selected' : ''}>${v.label}</option>`).join('');
+  const gameOpts = '<option value="">All games</option>' + games.map((g) => `<option value="${g.universeId}"${String(g.universeId) === String(goal.game || '') ? ' selected' : ''}>${esc(cleanName(g.name))}</option>`).join('');
+  return `<li class="ms-edit"><form class="goal-edit" data-goal-key="${esc(goal.key || 'new')}">
+    <div class="ge-row"><select name="metric" aria-label="Goal type">${metrics}</select><select name="game" aria-label="Game">${gameOpts}</select></div>
+    <div class="ge-row"><input name="amount" type="number" min="1" step="any" value="${goal.target || ''}" placeholder="Target" aria-label="Target" required><input name="by" type="date" value="${goal.by ? String(goal.by).slice(0, 10) : ''}" aria-label="By date (optional)"></div>
+    <div class="ge-row ge-btns"><button class="primary" type="submit">Save</button><button type="button" data-goal-cancel>Cancel</button>${goal.key && goal.key !== 'new' && !goal.auto ? '<button type="button" class="ge-del" data-goal-remove>Delete</button>' : ''}</div>
+  </form></li>`;
+}
+function renderOverviewGoals(shown) {
+  const sales = (data.revenue && data.revenue.sales) || [];
+  const ids = new Set(shown.map((g) => String(g.universeId)));
+  const mine = allGoals().filter((g) => !g.game ? shown.length === data.games.length : ids.has(String(g.game)));
+  const rows = [];
+  for (const goal of mine) {
+    const p = goalProgress(goal, data.games, sales);
+    if (!p) continue;
+    rows.push({ goal, name: goal.game ? p.gs[0].name : 'All experiences', what: p.m.label.toLowerCase(), value: p.cur, next: goal.target, k: Math.min(1, p.k), eta: p.eta, fmtV: p.fmtV, done: p.k >= 1, by: goal.by });
+  }
+  // Fill up with automatic milestones that don't repeat a goal.
+  for (const r of milestoneRows(shown)) {
+    if (rows.length >= 3) break;
+    if (rows.some((x) => x.goal && x.goal.metric === r.metric && String(x.goal.game || '') === String(r.game || ''))) continue;
+    rows.push({ ...r, goal: { metric: r.metric, game: r.game, target: r.next, key: `auto:${r.metric}|${r.game || ''}`, auto: true } });
+  }
+  $('ms-title').textContent = mine.length ? 'Goals' : 'Next milestones';
+  const eta = (d) => (d == null ? 'Pace not known yet' : d < 1 ? 'Less than a day at this pace' : d < 60 ? `About ${Math.round(d)} day${Math.round(d) === 1 ? '' : 's'} at this pace` : 'Over 2 months at this pace');
+  const list = rows.slice(0, Math.max(3, mine.length));
+  let html = list.map((r) => {
+    if (editingGoal && editingGoal === r.goal.key) return goalEditor(r.goal, data.games);
+    const val = r.fmtV ? r.fmtV(r.value) : compact.format(r.value), tgt = r.fmtV ? r.fmtV(r.next) : compact.format(r.next);
+    return `<li class="${r.goal.auto ? '' : 'is-goal'}">
+      <div class="ms-top"><span class="ms-name">${esc(r.name)} <span class="faint">· ${r.what}</span></span><span class="num ms-val"><b>${val}</b> <span class="faint">/ ${tgt}</span><button type="button" class="ms-pen" data-goal-edit="${esc(r.goal.key)}" title="${r.goal.auto ? 'Set your own goal' : 'Change this goal'}" aria-label="${r.goal.auto ? 'Set your own goal' : 'Change this goal'}"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M8.2 1.6l2.2 2.2-6.6 6.6H1.6V8.2z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button></span></div>
+      <div class="ms-bar"><i style="--w:${(r.k * 100).toFixed(1)}%"></i></div>
+      <div class="ms-sub">${r.done ? 'Reached 🎉' : `${Math.round(r.k * 100)}% there · ${eta(r.eta)}`}${r.by ? ` · by ${dayFmt.format(new Date(r.by))}` : ''}${r.goal.auto ? '' : ' · <span class="ms-tag">your goal</span>'}</div>
+    </li>`;
+  }).join('');
+  if (editingGoal === 'new') html = goalEditor({ key: 'new', metric: 'visits', game: ovGame !== 'all' ? ovGame : null }, data.games) + html;
+  $('milestones').innerHTML = html || '<li class="faint">Every milestone reached. Legendary.</li>';
+  overviewGoalRows = list;
+}
+let overviewGoalRows = [];
+function findGoal(key) {
+  return allGoals().find((g) => g.key === key) || (overviewGoalRows.find((r) => r.goal.key === key) || {}).goal || null;
+}
+// Save a goal from either editor: replaces the goal being edited, or adds a new one.
+function storeGoal(key, values) {
+  if (key && key.startsWith('l:')) localGoals[Number(key.slice(2))] = { ...localGoals[Number(key.slice(2))], ...values, title: undefined };
+  else {
+    if (key && key.startsWith('s:')) hiddenShared.push(key.slice(2));
+    localGoals.push(values);
+  }
+  saveGoals();
+}
+function removeGoal(key) {
+  if (key.startsWith('l:')) localGoals.splice(Number(key.slice(2)), 1);
+  else if (key.startsWith('s:')) hiddenShared.push(key.slice(2));
+  saveGoals();
+}
+const refreshGoals = () => { editingGoal = null; render(); if (view === 'reports') renderReports(data.games); };
+document.addEventListener('click', (e) => {
+  const ed = e.target.closest('[data-goal-edit]');
+  if (ed) { editingGoal = ed.dataset.goalEdit; render(); $('milestones').querySelector('input[name=amount]')?.focus(); return; }
+  if (e.target.closest('[data-goal-new]')) { editingGoal = 'new'; render(); $('milestones').querySelector('input[name=amount]')?.focus(); return; }
+  if (e.target.closest('[data-goal-cancel]')) { editingGoal = null; render(); return; }
+  if (e.target.closest('[data-goal-remove]')) { removeGoal(e.target.closest('[data-goal-key]').dataset.goalKey); refreshGoals(); }
+});
+document.addEventListener('submit', (e) => {
+  const f = e.target.closest('.goal-edit');
+  if (!f) return;
+  e.preventDefault();
+  const target = Number(f.amount.value);
+  if (!(target > 0)) return;
+  const key = f.dataset.goalKey;
+  storeGoal(key.startsWith('auto:') || key === 'new' ? null : key, { metric: f.metric.value, target, by: f.by.value || null, game: f.game.value || null });
+  refreshGoals();
+});
+
 function renderGoals(games, sales) {
-  const goals = [...(data.goals || []).map((g) => ({ ...g, shared: true })), ...localGoals.map((g, i) => ({ ...g, idx: i }))];
+  const goals = allGoals();
   const ring = (k) => {
     const r = 26, c = 2 * Math.PI * r;
     return `<svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--track)" stroke-width="6"/><circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--ink)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(Math.min(1, k) * c).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 32 32)" style="filter:drop-shadow(0 0 6px var(--glow))"/></svg>`;
@@ -4295,7 +4417,7 @@ function renderGoals(games, sales) {
       <div class="gtxt"><div class="gtitle">${esc(goal.title || `${fmtV(goal.target)} ${m.label.toLowerCase()}`)}</div>
         <div class="faint">${goal.game ? esc(cleanName(gs[0].name)) : 'All games'}${by ? ` · by ${new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).format(by)}` : ''}</div>
         <div class="gnum">${fmtV(cur)} <span class="faint">/ ${fmtV(goal.target)}</span></div><div class="gpace">${pace}</div></div>
-      ${goal.shared ? '<span class="faint gtag">from config</span>' : `<button class="icon gdel" type="button" data-goal-del="${goal.idx}" aria-label="Remove goal">✕</button>`}
+      <span class="gbtns">${goal.shared ? '<span class="faint gtag">from config</span>' : ''}<button class="icon gdel" type="button" data-goal-change="${esc(goal.key)}" aria-label="Change goal" title="Change goal"><svg width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M8.2 1.6l2.2 2.2-6.6 6.6H1.6V8.2z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button><button class="icon gdel" type="button" data-goal-del="${esc(goal.key)}" aria-label="Remove goal" title="Remove goal">✕</button></span>
     </li>`;
   }).join('') : '<li class="faint">No goals yet. Add one below.</li>';
   $('goal-game').innerHTML = '<option value="">All games</option>' + games.map((g) => `<option value="${g.universeId}">${esc(cleanName(g.name))}</option>`).join('');
@@ -4509,7 +4631,19 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('#exp-daily')) exportDaily();
   if (e.target.closest('#exp-json')) download('dashboard-data.json', JSON.stringify(data, null, 2), 'application/json');
   const del = e.target.closest('[data-goal-del]');
-  if (del) { localGoals.splice(Number(del.dataset.goalDel), 1); store('rgo.goals', JSON.stringify(localGoals)); renderReports(data.games); }
+  if (del) { removeGoal(del.dataset.goalDel); reportEditing = null; refreshGoals(); }
+  const ch = e.target.closest('[data-goal-change]');
+  if (ch) {
+    const goal = findGoal(ch.dataset.goalChange);
+    const f = $('goal-form');
+    if (!goal || !f) return;
+    reportEditing = ch.dataset.goalChange;
+    f.metric.value = goal.metric; f.amount.value = goal.target; f.by.value = goal.by ? String(goal.by).slice(0, 10) : ''; f.game.value = goal.game || '';
+    f.querySelector('button[type=submit]').textContent = 'Save changes';
+    $('goal-cancel').hidden = false;
+    f.amount.focus();
+  }
+  if (e.target.closest('#goal-cancel')) { reportEditing = null; const f = $('goal-form'); f.reset(); f.querySelector('button[type=submit]').textContent = 'Add goal'; $('goal-cancel').hidden = true; }
 });
 document.addEventListener('submit', (e) => {
   if (e.target.id !== 'goal-form') return;
@@ -4517,10 +4651,12 @@ document.addEventListener('submit', (e) => {
   const f = e.target;
   const target = Number(f.amount.value);
   if (!target) return;
-  localGoals.push({ metric: f.metric.value, target, by: f.by.value || null, game: f.game.value || null });
-  store('rgo.goals', JSON.stringify(localGoals));
+  storeGoal(reportEditing, { metric: f.metric.value, target, by: f.by.value || null, game: f.game.value || null });
+  reportEditing = null;
   f.reset();
-  renderReports(data.games);
+  f.querySelector('button[type=submit]').textContent = 'Add goal';
+  $('goal-cancel').hidden = true;
+  refreshGoals();
 });
 
 // ---- All-ages eligibility: highly engaged players ----
