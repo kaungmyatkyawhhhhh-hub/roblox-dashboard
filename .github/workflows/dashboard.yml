@@ -51,7 +51,14 @@ jobs:
           git init -q -b stats
           git add history.json
           git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -qm "Update stats history"
-          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" stats
+          # GitHub sometimes rejects pushes for a few minutes (500 errors). Retry, and if it
+          # still fails, keep going so the site is still updated; the next run saves history.
+          for wait in 5 15 30 0; do
+            git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" stats && exit 0
+            [ "$wait" = 0 ] && break
+            echo "push failed, retrying in ${wait}s"; sleep "$wait"
+          done
+          echo "::warning::Couldn't save the stats history (GitHub rejected the push); the site is still updated."
 
       - name: Build site
         run: cp public/index.html site/
