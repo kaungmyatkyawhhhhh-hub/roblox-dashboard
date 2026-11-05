@@ -1777,7 +1777,10 @@ function ago(t) {
   return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : `${Math.round(m / 60)}h ago`;
 }
 
+let lastStaticLoad = 0;
 async function loadStatic() {
+  clearTimeout(timer);
+  lastStaticLoad = Date.now();
   try {
     const res = await fetch(`data.json?t=${Date.now()}`, { cache: 'no-store' });
     if (!res.ok) return false;
@@ -1832,7 +1835,17 @@ async function pollLive() {
     setSync(`Updated ${ago(data.fetchedAt)} · live paused`, 'ok');
   }
 }
-document.addEventListener('visibilitychange', () => { if (!document.hidden && staticMode) pollLive(); });
+// Browsers pause timers in background tabs (and phones freeze them), so the 5-minute
+// reload may not have run while the page was hidden. Coming back to it reloads the
+// saved history first if it's out of date; otherwise the chart would draw a straight
+// line from the old data to the current live point.
+function wakeUp() {
+  if (!staticMode || document.hidden) return;
+  if (Date.now() - lastStaticLoad > 4 * 60 * 1000) loadStatic(); else pollLive();
+}
+document.addEventListener('visibilitychange', wakeUp);
+addEventListener('pageshow', (e) => { if (e.persisted) wakeUp(); });
+addEventListener('focus', wakeUp);
 
 async function refresh(showLoading) {
   clearTimeout(timer);
