@@ -1780,12 +1780,17 @@ function ago(t) {
 let lastStaticLoad = 0;
 async function loadStatic() {
   clearTimeout(timer);
-  lastStaticLoad = Date.now();
   try {
     const res = await fetch(`data.json?t=${Date.now()}`, { cache: 'no-store' });
-    if (!res.ok) return false;
+    if (!res.ok) throw new Error(res.status);
     data = await res.json();
-  } catch { return false; }
+  } catch {
+    // Network not ready (e.g. just after the computer wakes up): try again soon, and
+    // never stop reloading because of one failed attempt.
+    timer = setTimeout(loadStatic, 30 * 1000);
+    return false;
+  }
+  lastStaticLoad = Date.now();
   staticMode = true;
   document.body.classList.add('static');
   mountDashboard();
@@ -2104,10 +2109,26 @@ function lineChart(box, series, { animate = false, label = '', height, floor = 4
   const shapes = series.map((s, i) => {
     const pts = s.points.map((p) => [x(p[0]), y(p[1])]);
     if (pts.length < 2) return '';
-    const d = smoothPath(pts);
+    // Where samples are missing (much longer than the usual spacing), don't draw a made-up
+    // curve: end the line and bridge the gap with a faint dotted line instead.
+    const gaps = s.points.slice(1).map((p, k) => p[0] - s.points[k][0]).sort((a, b) => a - b);
+    const usual = gaps[Math.floor(gaps.length / 2)] || 0;
+    const maxGap = Math.max(25 * 60000, usual * 4);
+    const segs = [[pts[0]]];
+    for (let k = 1; k < pts.length; k++) {
+      if (s.points[k][0] - s.points[k - 1][0] > maxGap) segs.push([]);
+      segs[segs.length - 1].push(pts[k]);
+    }
     const last = pts[pts.length - 1];
-    return `<path class="area" d="${d}L${last[0]},${y(yMin)}L${pts[0][0]},${y(yMin)}Z" fill="url(#${id}g${i})"/>
-      <path class="line" d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" filter="url(#${id}glow)"${s.dash ? ` style="stroke-dasharray:${s.dash}"` : ''}/>
+    const lineStyle = s.dash ? ` style="stroke-dasharray:${s.dash}"` : '';
+    const parts = segs.map((sg) => {
+      if (sg.length === 1) return `<circle cx="${sg[0][0]}" cy="${sg[0][1]}" r="1.6" fill="${s.color}"/>`;
+      const d = smoothPath(sg);
+      return `<path class="area" d="${d}L${sg[sg.length - 1][0]},${y(yMin)}L${sg[0][0]},${y(yMin)}Z" fill="url(#${id}g${i})"/>
+      <path class="line" d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" filter="url(#${id}glow)"${lineStyle}/>`;
+    }).join('');
+    const bridges = segs.slice(1).map((sg, k) => { const a = segs[k][segs[k].length - 1], b = sg[0]; return `<line class="gap" x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${s.color}" stroke-opacity=".35" stroke-width="1.2" stroke-dasharray="2 4"><title>No data saved for this time</title></line>`; }).join('');
+    return `${parts}${bridges}
       <g class="end">${liveNow ? `<circle class="ping" cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${s.color}"/>` : ''}
       <circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${s.color}" stroke="var(--panel)" stroke-width="2"/></g>`;
   }).join('');
