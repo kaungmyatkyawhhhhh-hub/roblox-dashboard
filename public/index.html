@@ -1766,9 +1766,10 @@ function showOwners(owners, count) {
   }
 }
 
+let updateReady = false;
 function setSync(html, state) {
   if (!$('kpis') && $('onboard')) $('onboard').querySelector('p').innerHTML = html;
-  $('sync-text').innerHTML = html;
+  $('sync-text').innerHTML = updateReady ? `${html} · <b>Refresh for update</b>` : html;
   $('sync').className = `pill ${state || ''}`;
 }
 
@@ -1800,6 +1801,26 @@ async function fetchData() {
   if (!best) throw new Error('no data');
   return best;
 }
+// A tab left open keeps running the page code it loaded. When the data says a newer
+// version of the page is out, reload (once per version) unless music is playing;
+// then show a "refresh" note instead so the song isn't cut off.
+const APP_VERSION = '__APP_VERSION__';
+function checkAppVersion() {
+  const v = data && data.appVersion;
+  if (!v || APP_VERSION.startsWith('__') || v === APP_VERSION) return;
+  let tried = null;
+  try { tried = sessionStorage.getItem('rgo.reloadedFor'); } catch {}
+  if (tried === v) return;
+  if (typeof isPlaying === 'function' && isPlaying()) {
+    updateReady = true;
+    setSync(`Updated ${ago(data.fetchedAt)}`, 'ok');
+    $('sync').style.cursor = 'pointer';
+    $('sync').onclick = () => location.reload();
+    return;
+  }
+  try { sessionStorage.setItem('rgo.reloadedFor', v); } catch {}
+  location.reload();
+}
 let lastStaticLoad = 0;
 async function loadStatic() {
   clearTimeout(timer);
@@ -1812,6 +1833,7 @@ async function loadStatic() {
     return false;
   }
   lastStaticLoad = Date.now();
+  checkAppVersion();
   staticMode = true;
   document.body.classList.add('static');
   mountDashboard();

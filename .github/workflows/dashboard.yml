@@ -68,15 +68,20 @@ jobs:
       # The page reads fresh data.json from the stats branch, so the site itself is only
       # redeployed when its code changes (or on request). GitHub Pages quietly stops
       # publishing when a site is deployed more than about 10 times an hour.
+      # Once an hour the site is redeployed anyway, so its fallback data.json stays fresh
+      # (well under GitHub Pages' limit of about 10 deploys an hour).
+      - id: when
+        run: echo "hourly=$([ "$(date -u +%M)" -lt 5 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
       - name: Build site
-        if: github.event_name == 'push' || inputs.deploy
-        run: cp public/index.html site/
+        if: github.event_name == 'push' || inputs.deploy || steps.when.outputs.hourly == 'true'
+        run: sed "s/__APP_VERSION__/${GITHUB_SHA}/" public/index.html > site/index.html
 
       - uses: actions/upload-pages-artifact@v3
-        if: github.event_name == 'push' || inputs.deploy
+        if: github.event_name == 'push' || inputs.deploy || steps.when.outputs.hourly == 'true'
         with:
           path: site
 
       - id: deploy
-        if: github.event_name == 'push' || inputs.deploy
+        if: github.event_name == 'push' || inputs.deploy || steps.when.outputs.hourly == 'true'
         uses: actions/deploy-pages@v4
