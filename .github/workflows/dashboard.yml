@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Also redeploy the website'
+        type: boolean
+        default: false
   push:
     branches: [main]
 
@@ -46,10 +51,10 @@ jobs:
       - name: Save history
         run: |
           tmp=$(mktemp -d)
-          cp history.json "$tmp/"
+          cp history.json site/data.json "$tmp/"
           cd "$tmp"
           git init -q -b stats
-          git add history.json
+          git add history.json data.json
           git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -qm "Update stats history"
           # GitHub sometimes rejects pushes for a few minutes (500 errors). Retry, and if it
           # still fails, keep going so the site is still updated; the next run saves history.
@@ -58,14 +63,20 @@ jobs:
             [ "$wait" = 0 ] && break
             echo "push failed, retrying in ${wait}s"; sleep "$wait"
           done
-          echo "::warning::Couldn't save the stats history (GitHub rejected the push); the site is still updated."
+          echo "::warning::Couldn't save the stats history (GitHub rejected the push)."
 
+      # The page reads fresh data.json from the stats branch, so the site itself is only
+      # redeployed when its code changes (or on request). GitHub Pages quietly stops
+      # publishing when a site is deployed more than about 10 times an hour.
       - name: Build site
+        if: github.event_name == 'push' || inputs.deploy
         run: cp public/index.html site/
 
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name == 'push' || inputs.deploy
         with:
           path: site
 
       - id: deploy
+        if: github.event_name == 'push' || inputs.deploy
         uses: actions/deploy-pages@v4

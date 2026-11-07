@@ -1777,13 +1777,34 @@ function ago(t) {
   return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : `${Math.round(m / 60)}h ago`;
 }
 
+// Fresh numbers live on the repository's stats branch (saved every 5 minutes); the
+// data.json deployed with the site is only a fallback, since the site itself is
+// redeployed only when its code changes.
+function statsUrl() {
+  const m = location.hostname.match(/^([^.]+)\.github\.io$/);
+  const repo = location.pathname.split('/').filter(Boolean)[0];
+  return m && repo ? `https://raw.githubusercontent.com/${m[1]}/${repo}/stats/data.json` : null;
+}
+async function fetchData() {
+  const urls = [statsUrl(), 'data.json'].filter(Boolean);
+  let best = null;
+  for (const u of urls) {
+    try {
+      const res = await fetch(`${u}?t=${Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) continue;
+      const d = await res.json();
+      if (!best || (d.fetchedAt || 0) > (best.fetchedAt || 0)) best = d;
+      if (best && Date.now() - best.fetchedAt < 15 * 60 * 1000) break;   // fresh enough
+    } catch {}
+  }
+  if (!best) throw new Error('no data');
+  return best;
+}
 let lastStaticLoad = 0;
 async function loadStatic() {
   clearTimeout(timer);
   try {
-    const res = await fetch(`data.json?t=${Date.now()}`, { cache: 'no-store' });
-    if (!res.ok) throw new Error(res.status);
-    data = await res.json();
+    data = await fetchData();
   } catch {
     // Network not ready (e.g. just after the computer wakes up): try again soon, and
     // never stop reloading because of one failed attempt.
