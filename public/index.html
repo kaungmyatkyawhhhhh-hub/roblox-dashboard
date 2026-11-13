@@ -1357,6 +1357,10 @@
   .ms-top { min-width: 0; }
   .ms-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .ms-val { flex: none; }
+  /* demo mode: impossible to mistake for real data */
+  .demo-bar { position: fixed; z-index: 10000; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; padding: 8px 16px; border-radius: 99px; background: #ff3b30; color: #fff; font-size: 12.5px; box-shadow: 0 8px 30px -6px rgb(255 59 48 / .6); white-space: nowrap; max-width: calc(100vw - 32px); overflow: hidden; text-overflow: ellipsis; }
+  .demo-bar a { color: #fff; font-weight: 600; text-decoration: underline; }
+  html.demo body::after { content: "DEMO DATA  DEMO DATA  DEMO DATA  DEMO DATA  DEMO DATA  DEMO DATA  DEMO DATA  DEMO DATA"; position: fixed; inset: -50%; z-index: 9999; pointer-events: none; display: flex; align-items: center; justify-content: center; transform: rotate(-24deg); font: 800 64px/1.6 Inter, system-ui, sans-serif; letter-spacing: .08em; color: rgb(255 59 48 / .07); white-space: pre-wrap; word-spacing: 40px; text-align: center; }
 </style>
 </head>
 <body class="intro-hold">
@@ -1821,11 +1825,57 @@ function checkAppVersion() {
   try { sessionStorage.setItem('rgo.reloadedFor', v); } catch {}
   location.reload();
 }
+// ---- Demo mode: ?demo or ?demo=<visits a day>,<Robux this month> ----
+// Scales every number so the dashboard can be previewed at a bigger size. It only
+// happens for whoever opens the demo link, and the page is clearly marked as demo data.
+const DEMO = (() => {
+  const q = new URLSearchParams(location.search);
+  if (!q.has('demo')) return null;
+  const [v, r] = (q.get('demo') || '').split(',').map((x) => Number(String(x).replace(/[^\d.]/g, '')));
+  return { visits: v > 0 ? v : 1030321, robux: r > 0 ? r : 4000000 };
+})();
+function applyDemo(d) {
+  const all = [...d.games, ...(d.archived || [])];
+  const realPerDay = visitsPerDay(d.games) || 1;
+  const kv = DEMO.visits / realPerDay;
+  const sales = (d.revenue && d.revenue.sales) || [];
+  const now = new Date(), monthStartT = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  // Match the "this month" figure the Monetization tab shows (Roblox's own summary), or
+  // this calendar month's sales when there's no summary.
+  let realMonth = 0;
+  for (const sum of Object.values((d.revenue && d.revenue.summaries) || {})) for (const k of Object.keys(REV_KEYS)) realMonth += (sum.month && sum.month[k]) || 0;
+  if (!realMonth) realMonth = sales.filter((x) => x.t >= monthStartT).reduce((t, x) => t + x.robux, 0);
+  realMonth = realMonth || 1;
+  const kr = DEMO.robux / realMonth;
+  const sc = (v, k) => (typeof v === 'number' ? Math.round(v * k) : v);
+  for (const g of all) {
+    for (const key of ['playing', 'visits', 'favorites', 'upVotes', 'downVotes']) g[key] = sc(g[key], kv);
+    g.history = (g.history || []).map((p) => p.map((v, i) => (i === 0 ? v : sc(v, kv))));
+  }
+  for (const c of d.competitors || []) c.history = c.history || [];
+  if (d.revenue) {
+    for (const x of sales) x.robux = sc(x.robux, kr);
+    for (const sum of Object.values(d.revenue.summaries || {})) for (const per of Object.values(sum)) if (per && typeof per === 'object') for (const k of Object.keys(per)) per[k] = sc(per[k], kr);
+    for (const f of Object.values(d.revenue.funds || {})) if (f) f.robux = sc(f.robux, kr);
+  }
+  d.demo = { kv, kr };
+}
+if (DEMO) {
+  document.documentElement.classList.add('demo');
+  document.title = `DEMO · ${document.title}`;
+  addEventListener('DOMContentLoaded', () => {
+    const bar = document.createElement('div');
+    bar.className = 'demo-bar';
+    bar.innerHTML = `<b>DEMO DATA</b> · not real numbers · ${fmt.format(DEMO.visits)} visits a day, R$ ${fmt.format(DEMO.robux)} this month <a href="${location.pathname}">Exit demo</a>`;
+    document.body.prepend(bar);
+  });
+}
 let lastStaticLoad = 0;
 async function loadStatic() {
   clearTimeout(timer);
   try {
     data = await fetchData();
+    if (DEMO) applyDemo(data);
   } catch {
     // Network not ready (e.g. just after the computer wakes up): try again soon, and
     // never stop reloading because of one failed attempt.
@@ -1870,7 +1920,9 @@ async function pollLive() {
     for (const g of data.games) {
       const l = byId.get(g.universeId);
       if (!l) continue;
-      Object.assign(g, { playing: l.playing, visits: l.visits, favorites: l.favorites, upVotes: l.upVotes, downVotes: l.downVotes });
+      const k = (data.demo && data.demo.kv) || 1;   // demo mode scales live numbers the same way
+      Object.assign(g, { playing: Math.round(l.playing * k), visits: Math.round(l.visits * k), favorites: Math.round(l.favorites * k), upVotes: Math.round(l.upVotes * k), downVotes: Math.round(l.downVotes * k) });
+      l.playing = g.playing; l.visits = g.visits;
       // Extend the chart with at most one live point per minute.
       const last = g.history[g.history.length - 1];
       if (last && livePoints.has(last) && now - last[0] < 60000) last.splice(1, 2, l.playing, l.visits);
